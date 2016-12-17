@@ -4,7 +4,10 @@
 
 ## Purpose ##
 
-**gcreds** gets temporary credentials
+**gcreds** requests temporary credentials from Amazon Security Token Service (STS) for
+roles that normally require mfa credentials in order to authenticate.  The primary use case
+for gcreds is for generating a temporary set of AWS access credentials for programmatic
+use by an automation tools running on your local machine.
 
 * * * 
 
@@ -24,8 +27,10 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 
 ## Dependencies ##
 
-- awscli | must be installed and configured
-- jq | json parser
+- One of the following python versions: 2.6.5, 2.7.X+, 3.3.X+, 3.4.X+
+- Installation Amazon CLI tools (awscli, see Installation section)
+- jq | a json parser generally available from your distribution repo
+- bash (4.x)
 
 * * *
 
@@ -38,12 +43,6 @@ Help Menu
 * * *
 
 ## Installation ##
-
-* General Dependencies
-    - One of the following python versions: 2.6.5, 2.7.X+, 3.3.X+, 3.4.X+
-    - Installation Amazon CLI tools (awscli, see below this section)
-    - awk, see your dist repo
-    - sed, see your dist repo
 
 * Install jq, a JSON parser from your local distribution repository.
 ```bash
@@ -73,7 +72,7 @@ Help Menu
 * Clone this git repo in a writeable directory:
 
 ```bash
-    $ git clone https://blakeca00@bitbucket.org/blakeca00/gcreds.git
+    $ git clone <domain>/gcreds.git
 ```
 
 
@@ -84,5 +83,10 @@ Help Menu
 Sample Output - generating credentials
 
 ![](./.images/sample-output.png)
+
+Changes to local configuration for awscli:  ./aws/credentials
+(**Note:** actual keys and account ids have been obscured)
+
+![](./.images/credentials.png)
 
 * * * 
