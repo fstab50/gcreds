@@ -46,6 +46,7 @@ Help Menu
 ## Installation ##
 
 * Install jq, a JSON parser from your local distribution repository.
+
 ```bash
     $ sudo apt-get install jq    # Ubuntu, most Debian-based distributions
 ```
