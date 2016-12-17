@@ -2,38 +2,38 @@
 # README :  gcreds (v1.0)
 * * *
 
-### Purpose
+## Purpose ##
 
 **gcreds** gets temporary credentials
 
 * * * 
 
-### Deployment Owner/ Author
+## Deployment Owner/ Author ##
 
 Blake Huber  
 Slack: [@blake](https://mpcaws.slack.com/team/blake)  
 
 * * * 
 
-### Contents
+## Contents ##
 
 * [README.md](./README.md):  This file
 * [gcreds](./gcreds):  gcreds main executable
 
 * * * 
 
-### Dependencies
+## Dependencies ##
 
 - awscli | must be installed and configured
 - jq | json parser
 
 * * *
 
-### Usage 
+## Usage ##
 
 Help Menu
 
-![](./images/help-menu.png)
+![](./.images/help-menu.png)
 
 * * *
 
@@ -79,10 +79,10 @@ Help Menu
 
 * * *
 
-### Output
+## Output ##
 
 Sample Output - generating credentials
 
-![](./images/sample-output.png)
+![](./.images/sample-output.png)
 
 * * * 
