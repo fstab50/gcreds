@@ -1,0 +1,316 @@
+#!/bin/bash
+
+# global variables
+pkg=$(basename $0)
+version="0.8"
+pkg_path=$(cd $(dirname $0); pwd -P)
+gcreds_log="$pkg_path/logs/gcreds.log"
+host=$(hostname)
+system=$(uname)
+#
+ACCTFILE=$1         # profiles to gen temp creds, one per line
+MFA_CODE=$2         # otp code
+TIMEOUT=900         # temp creds expiration, 1 hour
+
+# Formatting
+blue=$(tput setaf 4)
+cyan=$(tput setaf 6)
+green=$(tput setaf 2)
+purple=$(tput setaf 5)
+red=$(tput setaf 1)
+white=$(tput setaf 7)
+yellow=$(tput setaf 3)
+gray=$(tput setaf 008)
+lgray='\033[0;37m'      # light gray
+dgray='\033[1;30m'       # dark gray
+reset=$(tput sgr0)
+#   
+BOLD=`tput bold`              
+UNBOLD=`tput sgr0` 
+
+# error codes
+E_DEPENDENCY=1                # exit code if missing required dependency
+E_NOLOG=2                     # exit code if failure to create log dir, log file
+E_BADSHELL=3                  # exit code if incorrect shell detected
+E_AUTHFAIL=5                  # exit code if authentication failure
+E_USER_CANCEL=7               # exit code if user cancel
+E_BADARG=8                    # exit code if bad input parameter        
+E_MISC=11                     # exit code if miscellaneous (unspecified) error
+
+#<-- function declaration -->
+
+function indent02() { sed 's/^/  /'; }
+
+function indent10() { sed 's/^/          /'; }
+
+function gcreds-logger(){
+    local msg="$1"
+    if [[ ! $gcreds_log ]]; then
+        echo "$pkg: failure to call gcreds-logger, $gcreds_log location undefined"
+        exit $E_NOLOG
+    fi
+    echo "$(date +'%b %d %T') $host $pkg: $msg" >> "$gcreds_log"
+}
+
+function gcreds-message(){
+    local msg="$1"
+    gcreds-logger "INFO: $msg"
+    [[ $quiet ]] && return
+    shift
+    pref="----"
+    if [[ $1 ]]; then
+        pref="${1:0:4}"
+        shift
+    fi
+    echo -e "\n${yellow}[ $cyan$pref$yellow ]$reset  $msg\n"
+}
+
+function gcreds-error(){
+    local msg="$1"
+    gcreds-logger "ERROR: $msg"
+    echo -e "\n${yellow}[ ${red}ERRR$yellow ]$reset  $msg\n"
+}
+
+function gcreds-error-exit(){
+    local msg="$1"
+    local status="$2"
+    gcreds-error "$msg"
+    exit $status
+}
+
+function gcreds-precheck(){
+    ## test default shell ##
+    if [ ! -n "$BASH" ]; then
+        # shell other than bash 
+        gcreds-error-exit "Default shell appears to be something other than bash. Please rerun with bash. Aborting (code $E_BADSHELL)" $E_BADSHELL
+    fi 
+
+    ## create log dir for gcreds ##
+    if [[ ! -d $pkg_path/logs ]]; then
+        if ! mkdir -p "$pkg_path/logs"; then
+            gcreds-error-exit "$pkg: failed to make log directory: $pkg_path/logs" $E_NOLOG
+        fi
+    fi
+
+    ## set fs pointer to writeable temp location ##
+    if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
+            # in-memory
+            TMPDIR="/dev/shm"
+            cd $TMPDIR     
+    else
+            TMPDIR="/tmp"
+            cd $TMPDIR 
+    fi
+
+    ## check for required cli tools ##
+    for prog in aws jq; do
+        if ! type "$prog" > /dev/null 2>&1; then
+            gcreds-error-exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
+        fi
+    done
+
+    ## check if awscli tools are configured ##
+    if [[ ! -f $HOME/.aws/config ]]; then
+        gcreds-error-exit "awscli not configured, run 'aws configure'. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
+    fi
+
+    ## check for jq, use system installed version if found, otherwise use bundled ##
+    if which jq > /dev/null; then
+        jq=$(which jq)
+    else
+        jq="assets/jq/$system/jq"
+        if [[ ! -f $jq ]]; then
+            gcreds-error-exit "no viable json parser binary (jq) found, Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
+        fi
+    fi
+
+    ## check temp credential lifetime > required min
+    if [[ $TIMEOUT -lt 900 ]]; then
+        gcreds-error-exit "Requested temporary credential lifetime must be 15 minutes or more. Exiting (code $E_AUTHFAIL)" $E_AUTHFAIL
+    fi
+    #
+    # <-- end function gcreds-precheck -->
+    #
+}
+
+function gcreds-authentication(){
+    if [[ $# -eq 1 ]]; then
+        local $1
+    elif [[ $# -eq 2 ]]; then
+        local $1
+        local $2
+    elif [[ $# -eq 3 ]]; then
+        local $1
+        local $2
+        local $3
+    fi
+
+    if [[ ! $1 ]] || [[ ! $2 ]] || [[ ! $3 ]]; then
+        # authenication failed, most likely invalid mfa token
+        gcreds-error-exit "Authentication Failure: MFA code incorrect. (code $E_AUTHFAIL)" $E_AUTHFAIL
+    fi
+}
+
+function revert_creds(){
+    # deletes temp credentials from local awscli config
+    echo -e "\n${red}${BOLD}WARNING:${UNBOLD}${reset}\n" | indent10
+    echo -e "All temp credentials from your local config will be discarded." | indent02
+    echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
+    read -p "  ${yellow}Are you sure you want to proceed?${reset} [n]:  " CHOICE 
+
+    if [[ -z "$CHOICE" ]] || [[ "$CHOICE" == "n" ]]; then
+        echo -e "\nYour temporary credentials remain in your config. Nothing done.\n"
+    elif [[ "$CHOICE" == "y" ]] || [[ "$CHOICE" == "yes" ]]; then
+        # ensure backup exists
+        if [[ -e ~/.aws/credentials.orig ]]; then
+            mv ~/.aws/credentials.orig ~/.aws/credentials
+            echo -e "\nYour config has been cleaned.\n" | indent02
+        else
+            # no backup exists
+            echo -e "\nNothing done. Your config appears to be clean already.\n"
+        fi
+    else
+        echo -e "\nNothing done.\n" | indent02
+    fi
+    #
+    # <-- end function precheck -->
+    #
+}
+
+function parse_parameters(){
+    ## help requested ##
+    if [[ $1 == "-h" ]] || [[ ! $@ ]] || [[ $1 == "--help" ]]; then
+        # display help
+        help_menu
+    elif [[ $1 == "revert" ]]; then
+        revert_creds
+        exit 0
+    fi
+    ## check number ##
+    if [ $# -ne 3 ]; then
+        echo -e "\n3 parameters are required, only $# given. (code $E_BADARG)\n" | indent02
+        help_menu
+        exit $E_BADARG
+    fi
+    ## valid atos-aua1 profile ##
+    MFA_ARN=$(aws configure get $3.mfa_serial)
+    if [[ $MFA_ARN == "" ]]; then
+        echo -e "\nInvalid AUA1 profile name provided. (code $E_BADARG)\n" | indent02
+        help_menu
+    fi
+    #
+    # <-- end function parse_parameters -->
+    #
+}
+
+function help_menu(){
+    cat <<EOM
+ 
+ Help Conents
+
+    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTION] [profiles.list] [MFA_TOKEN] [MFA_PROFILENAME] 
+
+    ${white}${BOLD}Options${UNBOLD}${reset} :
+        -t, --timeout=N    temp credential expiration in N seconds (900 sec minimum)
+        -s, --silent       when given, supresses all stout messages
+
+    ${white}${BOLD}profiles.list${reset}${UNBOLD} (required)
+        list of profile names from your local awscli configuration, one per line
+
+    ${white}${BOLD}MFA_TOKEN${reset}${UNBOLD} (required)
+        6 digit numerical code from either a hardware or virtual mfa device
+        mfa code must correspond to the MFA_PROFILENAME given
+
+    ${white}${BOLD}MFA_PROFILENAME${reset}${UNBOLD} (required)
+        profile name in your local awscli configuration that contains the
+        arn of your mfa_serial used when assuming roles 
+
+
+EOM
+    exit 0
+}
+
+function check-creds(){
+    # verify existence of previous temp credentials
+    if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
+        echo -e "\nYou appear to have active temp credentials in your config.\n" | indent02
+        revert_creds
+    fi
+}
+
+#<-- start -->
+
+# check deps
+gcreds-precheck
+
+# backup existing awscli config
+if [[ ! -e ~/.aws/credentials.orig ]]; then
+    # backup doesn't exist
+    cp ~/.aws/credentials ~/.aws/credentials.orig
+fi
+
+# parse inputs
+parse_parameters $@
+
+# check for active temp credentials before generating new creds
+check-creds
+
+# generate temp creds for AUA1
+aws sts get-session-token \
+    --duration-seconds "$TIMEOUT" \
+    --serial-number "$MFA_ARN" \
+    --token-code "$MFA_CODE" \
+    --profile A469005 2>/dev/null > aua.creds.json
+
+# create temp profile
+AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId aua.creds.json)
+AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey aua.creds.json)
+AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken aua.creds.json)
+
+# validate authentication
+gcreds-authentication $AWS_ACCESS_KEY $AWS_SECRET_KEY $AWS_SESSION_TOKEN
+
+echo " " > ./new.profile
+echo "[gcreds-atos-aua1]" >> ./new.profile
+echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./new.profile
+echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./new.profile
+echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./new.profile
+
+cat ./new.profile >> ~/.aws/credentials
+
+# create temp credentials for each profile in ACCTFILE
+for profile in $(cat $ACCTFILE); do
+    ### Need to validate that profile ###
+    ### exists in local config HERE ###
+    # use local config to pull role_arn
+    role_arn=$(aws configure get $profile.role_arn)
+    echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}"
+    echo -e "Assuming role: ${blue}$role_arn${reset}\n"
+
+    # call assume role to gen temp creds
+    aws sts assume-role \
+        --role-arn "$role_arn" \
+        --role-session-name "gcreds-$profile" \
+        --profile "gcreds-atos-aua1" > creds.json
+
+    # create temp profile
+    AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId creds.json)
+    AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey creds.json)
+    AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken creds.json)
+
+    echo " " > ./new.profile
+    echo "[gcreds-$profile]" >> ./new.profile
+    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./new.profile
+    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./new.profile
+    echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./new.profile
+
+    # add to local config
+    cat ./new.profile >> ~/.aws/credentials
+done
+
+# clean up
+rm aua.creds.json creds.json new.profile
+
+#<-- end -->
+
+exit 0
