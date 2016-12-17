@@ -39,7 +39,7 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 
 Help Menu
 
-![](./.images/help-menu.png)
+![help-menu](./.images/help-menu.png)
 
 * * *
 
@@ -84,7 +84,7 @@ Help Menu
 
 Sample Output - generating credentials
 
-![](./.images/sample-output.png)
+![gcreds output](./.images/sample-output.png)
 
 Changes to local configuration for awscli:  
 
@@ -94,6 +94,6 @@ Changes to local configuration for awscli:
 
 (**Note:** actual keys and account ids have been obscured)
 
-![](./.images/credentials.png)
+![aws credentials file](./.images/credentials.png)
 
 * * * 
