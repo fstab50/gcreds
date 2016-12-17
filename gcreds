@@ -92,6 +92,16 @@ function gcreds-depcheck(){
         fi
     fi
 
+    ## set fs pointer to writeable temp location ##
+    if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
+            # in-memory
+            TMPDIR="/dev/shm"
+            cd $TMPDIR     
+    else
+            TMPDIR="/tmp"
+            cd $TMPDIR 
+    fi    
+
     ## check for required cli tools ##
     for prog in aws jq; do
         if ! type "$prog" > /dev/null 2>&1; then
@@ -204,10 +214,11 @@ function gcreds-parse-parameters(){
     fi
     
     # set assignments
-    ACCTFILE=$pkg_path/$1         # profiles to gen temp creds, one per line
-    MFA_PROFILE=$2      # iam user profile used to assume roles
-    MFA_CODE=$3         # otp code
-    ## valid atos-aua1 profile ##
+    ACCTFILE=$pkg_path/$1       # profiles to gen temp creds, one per line
+    MFA_PROFILE=$2              # iam user profile used to assume roles
+    MFA_CODE=$3                 # otp code
+
+    ## verify valid mfa_profile ##
     MFA_ARN=$(aws configure get $2.mfa_serial)
     if [[ $MFA_ARN == "" ]]; then
         echo -e "\nInvalid MFA profile name provided. (code $E_BADARG)\n" | indent02
