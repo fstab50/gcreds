@@ -8,8 +8,8 @@ gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
 #
-ACCTFILE=$1         # profiles to gen temp creds, one per line
-MFA_CODE=$2         # otp code
+#ACCTFILE=$1         # profiles to gen temp creds, one per line
+#MFA_CODE=$2         # otp code
 TIMEOUT=900         # temp creds expiration, 1 hour
 
 # Formatting
@@ -78,7 +78,7 @@ function gcreds-error-exit(){
     exit $status
 }
 
-function gcreds-precheck(){
+function gcreds-depcheck(){
     ## test default shell ##
     if [ ! -n "$BASH" ]; then
         # shell other than bash 
@@ -90,16 +90,6 @@ function gcreds-precheck(){
         if ! mkdir -p "$pkg_path/logs"; then
             gcreds-error-exit "$pkg: failed to make log directory: $pkg_path/logs" $E_NOLOG
         fi
-    fi
-
-    ## set fs pointer to writeable temp location ##
-    if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
-            # in-memory
-            TMPDIR="/dev/shm"
-            cd $TMPDIR     
-    else
-            TMPDIR="/tmp"
-            cd $TMPDIR 
     fi
 
     ## check for required cli tools ##
@@ -129,29 +119,42 @@ function gcreds-precheck(){
         gcreds-error-exit "Requested temporary credential lifetime must be 15 minutes or more. Exiting (code $E_AUTHFAIL)" $E_AUTHFAIL
     fi
     #
-    # <-- end function gcreds-precheck -->
+    # <-- end function gcreds-depcheck -->
     #
 }
 
 function gcreds-authentication(){
-    if [[ $# -eq 1 ]]; then
-        local $1
-    elif [[ $# -eq 2 ]]; then
-        local $1
-        local $2
-    elif [[ $# -eq 3 ]]; then
-        local $1
-        local $2
-        local $3
-    fi
-
+    # validate authenthentication to aws apis before writing to awscli config
     if [[ ! $1 ]] || [[ ! $2 ]] || [[ ! $3 ]]; then
         # authenication failed, most likely invalid mfa token
+        gcreds-clean .aua.creds.json
         gcreds-error-exit "Authentication Failure: MFA code incorrect. (code $E_AUTHFAIL)" $E_AUTHFAIL
     fi
+    #
+    #<-- end function gcreds-authentication -->
+    #
 }
 
-function revert_creds(){
+function gcreds-backup(){
+    # backup existing awscli config
+    if [[ ! -e ~/.aws/credentials.orig ]]; then
+        # backup doesn't exist
+        cp ~/.aws/credentials ~/.aws/credentials.orig
+    fi
+    #
+    #<-- end functions gcreds-backup -->
+    #
+}
+
+function gcreds-clean(){
+    # delete files given as parameters
+    rm $@
+    #
+    #<-- end function gcreds-clean -->
+    #
+}
+
+function gcreds-revert-creds(){
     # deletes temp credentials from local awscli config
     echo -e "\n${red}${BOLD}WARNING:${UNBOLD}${reset}\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
@@ -173,110 +176,142 @@ function revert_creds(){
         echo -e "\nNothing done.\n" | indent02
     fi
     #
-    # <-- end function precheck -->
+    # <-- end function gcreds-revert-creds -->
     #
 }
 
-function parse_parameters(){
+function gcreds-parse-parameters(){
     ## help requested ##
-    if [[ $1 == "-h" ]] || [[ ! $@ ]] || [[ $1 == "--help" ]]; then
+    if [[ ! $@ ]]; then
         # display help
-        help_menu
-    elif [[ $1 == "revert" ]]; then
-        revert_creds
-        exit 0
+        gcreds-help
+    else   
+        case $1 in
+            -h | --help | -help)
+                # display help
+                gcreds-help
+                ;;
+            -r | revert | rever | Revert)
+                gcreds-revert-creds
+                exit 0
+                ;;
+        esac
     fi
     ## check number ##
     if [ $# -ne 3 ]; then
-        echo -e "\n3 parameters are required, only $# given. (code $E_BADARG)\n" | indent02
-        help_menu
-        exit $E_BADARG
+        gcreds-error "3 parameters are required, only $# provided (code $E_BADARG)." $E_BADARG
+        gcreds-help
     fi
+    
+    # set assignments
+    ACCTFILE=$pkg_path/$1         # profiles to gen temp creds, one per line
+    MFA_PROFILE=$2      # iam user profile used to assume roles
+    MFA_CODE=$3         # otp code
     ## valid atos-aua1 profile ##
-    MFA_ARN=$(aws configure get $3.mfa_serial)
+    MFA_ARN=$(aws configure get $2.mfa_serial)
     if [[ $MFA_ARN == "" ]]; then
-        echo -e "\nInvalid AUA1 profile name provided. (code $E_BADARG)\n" | indent02
-        help_menu
+        echo -e "\nInvalid MFA profile name provided. (code $E_BADARG)\n" | indent02
+        gcreds-help
     fi
     #
-    # <-- end function parse_parameters -->
+    # <-- end function gcreds-parse-parameters -->
     #
 }
 
-function help_menu(){
+function gcreds-help(){
     cat <<EOM
  
  Help Conents
+ ------------
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTION] [profiles.list] [MFA_TOKEN] [MFA_PROFILENAME] 
+    To generate temporary credentials:
 
-    ${white}${BOLD}Options${UNBOLD}${reset} :
+    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTION] [profiles.list] [MFA_PROFILENAME] [MFA_TOKEN]
+
+    ${white}${BOLD}Options${UNBOLD}${reset} : (not currently implemented)
         -t, --timeout=N    temp credential expiration in N seconds (900 sec minimum)
         -s, --silent       when given, supresses all stout messages
 
     ${white}${BOLD}profiles.list${reset}${UNBOLD} (required)
-        list of profile names from your local awscli configuration, one per line
-
-    ${white}${BOLD}MFA_TOKEN${reset}${UNBOLD} (required)
-        6 digit numerical code from either a hardware or virtual mfa device
-        mfa code must correspond to the MFA_PROFILENAME given
+        list of names from your local awscli configuration, one per line
+        corresponding to IAM role profiles for which you wish to generate
+        temporary credentials
 
     ${white}${BOLD}MFA_PROFILENAME${reset}${UNBOLD} (required)
         profile name in your local awscli configuration that contains the
         arn of your mfa_serial used when assuming roles 
 
+    ${white}${BOLD}MFA_TOKEN${reset}${UNBOLD} (required)
+        6 digit numerical code from either a hardware or virtual mfa device
+        mfa code must correspond to the MFA_PROFILENAME given        
+
+    ---------------------------------------------------------------------------
+
+    To remove temporary credentials:
+
+    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS]
+
+        -r, revert    Cleans temporary credentials from your local
+                      awscli configuration, returning your config to
+                      a pre-gcreds state.
 
 EOM
     exit 0
+    #
+    #<-- end function gcreds-help -->
+    #
 }
 
-function check-creds(){
+function gcreds-check-creds(){
     # verify existence of previous temp credentials
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
-        echo -e "\nYou appear to have active temp credentials in your config.\n" | indent02
-        revert_creds
+        echo -e "\nYou appear to have active temp credentials already in your config.\n" | indent02
+        # clear active creds by restoring from backup
+        gcreds-revert-creds
+        # restor backup of awscli
+        gcreds-backup
     fi
+    #
+    #<-- end function gcreds-check-creds -->
+    #
 }
 
 #<-- start -->
 
 # check deps
-gcreds-precheck
+gcreds-depcheck
 
-# backup existing awscli config
-if [[ ! -e ~/.aws/credentials.orig ]]; then
-    # backup doesn't exist
-    cp ~/.aws/credentials ~/.aws/credentials.orig
-fi
+# verify backup of existing awscli config
+gcreds-backup
 
 # parse inputs
-parse_parameters $@
+gcreds-parse-parameters $@
 
 # check for active temp credentials before generating new creds
-check-creds
+gcreds-check-creds
 
 # generate temp creds for AUA1
 aws sts get-session-token \
     --duration-seconds "$TIMEOUT" \
     --serial-number "$MFA_ARN" \
     --token-code "$MFA_CODE" \
-    --profile A469005 2>/dev/null > aua.creds.json
+    --profile $MFA_PROFILE 2>/dev/null > .aua.creds.json
 
 # create temp profile
-AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId aua.creds.json)
-AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey aua.creds.json)
-AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken aua.creds.json)
+AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .aua.creds.json)
+AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .aua.creds.json)
+AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .aua.creds.json)
 
 # validate authentication
 gcreds-authentication $AWS_ACCESS_KEY $AWS_SECRET_KEY $AWS_SESSION_TOKEN
 
-echo " " > ./new.profile
-echo "[gcreds-atos-aua1]" >> ./new.profile
-echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./new.profile
-echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./new.profile
-echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./new.profile
+echo " " > ./.new.profile
+echo "[gcreds-$MFA_PROFILE]" >> ./.new.profile
+echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
+echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
+echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
 
-cat ./new.profile >> ~/.aws/credentials
+cat ./.new.profile >> ~/.aws/credentials
 
 # create temp credentials for each profile in ACCTFILE
 for profile in $(cat $ACCTFILE); do
@@ -285,31 +320,31 @@ for profile in $(cat $ACCTFILE); do
     # use local config to pull role_arn
     role_arn=$(aws configure get $profile.role_arn)
     echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}"
-    echo -e "Assuming role: ${blue}$role_arn${reset}\n"
+    echo -e "Assuming role: ${lgray}$role_arn${reset}\n"
 
     # call assume role to gen temp creds
     aws sts assume-role \
         --role-arn "$role_arn" \
         --role-session-name "gcreds-$profile" \
-        --profile "gcreds-atos-aua1" > creds.json
+        --profile "gcreds-$MFA_PROFILE" > .creds.json
 
     # create temp profile
-    AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId creds.json)
-    AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey creds.json)
-    AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken creds.json)
+    AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .creds.json)
+    AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .creds.json)
+    AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .creds.json)
 
-    echo " " > ./new.profile
-    echo "[gcreds-$profile]" >> ./new.profile
-    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./new.profile
-    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./new.profile
-    echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./new.profile
+    echo " " > ./.new.profile
+    echo "[gcreds-$profile]" >> ./.new.profile
+    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
+    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
+    echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
 
     # add to local config
-    cat ./new.profile >> ~/.aws/credentials
+    cat ./.new.profile >> ~/.aws/credentials
 done
 
-# clean up
-rm aua.creds.json creds.json new.profile
+# clean up temp files
+gcreds-clean .aua.creds.json .creds.json .new.profile
 
 #<-- end -->
 
