@@ -4,10 +4,11 @@
 
 ## Purpose ##
 
-**gcreds** requests temporary credentials from Amazon Security Token Service (STS) for
-roles that normally require mfa credentials in order to authenticate.  The primary use case
-for gcreds is for generating a temporary set of AWS access credentials for programmatic
-use by an automation tools running on your local machine.
+**gcreds** requests temporary credentials from Amazon Security Token Service (STS)  
+for roles that normally require mfa credentials in order to authenticate.  
+
+The primary use case for gcreds is for generating a temporary set of AWS access  
+credentials for programmatic use by an automation tools running on your local machine.
 
 * * * 
 
