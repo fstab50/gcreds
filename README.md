@@ -85,7 +85,12 @@ Sample Output - generating credentials
 
 ![](./.images/sample-output.png)
 
-Changes to local configuration for awscli:  ```bash./aws/credentials```  
+Changes to local configuration for awscli:  
+
+```bash
+    $ less ./aws/credentials
+```  
+
 (**Note:** actual keys and account ids have been obscured)
 
 ![](./.images/credentials.png)
