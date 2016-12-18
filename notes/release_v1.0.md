@@ -30,7 +30,7 @@ in the gcreds main executable.  (See Enhancement Roadmap section of the [README]
 * **gcreds** will complain if you want to have more than 1 set of temporary credentials in awscli  
 config at a time. This is to prevent corruption of the local awscli config.  _You can choose not  
 to clear credentials from your config before generating a new set of temp credentials; however, this  
-**will corrupt your local awscli config unless generating credentials for accounts and roles that are not  
-represented in the first set of temp credentials already present in the config**._
+**will corrupt your local awscli config unless generating credentials for accounts and roles that  
+are not represented in the first set of temp credentials already present in the config**._
 
 * * *
