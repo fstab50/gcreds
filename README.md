@@ -111,3 +111,5 @@ Changes to local configuration for awscli:
 have a corresponding entry and role_arn present in the local config.
 * flag passed at runtime to suppress all stdout msgs, diverting instead to log only.
 * run time parameter filtering to eleminate dep on given parameter order.
+* Pass a run time parameter to function gcreds-revert_creds() that will bypass currently  
+required user input to clear or restore credentials.

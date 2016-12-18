@@ -15,6 +15,10 @@ awscli config before generating new temporary credentials to prevent duplicate e
 in the local config files.  If you attempt to generate new credentials with temp credentials already  
 in your config, **gcreds** will prompt you to clear your config _before_ generating new creds.
 
+* **Logging**. Log file generation has been implemented in anticipation of **gcreds** use as a library  
+called by automation applications.  When used as a library, output messages will divert only to  
+the log file instead of to stdout to enable debugging.
+
 * * *
 
 ## Limitations
