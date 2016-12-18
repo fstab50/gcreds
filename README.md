@@ -24,6 +24,7 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 
 * [README.md](./README.md):  This file
 * [gcreds](./gcreds):  gcreds main executable
+* [notes/](./notes/):  Directory containing all release notes
 
 * * * 
 
