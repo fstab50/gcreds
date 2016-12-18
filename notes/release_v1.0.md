@@ -23,7 +23,7 @@ in your config, **gcreds** will prompt you to clear your config _before_ generat
 This is only changeable in the current release via the TIMEOUT variable setting contained  
 in the gcreds main executable.  (See Enhancement Roadmap section of the [README](../README.md))
 
-### Working with Duplication Sets of Temp Credentials
+#### Working with Duplicate Sets of Credentials
 
 * **gcreds** will complain if you want to have more than 1 set of temporary credentials in awscli  
 config at a time. This is to prevent corruption of the local awscli config.  _You can choose **not**  
