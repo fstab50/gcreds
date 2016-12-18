@@ -6,7 +6,7 @@
 **gcreds** requests temporary credentials from [Amazon Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html)  
 for roles that normally require mfa credentials in order to authenticate.  
 
-The primary use case for gcreds is for generating a temporary set of AWS access  
+The primary use case for **gcreds** is for generating a temporary set of AWS access  
 credentials for programmatic use by an automation tools running on your local machine.
 
 See [v1.0 Release Notes](./notes/release_v1.0.md)
@@ -105,6 +105,8 @@ Changes to local configuration for awscli:
 
 ## Enhancement Roadmap ##
 
-* temp credential expiration variable at runtime via user-provided parameter
-* flag passed at runtime to suppress all stdout msgs, diverting instead to log only
-* run time parameter filtering to eleminate dep on given parameter order
+* temp credential expiration variable at runtime via user-provided parameter.
+* Needs to validate that all profile names for which it is generating temp credentials  
+have a corresponding entry and role_arn present in the local config.
+* flag passed at runtime to suppress all stdout msgs, diverting instead to log only.
+* run time parameter filtering to eleminate dep on given parameter order.
