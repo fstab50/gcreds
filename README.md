@@ -1,4 +1,3 @@
-* * *
 # README :  gcreds (v1.0)
 * * *
 
@@ -38,6 +37,10 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 ## Usage ##
 
 Help Menu
+
+```bash
+    $ ./gcreds -h  
+```
 
 ![help-menu](./.images/help-menu.png)
 

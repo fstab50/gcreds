@@ -232,8 +232,8 @@ function gcreds-parse-parameters(){
 function gcreds-help(){
     cat <<EOM
  
- Help Conents
- ------------
+ Help Contents
+ -------------
 
     To generate temporary credentials:
 
@@ -241,7 +241,7 @@ function gcreds-help(){
 
     ${white}${BOLD}Options${UNBOLD}${reset} : (not currently implemented)
         -t, --timeout=N    temp credential expiration in N seconds (900 sec minimum)
-        -s, --silent       when given, supresses all stout messages
+        -s, --silent       when given, suppresses all stout messages
 
     ${white}${BOLD}profiles.list${reset}${UNBOLD} (required)
         list of names from your local awscli configuration, one per line
@@ -287,7 +287,7 @@ function gcreds-check-creds(){
     #
 }
 
-#<-- start -->
+#<-- start MAIN -->
 
 # check deps
 gcreds-depcheck
