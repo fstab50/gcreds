@@ -240,8 +240,8 @@ function gcreds-help(){
     ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTION] [profiles.list] [MFA_PROFILENAME] [MFA_TOKEN]
 
     ${white}${BOLD}Options${UNBOLD}${reset} : (not currently implemented)
-        -t, --timeout=N    temp credential expiration in N seconds (900 sec minimum)
-        -s, --silent       when given, suppresses all stout messages
+        -t, --timeout=N :  temp credential expiration in N seconds (900 sec minimum)
+        -s, --silent    :  when given, suppresses all stout messages
 
     ${white}${BOLD}profiles.list${reset}${UNBOLD} (required)
         list of names from your local awscli configuration, one per line
