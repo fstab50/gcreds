@@ -244,9 +244,9 @@ function gcreds-help(){
         -s, --silent    :  when given, suppresses all stout messages
 
     ${white}${BOLD}profiles.list${reset}${UNBOLD} (required)
-        list of names from your local awscli configuration, one per line
+        list of profile names from your local awscli configuration, one per line
         corresponding to IAM role profiles for which you wish to generate
-        temporary credentials
+        temporary credentials. Profiles.list must be in gcreds root directory
 
     ${white}${BOLD}MFA_PROFILENAME${reset}${UNBOLD} (required)
         profile name in your local awscli configuration that contains the

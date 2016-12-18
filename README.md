@@ -7,7 +7,7 @@
 for roles that normally require mfa credentials in order to authenticate.  
 
 The primary use case for **gcreds** is for generating a temporary set of AWS access  
-credentials for programmatic use by an automation tools running on your local machine.
+credentials for programmatic use by automation tools running on your local machine.
 
 See [v1.0 Release Notes](./notes/release_v1.0.md)
 
