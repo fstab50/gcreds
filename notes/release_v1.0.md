@@ -6,8 +6,8 @@
 * [Security]: Temp files used during processing are now hidden files (.*)
 
 * [Security]: Temp files are now written to a location in memory instead of disk to prevent  
-user capture during generation of temp credentials. This is useful when gcreds is  
-called by an application invoked by a user without permissions to view or modify the local  
+user capture during generation of temp credentials. This is useful when **gcreds** is  
+called invoked by a user or application without permissions to view or modify the local  
 awscli config (.aws/*)
 
 * **gcreds** now checks for the existence of active (or expired) temp credentials in the local  
