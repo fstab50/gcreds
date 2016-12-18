@@ -3,19 +3,19 @@
 
 ## Features Implemented in v1.0
 
-* [Security]: Temp files used during processing are now hidden files (.*)
+* [**Security**]: Temp files used during processing are now hidden files (.*)
 
-* [Security]: Temp files are now written to a location in memory instead of disk to prevent  
+* [**Security**]: Temp files are now written to a location in memory instead of disk to prevent  
 user capture during generation of temp credentials. This is useful when **gcreds** is  
 called invoked by a user or application without permissions to view or modify the local  
 awscli config (.aws/*)
 
-* **gcreds** now checks for the existence of active (or expired) temp credentials in the local  
-awscli config before generating new temporary credentials to prevent duplicate entries  
-in the local config files.  If you attempt to generate new credentials with temp credentials already  
-in your config, **gcreds** will prompt you to clear your config _before_ generating new creds.
+* [**Exception Handling**]: **gcreds** now checks for the existence of active (or expired) temp  
+credentials in the local awscli config before generating new temporary credentials to prevent duplicate  
+entries in the local config files.  If you attempt to generate new credentials with temp credentials  
+already in your config, **gcreds** will prompt you to clear your config _before_ generating new creds.
 
-* **Logging**. Log file generation has been implemented in anticipation of **gcreds** use as a library  
+* [**Logging**]: Log file generation has been implemented in anticipation of **gcreds** use as a library  
 called by automation applications.  When used as a library, output messages will divert only to  
 the log file instead of to stdout to enable debugging.
 
