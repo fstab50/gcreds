@@ -3,11 +3,11 @@
 
 ## Features Implemented in v1.0
 
-* [Security]: temp files used during process are now hidden files (.*)
-* [Security]: temp files are written to a location in memory instead of  
-disk to prevent user capture during generation of temp credentials. This  
-is useful when gcreds is called by an application invoked by a user without  
-permissions to view or modify the local awscli config (.aws/*)
+* [Security]: Temp files used during process are now hidden files (.*)
+* [Security]: Temp files are written to a location in memory instead of disk to prevent  
+user capture during generation of temp credentials. This is useful when gcreds is  
+called by an application invoked by a user without permissions to view or modify the local  
+awscli config (.aws/*)
 
 * * *
 
