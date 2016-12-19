@@ -94,20 +94,10 @@ function gcreds-depcheck(){
         if ! mkdir -p "$pkg_path/logs"; then
             gcreds-error-exit "$pkg: failed to make log directory: $pkg_path/logs" $E_NOLOG
         fi
-    fi
-
-    ## set fs pointer to writeable temp location ##
-    if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
-            # in-memory
-            TMPDIR="/dev/shm"
-            cd $TMPDIR     
-    else
-            TMPDIR="/tmp"
-            cd $TMPDIR 
-    fi    
+    fi  
 
     ## check for required cli tools ##
-    for prog in aws jq; do
+    for prog in aws jq hostname awk grep; do
         if ! type "$prog" > /dev/null 2>&1; then
             gcreds-error-exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
@@ -127,6 +117,16 @@ function gcreds-depcheck(){
             gcreds-error-exit "no viable json parser binary (jq) found, Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
     fi
+
+    ## set fs pointer to writeable temp location ##
+    if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
+            # in-memory
+            TMPDIR="/dev/shm"
+            cd $TMPDIR     
+    else
+            TMPDIR="/tmp"
+            cd $TMPDIR 
+    fi  
 
     ## check temp credential lifetime > required min
     if [[ $TIMEOUT -lt 900 ]]; then
