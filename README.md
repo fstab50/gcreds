@@ -102,6 +102,10 @@ Changes to local configuration for awscli:
 
 ![aws example credentials file](./.images/credentials.png)
 
+Use of temporary credentials profile created by **greds**:
+
+![example usage](./images/example-usage.png)
+
 * * * 
 
 ## Enhancement Roadmap ##
