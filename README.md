@@ -110,8 +110,11 @@ Use of temporary credentials profile created by **greds**:
 
 ## Enhancement Roadmap ##
 
-1 temp credential expiration variable at runtime via user-provided parameter.
-2 flag passed at runtime to suppress all stdout msgs, diverting instead to log only.
-3 run time parameter filtering to eleminate dep on given parameter order.
-4 Pass a run time parameter to function gcreds-revert_creds() that will bypass currently  
+1. temp credential expiration variable at runtime via user-provided parameter.
+
+2. flag passed at runtime to suppress all stdout msgs, diverting instead to log only.
+
+3. run time parameter filtering to eleminate dep on given parameter order.
+
+4. Pass a run time parameter to function gcreds-revert_creds() that will bypass currently  
 required user input to clear or restore credentials.
