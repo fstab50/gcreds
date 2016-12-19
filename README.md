@@ -90,7 +90,7 @@ Help Menu
 
 Sample Output - generating credentials
 
-![gcreds output](./.images/sample-output.png)
+![gcreds output](./.images/stdout.png)
 
 Changes to local configuration for awscli:  
 
@@ -104,7 +104,7 @@ Changes to local configuration for awscli:
 
 Use of temporary credentials profile created by **greds**:
 
-![example usage](./images/example-usage.png)
+![example usage](./.images/example-usage.png)
 
 * * * 
 
