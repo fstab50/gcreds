@@ -2,7 +2,6 @@
 
 # global variables
 pkg=$(basename $0)
-version="0.8"
 pkg_path=$(cd $(dirname $0); pwd -P)
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
@@ -31,6 +30,7 @@ E_DEPENDENCY=1                # exit code if missing required dependency
 E_NOLOG=2                     # exit code if failure to create log dir, log file
 E_BADSHELL=3                  # exit code if incorrect shell detected
 E_AUTHFAIL=5                  # exit code if authentication failure
+E_BADPROFILE=6                # exit code if profile name/ role not found in local config
 E_USER_CANCEL=7               # exit code if user cancel
 E_BADARG=8                    # exit code if bad input parameter        
 E_MISC=11                     # exit code if miscellaneous (unspecified) error
@@ -66,7 +66,13 @@ function gcreds-message(){
 function gcreds-error(){
     local msg="$1"
     gcreds-logger "ERROR: $msg"
-    echo -e "\n${yellow}[ ${red}ERRR$yellow ]$reset  $msg\n"
+    echo -e "\n${yellow}[ ${red}ERRR${yellow} ]$reset  $msg\n"
+}
+
+function gcreds-warn(){
+    local msg="$1"
+    gcreds-logger "WARN: $msg"
+    echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg\n"    
 }
 
 function gcreds-error-exit(){
@@ -154,6 +160,20 @@ function gcreds-backup(){
     #
 }
 
+function gcreds-profile-exists(){
+    # validate if profile exists in local awscli config
+    if [[ $1 == "" ]] && [[ $1 == $MFA_ARN ]]; then
+        gcreds-error "Invalid MFA profile name provided ($MFA_PROFILE) Exiting code $E_BADARG." $E_BADARG
+        gcreds-help
+    elif [[ $1 == "" ]]; then
+        gcreds-warn "Profile name ($profile) not in your local config. (code $E_BADPROFILE)." $E_BADPROFILE
+        return 1
+    fi
+    #
+    #<-- end function gcreds-profile-exists -->
+    #
+}
+
 function gcreds-clean(){
     # delete all files given as parameters
     rm $@
@@ -215,13 +235,10 @@ function gcreds-parse-parameters(){
     ACCTFILE=$pkg_path/$1       # profiles to gen temp creds, one per line
     MFA_PROFILE=$2              # iam user profile used to assume roles
     MFA_CODE=$3                 # otp code
-
-    ## verify valid mfa_profile ##
     MFA_ARN=$(aws configure get $2.mfa_serial)
-    if [[ $MFA_ARN == "" ]]; then
-        gcreds-error "Invalid MFA profile name provided. (code $E_BADARG)." $E_BADARG
-        gcreds-help
-    fi
+    
+    ## verify valid mfa_profile ##
+    gcreds-profile-exists $MFA_ARN
     #
     # <-- end function gcreds-parse-parameters -->
     #
@@ -324,32 +341,34 @@ cat ./.new.profile >> ~/.aws/credentials
 
 # create temp credentials for each profile in ACCTFILE
 for profile in $(cat $ACCTFILE); do
-    ### Need to validate that profile ###
-    ### exists in local config HERE ###
-    # use local config to pull role_arn
+    # assign arn from local config
     role_arn=$(aws configure get $profile.role_arn)
-    echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}"
-    echo -e "Assuming role: ${lgray}$role_arn${reset}\n"
 
-    # call assume role to gen temp creds
-    aws sts assume-role \
-        --role-arn "$role_arn" \
-        --role-session-name "gcreds-$profile" \
-        --profile "gcreds-$MFA_PROFILE" > .creds.json
+    if gcreds-profile-exists $role_arn; then
+        echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}"
+        echo -e "Assuming role: ${lgray}$role_arn${reset}\n"
 
-    # create temp profile
-    AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .creds.json)
-    AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .creds.json)
-    AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .creds.json)
+        # call assume role to gen temp creds
+        aws sts assume-role \
+            --duration-seconds "$TIMEOUT" \
+            --role-arn "$role_arn" \
+            --role-session-name "gcreds-$profile" \
+            --profile "gcreds-$MFA_PROFILE" > .creds.json
 
-    echo " " > ./.new.profile
-    echo "[gcreds-$profile]" >> ./.new.profile
-    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
-    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
-    echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
+        # create temp profile
+        AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .creds.json)
+        AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .creds.json)
+        AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .creds.json)
 
-    # add to local config
-    cat ./.new.profile >> ~/.aws/credentials
+        echo " " > ./.new.profile
+        echo "[gcreds-$profile]" >> ./.new.profile
+        echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
+        echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
+        echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
+
+        # add to local config
+        cat ./.new.profile >> ~/.aws/credentials
+    fi
 done
 
 # clean up temp files
