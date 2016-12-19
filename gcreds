@@ -8,8 +8,6 @@ gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
 #
-#ACCTFILE=$1         # profiles to gen temp creds, one per line
-#MFA_CODE=$2         # otp code
 TIMEOUT=900         # temp creds expiration, 1 hour
 
 # Formatting
@@ -148,7 +146,7 @@ function gcreds-authentication(){
 function gcreds-backup(){
     # backup existing awscli config
     if [[ ! -e ~/.aws/credentials.orig ]]; then
-        # backup doesn't exist
+        # no config bkup, create 
         cp ~/.aws/credentials ~/.aws/credentials.orig
     fi
     #
@@ -157,7 +155,7 @@ function gcreds-backup(){
 }
 
 function gcreds-clean(){
-    # delete files given as parameters
+    # delete all files given as parameters
     rm $@
     #
     #<-- end function gcreds-clean -->
@@ -172,18 +170,18 @@ function gcreds-revert-creds(){
     read -p "  ${yellow}Are you sure you want to proceed?${reset} [n]:  " CHOICE 
 
     if [[ -z "$CHOICE" ]] || [[ "$CHOICE" == "n" ]]; then
-        echo -e "\nYour temporary credentials remain in your config. Nothing done.\n"
+        gcreds-message "Temporary credentials remain in your config. Nothing done." INFO
     elif [[ "$CHOICE" == "y" ]] || [[ "$CHOICE" == "yes" ]]; then
         # ensure backup exists
         if [[ -e ~/.aws/credentials.orig ]]; then
             mv ~/.aws/credentials.orig ~/.aws/credentials
-            echo -e "\nYour config has been cleaned.\n" | indent02
+            gcreds-message "Your local config has been cleaned." INFO
         else
-            # no backup exists
-            echo -e "\nNothing done. Your config appears to be clean already.\n"
+            # no backup exists, clean 
+            gcreds-message "Nothing done. Your config appears to be clean already." INFO
         fi
     else
-        echo -e "\nNothing done.\n" | indent02
+        gcreds-message "Nothing done." INFO
     fi
     #
     # <-- end function gcreds-revert-creds -->
@@ -221,7 +219,7 @@ function gcreds-parse-parameters(){
     ## verify valid mfa_profile ##
     MFA_ARN=$(aws configure get $2.mfa_serial)
     if [[ $MFA_ARN == "" ]]; then
-        echo -e "\nInvalid MFA profile name provided. (code $E_BADARG)\n" | indent02
+        gcreds-error "Invalid MFA profile name provided. (code $E_BADARG)." $E_BADARG
         gcreds-help
     fi
     #
@@ -276,7 +274,7 @@ EOM
 function gcreds-check-creds(){
     # verify existence of previous temp credentials
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
-        echo -e "\nYou appear to have active temp credentials already in your config.\n" | indent02
+        gcreds-message "You appear to have active temp credentials already in your local config." WARN
         # clear active creds by restoring from backup
         gcreds-revert-creds
         # restor backup of awscli
