@@ -72,7 +72,13 @@ function gcreds-error(){
 function gcreds-warn(){
     local msg="$1"
     gcreds-logger "WARN: $msg"
-    echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg\n"    
+    if [ "$3" ]; then
+        # there is a second line of the msg, to be printed by the caller
+        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg"
+    else
+        # msg is only 1 line sent by the caller
+        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg\n"
+    fi
 }
 
 function gcreds-error-exit(){
@@ -184,7 +190,7 @@ function gcreds-clean(){
 
 function gcreds-revert-creds(){
     # deletes temp credentials from local awscli config
-    echo -e "\n${red}${BOLD}WARNING:${UNBOLD}${reset}\n" | indent10
+    echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
     echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
     read -p "  ${yellow}Are you sure you want to proceed?${reset} [n]:  " CHOICE 
@@ -220,7 +226,10 @@ function gcreds-parse-parameters(){
                 gcreds-help
                 ;;
             -r | --revert | -revert | --Revert)
-                gcreds-revert-creds
+                revert=1    # flag indicating direct call to clear config
+                if ! gcreds-preexisting-creds $revert; then
+                    gcreds-message "You do not have temporary credentials in your config. Nothing to do." INFO
+                fi
                 exit 0
                 ;;
         esac
@@ -277,9 +286,9 @@ function gcreds-help(){
 
     ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS]
 
-        -r, revert    Cleans temporary credentials from your local
-                      awscli configuration, returning your config to
-                      a pre-gcreds state.
+        -r, --revert    Clears temporary credentials from your local
+                        awscli configuration, returning your config to
+                        a pre-gcreds state.
 
 EOM
     exit 0
@@ -288,17 +297,25 @@ EOM
     #
 }
 
-function gcreds-check-creds(){
+function gcreds-preexisting-creds(){
     # verify existence of previous temp credentials
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
-        gcreds-message "You appear to have active temp credentials already in your local config." WARN
+        if [ ! $1 ]; then
+            # not a direct call via revert parameter
+            line2=1     # flag indicating a 2 line msg
+            gcreds-warn "You appear to have active temp credentials already in your local config." WARN $line2
+            echo -e "These should be cleared before generating new credentials." | indent10
+        fi
         # clear active creds by restoring from backup
         gcreds-revert-creds
         # restor backup of awscli
         gcreds-backup
+    else
+        # no preexisting credentials in local config
+        return 1
     fi
     #
-    #<-- end function gcreds-check-creds -->
+    #<-- end function gcreds-preexisting-creds -->
     #
 }
 
@@ -314,7 +331,7 @@ gcreds-backup
 gcreds-parse-parameters $@
 
 # check for active temp credentials before generating new creds
-gcreds-check-creds
+gcreds-preexisting-creds
 
 # generate temp creds for AUA1
 aws sts get-session-token \
