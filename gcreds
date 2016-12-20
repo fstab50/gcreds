@@ -286,9 +286,9 @@ function gcreds-help(){
 
     ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS]
 
-        -r, --revert    Clears temporary credentials from your local
-                        awscli configuration, returning your config to
-                        a pre-gcreds state.
+        -r, --revert  :  Clears temporary credentials from your local
+                         awscli configuration, returning your config to
+                         a pre-gcreds state.
 
 EOM
     exit 0
