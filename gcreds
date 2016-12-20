@@ -219,7 +219,7 @@ function gcreds-parse-parameters(){
                 # display help
                 gcreds-help
                 ;;
-            -r | revert | rever | Revert)
+            -r | --revert | -revert | --Revert)
                 gcreds-revert-creds
                 exit 0
                 ;;
