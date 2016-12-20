@@ -7,7 +7,7 @@ gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
 #
-TIMEOUT=900         # temp creds expiration, 1 hour
+TIMEOUT=900         # temp creds expiration, 15 m
 
 # Formatting
 blue=$(tput setaf 4)
