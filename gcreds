@@ -103,7 +103,7 @@ function gcreds-depcheck(){
     fi  
 
     ## check for required cli tools ##
-    for prog in aws jq hostname awk grep; do
+    for prog in aws jq hostname awk grep cat; do
         if ! type "$prog" > /dev/null 2>&1; then
             gcreds-error-exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
