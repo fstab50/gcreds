@@ -6,7 +6,7 @@ pkg_path=$(cd $(dirname $0); pwd -P)
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
-debugMode="true"    # change this value to "True" to turn on verbose \
+debugMode=""    # change this value to "True" to turn on verbose \
                 # log output to aid debugging
 #
 TIMEOUT=900         # temp creds expiration, 15 m
@@ -90,22 +90,25 @@ function gcreds-error-exit(){
     exit $status
 }
 
-function env_info(){
+function gcreds-env-info(){
     local msg_header=$1
     local dep=$2
 
-    if [[ $prog == "aws" ]]; then
+    if [[ $dep == "aws" ]]; then
         version_info=$(aws --version 2>&1)
         gcreds-logger "[$msg_header]: awscli version detected: $(echo $version_info | awk '{print $1}')"
-        gcreds-logger "[$msg_header] Python version detected: $(echo $version_info | awk '{print $2}')"
-        gcreds-logger "[$msg_header] Kernel detected: $(echo $version_info | awk '{print $3}')"
-        gcreds-logger "[$msg_header] awscli library detected: $(echo $version_info | awk '{print $4}')"
-    elif [[ $prog == "jq" ]]; then
+        gcreds-logger "[$msg_header]: Python version detected: $(echo $version_info | awk '{print $2}')"
+        gcreds-logger "[$msg_header]: Kernel detected: $(echo $version_info | awk '{print $3}')"
+        gcreds-logger "[$msg_header]: awscli library detected: $(echo $version_info | awk '{print $4}')"
+    elif [[ $dep == "jq" ]]; then
         version_info=$(jq --version 2>&1)
-        gcreds-logger "[$msg_header] json parser detected: $(echo $version_info)"
+        gcreds-logger "[$msg_header]: json parser detected: $(echo $version_info)"
     else
-        gcreds-logger "[$msg_header] utility detected: $($prog --version | head -1)"
+        gcreds-logger "[$msg_header]: detected: $($prog --version | head -1)"
     fi
+    #
+    #<-- end function gcreds-env-info -->
+    #
 }
 
 function gcreds-depcheck(){
@@ -128,18 +131,7 @@ function gcreds-depcheck(){
             gcreds-error-exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
         if [ $debugMode ]; then
-            if [[ $prog == "aws" ]]; then
-                version_info=$(aws --version 2>&1)
-                gcreds-logger "[DEBUG]: awscli version detected: $(echo $version_info | awk '{print $1}')"
-                gcreds-logger "[DEBUG]: Python version detected: $(echo $version_info | awk '{print $2}')"
-                gcreds-logger "[DEBUG]: Kernel detected: $(echo $version_info | awk '{print $3}')"
-                gcreds-logger "[DEBUG]: awscli library detected: $(echo $version_info | awk '{print $4}')"
-            elif [[ $prog == "jq" ]]; then
-                version_info=$(jq --version 2>&1)
-                gcreds-logger "[DEBUG]: json parser detected: $(echo $version_info)"
-            else
-                gcreds-logger "[DEBUG]: utility detected: $($prog --version | head -1)"
-            fi
+            gcreds-env-info "DEBUG" $prog    
         fi
     done
 
