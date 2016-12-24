@@ -6,6 +6,8 @@ pkg_path=$(cd $(dirname $0); pwd -P)
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
+debugMode="true"    # change this value to "True" to turn on verbose \
+                # log output to aid debugging
 #
 TIMEOUT=900         # temp creds expiration, 15 m
 
@@ -88,6 +90,24 @@ function gcreds-error-exit(){
     exit $status
 }
 
+function env_info(){
+    local msg_header=$1
+    local dep=$2
+
+    if [[ $prog == "aws" ]]; then
+        version_info=$(aws --version 2>&1)
+        gcreds-logger "[$msg_header]: awscli version detected: $(echo $version_info | awk '{print $1}')"
+        gcreds-logger "[$msg_header] Python version detected: $(echo $version_info | awk '{print $2}')"
+        gcreds-logger "[$msg_header] Kernel detected: $(echo $version_info | awk '{print $3}')"
+        gcreds-logger "[$msg_header] awscli library detected: $(echo $version_info | awk '{print $4}')"
+    elif [[ $prog == "jq" ]]; then
+        version_info=$(jq --version 2>&1)
+        gcreds-logger "[$msg_header] json parser detected: $(echo $version_info)"
+    else
+        gcreds-logger "[$msg_header] utility detected: $($prog --version | head -1)"
+    fi
+}
+
 function gcreds-depcheck(){
     ## test default shell ##
     if [ ! -n "$BASH" ]; then
@@ -106,6 +126,20 @@ function gcreds-depcheck(){
     for prog in aws jq hostname awk grep cat; do
         if ! type "$prog" > /dev/null 2>&1; then
             gcreds-error-exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
+        fi
+        if [ $debugMode ]; then
+            if [[ $prog == "aws" ]]; then
+                version_info=$(aws --version 2>&1)
+                gcreds-logger "[DEBUG]: awscli version detected: $(echo $version_info | awk '{print $1}')"
+                gcreds-logger "[DEBUG]: Python version detected: $(echo $version_info | awk '{print $2}')"
+                gcreds-logger "[DEBUG]: Kernel detected: $(echo $version_info | awk '{print $3}')"
+                gcreds-logger "[DEBUG]: awscli library detected: $(echo $version_info | awk '{print $4}')"
+            elif [[ $prog == "jq" ]]; then
+                version_info=$(jq --version 2>&1)
+                gcreds-logger "[DEBUG]: json parser detected: $(echo $version_info)"
+            else
+                gcreds-logger "[DEBUG]: utility detected: $($prog --version | head -1)"
+            fi
         fi
     done
 
