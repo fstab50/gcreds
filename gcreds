@@ -243,7 +243,7 @@ function gcreds-parse-parameters(){
     # set assignments
     ACCTFILE=$pkg_path/$1       # profiles to gen temp creds, one per line
     MFA_PROFILE=$2              # iam user profile used to assume roles
-    MFA_CODE=$3                 # otp code
+    MFA_CODE=$3                 # otp code from virtual or hw mfa device
     MFA_ARN=$(aws configure get $2.mfa_serial)
     
     ## verify valid mfa_profile ##
@@ -333,11 +333,12 @@ gcreds-parse-parameters $@
 # check for active temp credentials before generating new creds
 gcreds-preexisting-creds
 
-# generate temp creds for AUA1
+# generate temp creds for MFA_PROFILE
 aws sts get-session-token \
     --duration-seconds "$TIMEOUT" \
     --serial-number "$MFA_ARN" \
     --token-code "$MFA_CODE" \
+    --output json \
     --profile $MFA_PROFILE 2>/dev/null > .aua.creds.json
 
 # create temp profile
@@ -370,6 +371,7 @@ for profile in $(cat $ACCTFILE); do
             --duration-seconds "$TIMEOUT" \
             --role-arn "$role_arn" \
             --role-session-name "gcreds-$profile" \
+            --output json \
             --profile "gcreds-$MFA_PROFILE" > .creds.json
 
         # create temp profile
