@@ -54,7 +54,7 @@ function gcreds-logger(){
 
 function gcreds-message(){
     local msg="$1"
-    gcreds-logger "INFO: $msg"
+    gcreds-logger "[INFO]: $msg"
     [[ $quiet ]] && return
     shift
     pref="----"
@@ -67,13 +67,13 @@ function gcreds-message(){
 
 function gcreds-error(){
     local msg="$1"
-    gcreds-logger "ERROR: $msg"
+    gcreds-logger "[ERRR]: $msg"
     echo -e "\n${yellow}[ ${red}ERRR${yellow} ]$reset  $msg\n"
 }
 
 function gcreds-warn(){
     local msg="$1"
-    gcreds-logger "WARN: $msg"
+    gcreds-logger "[WARN]: $msg"
     if [ "$3" ]; then
         # there is a second line of the msg, to be printed by the caller
         echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg"
@@ -131,7 +131,7 @@ function gcreds-depcheck(){
             gcreds-error-exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
         if [ $debugMode ]; then
-            gcreds-env-info "DEBUG" $prog    
+            gcreds-env-info "DBUG" $prog    
         fi
     done
 
