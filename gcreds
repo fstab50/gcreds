@@ -72,6 +72,8 @@ function gcreds-help(){
         6 digit otp code from either a hardware or virtual mfa device
         MFA code must correspond to the IAM_PROFILE given
 
+                                 -----------
+
         New profiles added to your awscli config prepended with '${BOLD}gcreds-${UNBOLD}'
 
     ---------------------------------------------------------------------------
