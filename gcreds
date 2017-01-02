@@ -8,8 +8,6 @@ host=$(hostname)
 system=$(uname)
 debugMode=""    # change this value to "True" to turn on verbose \
                 # log output to aid debugging
-#
-TIMEOUT=900         # temp creds expiration, 15 m
 
 # Formatting
 blue=$(tput setaf 4)
@@ -23,9 +21,9 @@ gray=$(tput setaf 008)
 lgray='\033[0;37m'      # light gray
 dgray='\033[1;30m'       # dark gray
 reset=$(tput sgr0)
-#   
-BOLD=`tput bold`              
-UNBOLD=`tput sgr0` 
+#
+BOLD=`tput bold`
+UNBOLD=`tput sgr0`
 
 # error codes
 E_DEPENDENCY=1                # exit code if missing required dependency
@@ -34,7 +32,7 @@ E_BADSHELL=3                  # exit code if incorrect shell detected
 E_AUTHFAIL=5                  # exit code if authentication failure
 E_BADPROFILE=6                # exit code if profile name/ role not found in local config
 E_USER_CANCEL=7               # exit code if user cancel
-E_BADARG=8                    # exit code if bad input parameter        
+E_BADARG=8                    # exit code if bad input parameter
 E_MISC=11                     # exit code if miscellaneous (unspecified) error
 
 #<-- function declaration -->
@@ -114,16 +112,16 @@ function gcreds-env-info(){
 function gcreds-depcheck(){
     ## test default shell ##
     if [ ! -n "$BASH" ]; then
-        # shell other than bash 
+        # shell other than bash
         gcreds-error-exit "Default shell appears to be something other than bash. Please rerun with bash. Aborting (code $E_BADSHELL)" $E_BADSHELL
-    fi 
+    fi
 
     ## create log dir for gcreds ##
     if [[ ! -d $pkg_path/logs ]]; then
         if ! mkdir -p "$pkg_path/logs"; then
             gcreds-error-exit "$pkg: failed to make log directory: $pkg_path/logs" $E_NOLOG
         fi
-    fi  
+    fi
 
     ## check for required cli tools ##
     for prog in aws jq hostname awk grep cat; do
@@ -131,7 +129,7 @@ function gcreds-depcheck(){
             gcreds-error-exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
         if [ $debugMode ]; then
-            gcreds-env-info "DBUG" $prog    
+            gcreds-env-info "DBUG" $prog
         fi
     done
 
@@ -154,15 +152,10 @@ function gcreds-depcheck(){
     if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
             # in-memory
             TMPDIR="/dev/shm"
-            cd $TMPDIR     
+            cd $TMPDIR
     else
             TMPDIR="/tmp"
-            cd $TMPDIR 
-    fi  
-
-    ## check temp credential lifetime > required min
-    if [[ $TIMEOUT -lt 900 ]]; then
-        gcreds-error-exit "Requested temporary credential lifetime must be 15 minutes or more. Exiting (code $E_AUTHFAIL)" $E_AUTHFAIL
+            cd $TMPDIR
     fi
     #
     # <-- end function gcreds-depcheck -->
@@ -184,7 +177,7 @@ function gcreds-authentication(){
 function gcreds-backup(){
     # backup existing awscli config
     if [[ ! -e ~/.aws/credentials.orig ]]; then
-        # no config bkup, create 
+        # no config bkup, create
         cp ~/.aws/credentials ~/.aws/credentials.orig
     fi
     #
@@ -219,7 +212,7 @@ function gcreds-revert-creds(){
     echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
     echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
-    read -p "  ${yellow}Are you sure you want to proceed?${reset} [n]:  " CHOICE 
+    read -p "  ${yellow}Are you sure you want to proceed?${reset} [n]:  " CHOICE
 
     if [[ -z "$CHOICE" ]] || [[ "$CHOICE" == "n" ]]; then
         gcreds-message "Temporary credentials remain in your config. Nothing done." INFO
@@ -229,7 +222,7 @@ function gcreds-revert-creds(){
             mv ~/.aws/credentials.orig ~/.aws/credentials
             gcreds-message "Your local config has been cleaned." INFO
         else
-            # no backup exists, clean 
+            # no backup exists, clean
             gcreds-message "Nothing done. Your config appears to be clean already." INFO
         fi
     else
@@ -245,35 +238,82 @@ function gcreds-parse-parameters(){
     if [[ ! $@ ]]; then
         # display help
         gcreds-help
-    else   
-        case $1 in
-            -h | --help | -help)
-                # display help
-                gcreds-help
-                ;;
-            -r | --revert | -revert | --Revert)
-                revert=1    # flag indicating direct call to clear config
-                if ! gcreds-preexisting-creds $revert; then
-                    gcreds-message "You do not have temporary credentials in your config. Nothing to do." INFO
-                fi
-                exit 0
-                ;;
-        esac
+    else
+        while [ $# -gt 0 ]; do
+            case $1 in
+                -h | --help | -help)
+                    # display help
+                    gcreds-help
+                    ;;
+                -r | --revert | -revert | --Revert)
+                    revert=1    # flag indicating direct call to clear config
+                    if ! gcreds-preexisting-creds $revert; then
+                        gcreds-message "You do not have temporary credentials in your config. Nothing to do." INFO
+                    fi
+                    exit 0
+                    ;;
+                *.accounts)
+                    ACCTFILE=$pkg/path/$1
+                    shift 1
+                    ;;
+                --profile)
+                    MFA_PROFILE=$2
+                    shift 2
+                    ;;
+                --mfa-code)
+                    # verify 6 digit integer
+                    if [[ $2 =~ ^[0-9]{6}$ ]]; then
+                        MFA_CODE=$2
+                        shift 2
+                    else
+                        gcreds-error-exit "You must enter a valid 6 digit mfa code. Exiting (code $E_BADARG)" $E_BADARG
+                    fi
+                    ;;
+                -t | --timeout)
+                    TIMEOUT=$2
+                    shift 2
+                    ;;
+                *)
+                    # invalid argument
+                    gcreds-error-exit "Unrecognized argument [$1] given. Exiting (code $E_BADARG)" $E_BADARG
+            esac
+        done
     fi
-    ## check number ##
-    if [ $# -ne 3 ]; then
-        gcreds-error "3 parameters are required, only $# provided (code $E_BADARG)." $E_BADARG
-        gcreds-help
-    fi
-    
+    ## check that all required parameters have been supplied ##
+    #if [ $# -ne 3 ]; then
+    #    gcreds-error "3 parameters are required, only $# provided (code $E_BADARG)." $E_BADARG
+    #    gcreds-help
+    #fi
+
     # set assignments
-    ACCTFILE=$pkg_path/$1       # profiles to gen temp creds, one per line
-    MFA_PROFILE=$2              # iam user profile used to assume roles
-    MFA_CODE=$3                 # otp code from virtual or hw mfa device
-    MFA_ARN=$(aws configure get $2.mfa_serial)
-    
+    #ACCTFILE=$pkg_path/$1       # profiles to gen temp creds, one per line
+    #MFA_PROFILE=$2              # iam user profile used to assume roles
+    #MFA_CODE=$3                 # otp code from virtual or hw mfa device
+    MFA_ARN=$(aws configure get $MFA_PROFILE.mfa_serial)
+    # set timeout
+    if [[ ! $TIMEOUT ]]; then
+        TIMEOUT=900         # default temp creds expiration, 15 m
+    elif ! [[ $TIMEOUT =~ ^[0-9]+$ ]]; then
+        # time is ! integer
+        gcreds-error-exit "Temp credential lifetime must be an integer. Exiting (code $E_BADARG)" $E_BADARG
+    elif [[ $TIMEOUT -lt 900 ]]; then
+        # timeout < sts minimum limit
+        gcreds-error-exit "Temp credential lifetime must be 15 minutes (900 secs) or more. Exiting (code $E_AUTHFAIL)" $E_AUTHFAIL
+    elif [[ $TIMEOUT -gt 129600 ]]; then
+        # timeout is > 36 hr sts maximum
+        gcreds-error-exit "Temp credential lifetime must be less than 36 hours. Exiting (code $E_AUTHFAIL)" $E_AUTHFAIL
+    fi
+
     ## verify valid mfa_profile ##
     gcreds-profile-exists $MFA_ARN
+    # TESTING ######################################################
+    echo -e "ACCTFILE: "$ACCTFILE
+    echo -e "MFA_PROFILE: "$MFA_PROFILE
+    echo -e "MFA_CODE: "$MFA_CODE
+    echo -e "TIMEOUT: "$TIMEOUT
+    echo -e "MFA_ARN: "$MFA_ARN
+    exit 0
+    # TESTING ######################################################
     #
     # <-- end function gcreds-parse-parameters -->
     #
@@ -281,7 +321,7 @@ function gcreds-parse-parameters(){
 
 function gcreds-help(){
     cat <<EOM
- 
+
  Help Contents
  -------------
 
@@ -300,11 +340,11 @@ function gcreds-help(){
 
     ${white}${BOLD}MFA_PROFILENAME${reset}${UNBOLD} (required)
         profile name in your local awscli configuration that contains the
-        arn of your mfa_serial used when assuming roles 
+        arn of your mfa_serial used when assuming roles
 
     ${white}${BOLD}MFA_TOKEN${reset}${UNBOLD} (required)
         6 digit numerical code from either a hardware or virtual mfa device
-        mfa code must correspond to the MFA_PROFILENAME given        
+        mfa code must correspond to the MFA_PROFILENAME given
 
     ---------------------------------------------------------------------------
 
