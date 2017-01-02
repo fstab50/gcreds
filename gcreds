@@ -314,7 +314,7 @@ function gcreds-parse-parameters(){
     if [[ ! $TIMEOUT ]]; then
         TIMEOUT=15         # default temp creds expiration, 15 minutes
     else
-        gcreds-validate-parameter $TIMEOUT int $STS_MIN $STS_MAX "minutes" "Temp credential lifetime"
+        gcreds-validate-parameter $TIMEOUT int "Temp credential lifetime" $STS_MIN $STS_MAX "minutes"
     fi
     #
     # <-- end function gcreds-parse-parameters -->
@@ -392,7 +392,7 @@ function gcreds-test(){
     echo -e "ACCTFILE: "$ACCTFILE
     echo -e "MFA_PROFILE: "$MFA_PROFILE
     echo -e "MFA_CODE: "$MFA_CODE
-    echo -e "TIMEOUT: "$TIMEOUT
+    echo -e "TIMEOUT: $TIMEOUT minutes"
     echo -e "MFA_ARN: "$MFA_ARN
     exit 0
 }
@@ -400,10 +400,11 @@ function gcreds-test(){
 function gcreds-validate-parameter(){
     local parameter=$1          # parameter value to validate range
     local type=$2               # type of value expected
-    local min_value=$3          # min value in range
-    local max_value=$4          # max value in range
-    local units=$5              # units, min_value (minutes, lbs, kg, etc)
-    local msg_description="$6"  # error msg leading description
+    local msg_description="$3"  # error msg leading description
+    local min_value=$4          # min value in range
+    local max_value=$5          # max value in range
+    local units="$6"            # units, min_value (minutes, lbs, kg, etc)
+    
     ## validate parameter type, integer or decimal ##
     case $type in
         int)
@@ -426,13 +427,15 @@ function gcreds-validate-parameter(){
             Exiting (code $E_BADARG)" $E_BADARG
             ;;
     esac
-    ## validate range ##
-    if [[ $parameter -lt $min_value ]]; then
-        # timeout < sts minimum limit
-        gcreds-error-exit "$msg_description must be $min_value $units or more. Exiting (code $E_BADARG)" $E_BADARG
-    elif [[ $parameter -gt $max_value ]]; then
-        # timeout is > sts maximum
-        gcreds-error-exit "$msg_description must be less than $max_value $units. Exiting (code $E_BADARG)" $E_BADARG
+    ## validate range, if limits given ##
+    if [ $4 ] && [ $5 ] && [ $6 ]; then
+        if [[ $parameter -lt $min_value ]]; then
+            # timeout < sts minimum limit
+            gcreds-error-exit "$msg_description must be $min_value $units or more. Exiting (code $E_BADARG)" $E_BADARG
+        elif [[ $parameter -gt $max_value ]]; then
+            # timeout is > sts maximum
+            gcreds-error-exit "$msg_description must be less than $max_value $units. Exiting (code $E_BADARG)" $E_BADARG
+        fi
     fi
     #
     #<-- end function gcreds-validate-parameter -->
