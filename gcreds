@@ -57,7 +57,7 @@ function gcreds-help(){
         $pkg [OPTION] [*.accounts] --profile [IAM_PROFILE] --mfa-code [MFA_CODE]
 
     ${white}${BOLD}Options${UNBOLD}${reset} :
-        -t, --timeout :  temp credential expiration in minutes (15 default)
+        -t, --timeout :  temp credential expiration in minutes (15 min default)
 
     <${white}${BOLD}filename$reset$UNBOLD>$white$BOLD.accounts${reset}${UNBOLD} (required)
         text file listing of profile names in your local awscli configuration, one
@@ -110,13 +110,13 @@ function gcreds-message(){
         pref="${1:0:4}"
         shift
     fi
-    echo -e "\n${yellow}[ $cyan$pref$yellow ]$reset  $msg\n"
+    echo -e "\n${yellow}[ $cyan$pref$yellow ]$reset  $msg\n" | indent02
 }
 
 function gcreds-error(){
     local msg="$1"
     gcreds-logger "[ERRR]: $msg"
-    echo -e "\n${yellow}[ ${red}ERRR${yellow} ]$reset  $msg\n"
+    echo -e "\n${yellow}[ ${red}ERRR${yellow} ]$reset  $msg\n" | indent02
 }
 
 function gcreds-warn(){
@@ -124,10 +124,10 @@ function gcreds-warn(){
     gcreds-logger "[WARN]: $msg"
     if [ "$3" ]; then
         # there is a second line of the msg, to be printed by the caller
-        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg"
+        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg" | indent02
     else
         # msg is only 1 line sent by the caller
-        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg\n"
+        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg\n" | indent02
     fi
 }
 
@@ -493,8 +493,8 @@ for profile in $(cat $ACCTFILE); do
     role_arn=$(aws configure get $profile.role_arn)
 
     if gcreds-profile-exists $role_arn; then
-        echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}"
-        echo -e "Assuming role: ${lgray}$role_arn${reset}\n"
+        echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}" | indent02
+        echo -e "Assuming role: ${lgray}$role_arn${reset}\n" | indent02
 
         # call assume role to gen temp creds
         aws sts assume-role \
