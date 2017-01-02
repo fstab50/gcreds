@@ -298,7 +298,7 @@ function gcreds-parse-parameters(){
                     fi
                     exit 0
                     ;;
-                *.accounts)
+                *.accounts | *.accts)
                     # list of accts to gen temp creds, one per line
                     ACCTFILE=$pkg_path/$1
                     shift 1
