@@ -32,8 +32,9 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 
 - One of the following python versions: 2.6.5, 2.7.X+, 3.3.X+, 3.4.X+
 - Installation Amazon CLI tools (awscli, see Installation section)
-- jq | a json parser generally available from your distribution repo
+- [jq](https://stedolan.github.io/jq), a json parser generally available from your distribution repo
 - bash (4.x)
+- Standard linux utilities: grep, awk, sed, cat, hostname
 
 * * *
 

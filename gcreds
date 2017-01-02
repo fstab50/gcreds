@@ -9,6 +9,10 @@ system=$(uname)
 debugMode=""    # change this value to "True" to turn on verbose \
                 # log output to aid debugging
 
+# Amazon Sercurity Token Service (STS) limits
+STS_MIN=15      # minutes, equivalent to 900 seconds
+STS_MAX=2160    # minutes, equivalent to 36 hours
+
 # Formatting
 blue=$(tput setaf 4)
 cyan=$(tput setaf 6)
@@ -212,12 +216,10 @@ function gcreds-revert-creds(){
     echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
     echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
-    read -p "  ${yellow}Are you sure you want to proceed?${reset} [n]:  " CHOICE
+    read -p "  ${yellow}Purge existing temporary credentials?${reset} [y]:  " CHOICE
 
-    if [[ -z "$CHOICE" ]] || [[ "$CHOICE" == "n" ]]; then
-        gcreds-message "Temporary credentials remain in your config. Nothing done." INFO
-    elif [[ "$CHOICE" == "y" ]] || [[ "$CHOICE" == "yes" ]]; then
-        # ensure backup exists
+    if [[ -z "$CHOICE" ]] || [[ "$CHOICE" == "y" ]] || [[ "$CHOICE" == "yes" ]]; then
+        # restore clean config from backup
         if [[ -e ~/.aws/credentials.orig ]]; then
             mv ~/.aws/credentials.orig ~/.aws/credentials
             gcreds-message "Your local config has been cleaned." INFO
@@ -225,8 +227,8 @@ function gcreds-revert-creds(){
             # no backup exists, clean
             gcreds-message "Nothing done. Your config appears to be clean already." INFO
         fi
-    else
-        gcreds-message "Nothing done." INFO
+    elif [[ "$CHOICE" == "no" ]] || [[ "$CHOICE" == "n" ]]; then
+        gcreds-message "Temporary credentials remain in your config. Nothing done." INFO
     fi
     #
     # <-- end function gcreds-revert-creds -->
@@ -253,15 +255,21 @@ function gcreds-parse-parameters(){
                     exit 0
                     ;;
                 *.accounts)
-                    ACCTFILE=$pkg/path/$1
+                    # list of accts to gen temp creds, one per line
+                    ACCTFILE=$pkg_path/$1
                     shift 1
                     ;;
                 --profile)
-                    MFA_PROFILE=$2
-                    shift 2
+                    # iam user profile used to assume roles
+                    if [ $2 ]; then
+                        MFA_PROFILE=$2
+                        shift 2
+                    else
+                        gcreds-error-exit "You must provide an IAM profile name. Exiting (code $E_BADARG)" $E_BADARG
+                    fi
                     ;;
-                --mfa-code)
-                    # verify 6 digit integer
+                --mfa-code | --mfacode | --code | -c)
+                    # otp code from virtual or hw mfa device. verify 6 digit int
                     if [[ $2 =~ ^[0-9]{6}$ ]]; then
                         MFA_CODE=$2
                         shift 2
@@ -269,51 +277,45 @@ function gcreds-parse-parameters(){
                         gcreds-error-exit "You must enter a valid 6 digit mfa code. Exiting (code $E_BADARG)" $E_BADARG
                     fi
                     ;;
-                -t | --timeout)
-                    TIMEOUT=$2
-                    shift 2
+                -t | --timeout)     # optional
+                    if [ $2 ]; then
+                        TIMEOUT=$2
+                        shift 2
+                    else
+                        gcreds-error-exit "You must provide a timeout value. Exiting (code $E_BADARG)" $E_BADARG
+                    fi
                     ;;
                 *)
                     # invalid argument
-                    gcreds-error-exit "Unrecognized argument [$1] given. Exiting (code $E_BADARG)" $E_BADARG
+                    gcreds-error-exit "Unrecognized argument [ $1 ] given. Exiting (code $E_BADARG)" $E_BADARG
             esac
         done
     fi
-    ## check that all required parameters have been supplied ##
-    #if [ $# -ne 3 ]; then
-    #    gcreds-error "3 parameters are required, only $# provided (code $E_BADARG)." $E_BADARG
-    #    gcreds-help
-    #fi
-
-    # set assignments
-    #ACCTFILE=$pkg_path/$1       # profiles to gen temp creds, one per line
-    #MFA_PROFILE=$2              # iam user profile used to assume roles
-    #MFA_CODE=$3                 # otp code from virtual or hw mfa device
-    MFA_ARN=$(aws configure get $MFA_PROFILE.mfa_serial)
-    # set timeout
-    if [[ ! $TIMEOUT ]]; then
-        TIMEOUT=900         # default temp creds expiration, 15 m
-    elif ! [[ $TIMEOUT =~ ^[0-9]+$ ]]; then
-        # time is ! integer
-        gcreds-error-exit "Temp credential lifetime must be an integer. Exiting (code $E_BADARG)" $E_BADARG
-    elif [[ $TIMEOUT -lt 900 ]]; then
-        # timeout < sts minimum limit
-        gcreds-error-exit "Temp credential lifetime must be 15 minutes (900 secs) or more. Exiting (code $E_AUTHFAIL)" $E_AUTHFAIL
-    elif [[ $TIMEOUT -gt 129600 ]]; then
-        # timeout is > 36 hr sts maximum
-        gcreds-error-exit "Temp credential lifetime must be less than 36 hours. Exiting (code $E_AUTHFAIL)" $E_AUTHFAIL
+    ## check that min required parameters have been supplied ##
+    if [ ! $ACCTFILE ]; then
+        gcreds-error "You must provide an account list, exiting (code $E_BADARG)." $E_BADARG
+        gcreds-help
+    fi
+    if [ ! $MFA_PROFILE ]; then
+        gcreds-error "You must enter an IAM user used to assume roles. Exiting (code $E_BADARG)" $E_BADARG
+        gcreds-help
+    fi
+    if [ ! $MFA_CODE ]; then
+        gcreds-error "You must enter a valid 6 digit mfa code. Exiting (code $E_BADARG)" $E_BADARG
+        gcreds-help
     fi
 
-    ## verify valid mfa_profile ##
+    # set remaining assignments
+    MFA_ARN=$(aws configure get $MFA_PROFILE.mfa_serial)
+    # verify valid mfa_profile
     gcreds-profile-exists $MFA_ARN
-    # TESTING ######################################################
-    echo -e "ACCTFILE: "$ACCTFILE
-    echo -e "MFA_PROFILE: "$MFA_PROFILE
-    echo -e "MFA_CODE: "$MFA_CODE
-    echo -e "TIMEOUT: "$TIMEOUT
-    echo -e "MFA_ARN: "$MFA_ARN
-    exit 0
-    # TESTING ######################################################
+
+    # set timeout
+    if [[ ! $TIMEOUT ]]; then
+        TIMEOUT=15         # default temp creds expiration, 15 minutes
+    else
+        gcreds-validate-parameter $TIMEOUT int $STS_MIN $STS_MAX "minutes" "Temp credential lifetime"
+    fi
     #
     # <-- end function gcreds-parse-parameters -->
     #
@@ -385,6 +387,58 @@ function gcreds-preexisting-creds(){
     #
 }
 
+function gcreds-test(){
+    # output for testing purposes only
+    echo -e "ACCTFILE: "$ACCTFILE
+    echo -e "MFA_PROFILE: "$MFA_PROFILE
+    echo -e "MFA_CODE: "$MFA_CODE
+    echo -e "TIMEOUT: "$TIMEOUT
+    echo -e "MFA_ARN: "$MFA_ARN
+    exit 0
+}
+
+function gcreds-validate-parameter(){
+    local parameter=$1          # parameter value to validate range
+    local type=$2               # type of value expected
+    local min_value=$3          # min value in range
+    local max_value=$4          # max value in range
+    local units=$5              # units, min_value (minutes, lbs, kg, etc)
+    local msg_description="$6"  # error msg leading description
+    ## validate parameter type, integer or decimal ##
+    case $type in
+        int)
+            # integer
+            if ! [[ $parameter =~ ^[0-9]+$ ]]; then
+                # parameter is not integer
+                gcreds-error-exit "$msg_description must be an integer. Exiting (code $E_BADARG)" $E_BADARG
+            fi
+            ;;
+        float)
+            # floating pt decimal
+            if [[ $parameter =~ ^[0-9]+$ ]]; then
+                # parameter is integer
+                gcreds-error-exit "$msg_description must be a floating point decimal. Exiting (code $E_BADARG)" $E_BADARG
+            fi
+            ;;
+        *)
+            # Unrecognized type
+            gcreds-error-exit "Unrecognized argument in gcreds-validate-parameter [ $type ]. \
+            Exiting (code $E_BADARG)" $E_BADARG
+            ;;
+    esac
+    ## validate range ##
+    if [[ $parameter -lt $min_value ]]; then
+        # timeout < sts minimum limit
+        gcreds-error-exit "$msg_description must be $min_value $units or more. Exiting (code $E_BADARG)" $E_BADARG
+    elif [[ $parameter -gt $max_value ]]; then
+        # timeout is > sts maximum
+        gcreds-error-exit "$msg_description must be less than $max_value $units. Exiting (code $E_BADARG)" $E_BADARG
+    fi
+    #
+    #<-- end function gcreds-validate-parameter -->
+    #
+}
+
 #<-- start MAIN -->
 
 # check deps
@@ -401,7 +455,7 @@ gcreds-preexisting-creds
 
 # generate temp creds for MFA_PROFILE
 aws sts get-session-token \
-    --duration-seconds "$TIMEOUT" \
+    --duration-seconds $(($TIMEOUT*60)) \
     --serial-number "$MFA_ARN" \
     --token-code "$MFA_CODE" \
     --output json \
@@ -434,7 +488,7 @@ for profile in $(cat $ACCTFILE); do
 
         # call assume role to gen temp creds
         aws sts assume-role \
-            --duration-seconds "$TIMEOUT" \
+            --duration-seconds $(($TIMEOUT*60)) \
             --role-arn "$role_arn" \
             --role-session-name "gcreds-$profile" \
             --output json \
