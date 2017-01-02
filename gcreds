@@ -485,7 +485,7 @@ echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
 cat ./.new.profile >> ~/.aws/credentials
 
 # success, log out
-gcreds-logger "[INFO]: Generated temporary credentials for new profile [gcreds-$MFA_PROFILE]"
+gcreds-logger "[INFO]: Generated temp credentials for new profile [gcreds-$MFA_PROFILE]"
 
 # create temp credentials for each profile in ACCTFILE
 for profile in $(cat $ACCTFILE); do
@@ -518,7 +518,7 @@ for profile in $(cat $ACCTFILE); do
         # add to local config
         cat ./.new.profile >> ~/.aws/credentials
         # success, log out
-        gcreds-logger "[INFO]: Generated new temporary credentials for new profile [gcreds-$profile]"
+        gcreds-logger "[INFO]: Generated new temp credentials for new profile [gcreds-$profile]"
     fi
 done
 
