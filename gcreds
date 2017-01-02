@@ -72,6 +72,8 @@ function gcreds-help(){
         6 digit otp code from either a hardware or virtual mfa device
         MFA code must correspond to the IAM_PROFILE given
 
+        New profiles added to your awscli config prepended with '${BOLD}gcreds-${UNBOLD}'
+
     ---------------------------------------------------------------------------
 
     To remove temporary credentials:
@@ -456,6 +458,9 @@ gcreds-parse-parameters $@
 # check for active temp credentials before generating new creds
 gcreds-preexisting-creds
 
+# begin log out
+gcreds-logger "[INFO]: Attempting to generate session token for new profile [gcreds-$MFA_PROFILE]"
+
 # generate temp creds for MFA_PROFILE
 aws sts get-session-token \
     --duration-seconds $(($TIMEOUT*60)) \
@@ -477,8 +482,10 @@ echo "[gcreds-$MFA_PROFILE]" >> ./.new.profile
 echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
 echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
 echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
-
 cat ./.new.profile >> ~/.aws/credentials
+
+# success, log out
+gcreds-logger "[INFO]: Generated temporary credentials for new profile [gcreds-$MFA_PROFILE]"
 
 # create temp credentials for each profile in ACCTFILE
 for profile in $(cat $ACCTFILE); do
@@ -510,6 +517,8 @@ for profile in $(cat $ACCTFILE); do
 
         # add to local config
         cat ./.new.profile >> ~/.aws/credentials
+        # success, log out
+        gcreds-logger "[INFO]: Generated new temporary credentials for new profile [gcreds-$profile]"
     fi
 done
 
