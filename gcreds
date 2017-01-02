@@ -273,7 +273,7 @@ function gcreds-revert-creds(){
             # no backup exists, clean
             gcreds-message "Nothing done. Your config appears to be clean already." INFO
         fi
-    elif [[ "$CHOICE" == "no" ]] || [[ "$CHOICE" == "n" ]]; then
+    else
         gcreds-message "Temporary credentials remain in your config. Nothing done." INFO
     fi
     #
@@ -391,11 +391,11 @@ function gcreds-preexisting-creds(){
 
 function gcreds-test(){
     # output for testing purposes only
-    echo -e "ACCTFILE: "$ACCTFILE
+    echo -e "\nACCTFILE: "$ACCTFILE
     echo -e "MFA_PROFILE: "$MFA_PROFILE
     echo -e "MFA_CODE: "$MFA_CODE
     echo -e "TIMEOUT: $TIMEOUT minutes"
-    echo -e "MFA_ARN: "$MFA_ARN
+    echo -e "MFA_ARN: $MFA_ARN\n"
     exit 0
 }
 
@@ -410,14 +410,14 @@ function gcreds-validate-parameter(){
     ## validate parameter type, integer or decimal ##
     case $type in
         int)
-            # integer
+            # integer required
             if ! [[ $parameter =~ ^[0-9]+$ ]]; then
                 # parameter is not integer
                 gcreds-error-exit "$msg_description must be an integer. Exiting (code $E_BADARG)" $E_BADARG
             fi
             ;;
         float)
-            # floating pt decimal
+            # floating pt decimal required
             if [[ $parameter =~ ^[0-9]+$ ]]; then
                 # parameter is integer
                 gcreds-error-exit "$msg_description must be a floating point decimal. Exiting (code $E_BADARG)" $E_BADARG
@@ -458,7 +458,7 @@ gcreds-parse-parameters $@
 # check for active temp credentials before generating new creds
 gcreds-preexisting-creds
 
-# begin log out
+# log out
 gcreds-logger "[INFO]: Attempting to generate session token for new profile [gcreds-$MFA_PROFILE]"
 
 # generate temp creds for MFA_PROFILE
