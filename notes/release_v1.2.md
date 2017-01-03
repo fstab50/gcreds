@@ -1,7 +1,5 @@
 # gcreds v1.2 | Release Notes
 
-* * * 
-
 #### Release date:  January 2, 2017
 
 * * *
