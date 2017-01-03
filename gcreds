@@ -265,7 +265,7 @@ function gcreds-revert-creds(){
     local silent=$1
     #
     # log out start
-    gcreds-logger "[INFO]: Attempting local config clean"
+    gcreds-logger "[INFO]: Attempting to remove temp credentials from local config"
     # header
     echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
