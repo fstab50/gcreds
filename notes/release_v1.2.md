@@ -2,6 +2,7 @@
 
 * * *
 **Release date**:  January 2, 2017
+* * *
 
 ## Features Implemented in v1.2
 
