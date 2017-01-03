@@ -1,5 +1,8 @@
 # v1.0 Release Notes
-* * * 
+
+* * *
+**Release date**:  December 18, 2016
+* * *
 
 ## Features Implemented in v1.0
 
