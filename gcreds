@@ -264,6 +264,9 @@ function gcreds-revert-creds(){
     # 
     local silent=$1
     #
+    # log out start
+    gcreds-logger "[INFO]: Attempting local config clean"
+    # header
     echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
     echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
