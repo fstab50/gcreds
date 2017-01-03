@@ -261,11 +261,18 @@ function gcreds-clean(){
 
 function gcreds-revert-creds(){
     # deletes temp credentials from local awscli config
+    # 
+    local silent=$1
+    #
     echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
     echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
-    read -p "  ${yellow}Purge existing temporary credentials?${reset} [y]:  " CHOICE
-
+    if [ $silent ]; then
+        # clean config, no user input
+        CHOICE="y"
+    else
+        read -p "  ${yellow}Purge existing temporary credentials?${reset} [y]:  " CHOICE
+    fi
     if [[ -z "$CHOICE" ]] || [[ "$CHOICE" == "y" ]] || [[ "$CHOICE" == "yes" ]]; then
         # restore clean config from backup
         if [[ -e ~/.aws/credentials.orig ]]; then
@@ -316,7 +323,7 @@ function gcreds-parse-parameters(){
                         gcreds-error-exit "You must provide an IAM profile name. Exiting (code $E_BADARG)" $E_BADARG
                     fi
                     ;;
-                --mfa-code | --mfacode | --code | -c)
+                --mfa-code | --mfacode | --mfa | --code | -c)
                     # otp code from virtual or hw mfa device. verify 6 digit int
                     if [[ $2 =~ ^[0-9]{6}$ ]]; then
                         MFA_CODE=$2
@@ -377,9 +384,12 @@ function gcreds-preexisting-creds(){
             line2=1     # flag indicating a 2 line msg
             gcreds-warn "You appear to have active temp credentials already in your local config." WARN $line2
             echo -e "These should be cleared before generating new credentials." | indent10
+            # clear active creds by restoring from backup, silent mode
+            gcreds-revert-creds -s
+        else
+            # clear active creds by restoring from backup, interactive mode
+            gcreds-revert-creds
         fi
-        # clear active creds by restoring from backup
-        gcreds-revert-creds
         # restor backup of awscli
         gcreds-backup
     else
@@ -487,7 +497,7 @@ echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
 cat ./.new.profile >> ~/.aws/credentials
 
 # success, log out
-gcreds-logger "[INFO]: Generated temp credentials for new profile [gcreds-$MFA_PROFILE]"
+gcreds-logger "[INFO]: Generated temp credentials for iam profile [gcreds-$MFA_PROFILE]"
 
 # create temp credentials for each profile in ACCTFILE
 for profile in $(cat $ACCTFILE); do
@@ -520,7 +530,7 @@ for profile in $(cat $ACCTFILE); do
         # add to local config
         cat ./.new.profile >> ~/.aws/credentials
         # success, log out
-        gcreds-logger "[INFO]: Generated new temp credentials for new profile [gcreds-$profile]"
+        gcreds-logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
     fi
 done
 
