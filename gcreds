@@ -57,7 +57,7 @@ function gcreds-help(){
         $pkg [OPTION] [*.accounts] --profile [IAM_PROFILE] --mfa-code [MFA_CODE]
 
     ${white}${BOLD}Options${UNBOLD}${reset} :
-        -t, --timeout :  temp credential expiration in minutes (15 min default)
+        -t, --timeout :  temp credential expiration in minutes (15 minute default)
 
     <${white}${BOLD}filename$reset$UNBOLD>$white$BOLD.accounts${reset}${UNBOLD} (required)
         text file listing of profile names in your local awscli configuration, one
