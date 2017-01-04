@@ -216,7 +216,7 @@ function gcreds-depcheck(){
 
 function gcreds-authentication(){
     # validate authenthentication to aws apis before writing to awscli config
-    if [[ ! $1 ]] || [[ ! $2 ]] || [[ ! $3 ]]; then
+    if [ ! $1 ] || [ ! $2 ] || [ ! $3 ]; then
         # authenication failed, most likely invalid mfa token
         gcreds-clean .aua.creds.json
         gcreds-error-exit "Authentication Failure: MFA code incorrect. (code $E_AUTHFAIL)" $E_AUTHFAIL
@@ -474,7 +474,7 @@ gcreds-parse-parameters $@
 gcreds-preexisting-creds
 
 # log out
-gcreds-logger "[INFO]: Attempting to generate session token for new profile [gcreds-$MFA_PROFILE]"
+gcreds-logger "[INFO]: Attempting to generate session token for iam profile [gcreds-$MFA_PROFILE]"
 
 # generate temp creds for MFA_PROFILE
 aws sts get-session-token \
