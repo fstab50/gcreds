@@ -87,11 +87,11 @@ Help Menu
 * Add an alias to your local shell profile (optional, but recommended)
 
 ```bash
-    $  echo "alias gcreds=~/<gcreds directory>/gcreds/gcreds" >> ~/.bashrc
+    $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bashrc
 
     OR
 
-    $  echo "alias gcreds=~/<gcreds directory>/gcreds/gcreds" >> ~/.bash_profile
+    $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bash_profile
 ```
 
 * * *
