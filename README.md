@@ -117,10 +117,11 @@ Use of temporary credentials profile created by **greds**:
 Log output:
 
 ```bash
-    $ cat ~/gcreds/logs/gcreds.log
+    $ less ~/gcreds/logs/gcreds.log
 ```
 
 ![example gcreds.log](./.images/log-output.png)
+(colors provided by pkg source-highlight)
 
 * * * 
 
