@@ -98,7 +98,8 @@ Help Menu
 
 ## Output ##
 
-Example stdout - when generating credentials
+#### stdout  
+when generating credentials
 
 ![gcreds output](./.images/stdout.png)
 
@@ -110,18 +111,19 @@ Modifications to local configuration for awscli (account ids have been obscured)
 
 ![aws example credentials file](./.images/credentials.png)
 
+#### awscli config  
 Use of temporary credentials profile created by **greds**:
 
 ![example usage](./.images/example-usage.png)
 
-Log output:
+#### Log output:  
+(colors provided by pkg source-highlight)
 
 ```bash
     $ less ~/gcreds/logs/gcreds.log
 ```
 
 ![example gcreds.log](./.images/log-output.png)  
-(colors provided by pkg source-highlight)
 
 * * * 
 
