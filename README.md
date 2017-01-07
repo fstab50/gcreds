@@ -120,7 +120,7 @@ Log output:
     $ less ~/gcreds/logs/gcreds.log
 ```
 
-![example gcreds.log](./.images/log-output.png)
+![example gcreds.log](./.images/log-output.png)  
 (colors provided by pkg source-highlight)
 
 * * * 
