@@ -13,6 +13,16 @@ debugMode=""    # change this value to "True" to turn on verbose \
 STS_MIN=15      # minutes, equivalent to 900 seconds
 STS_MAX=2160    # minutes, equivalent to 36 hours
 
+# error codes
+E_DEPENDENCY=1                # exit code if missing required dependency
+E_NOLOG=2                     # exit code if failure to create log dir, log file
+E_BADSHELL=3                  # exit code if incorrect shell detected
+E_AUTHFAIL=5                  # exit code if authentication failure
+E_BADPROFILE=6                # exit code if profile name/ role not found in local config
+E_USER_CANCEL=7               # exit code if user cancel
+E_BADARG=8                    # exit code if bad input parameter
+E_MISC=11                     # exit code if miscellaneous (unspecified) error
+
 # Formatting
 blue=$(tput setaf 4)
 cyan=$(tput setaf 6)
@@ -29,21 +39,11 @@ reset=$(tput sgr0)
 BOLD=`tput bold`
 UNBOLD=`tput sgr0`
 
-# error codes
-E_DEPENDENCY=1                # exit code if missing required dependency
-E_NOLOG=2                     # exit code if failure to create log dir, log file
-E_BADSHELL=3                  # exit code if incorrect shell detected
-E_AUTHFAIL=5                  # exit code if authentication failure
-E_BADPROFILE=6                # exit code if profile name/ role not found in local config
-E_USER_CANCEL=7               # exit code if user cancel
-E_BADARG=8                    # exit code if bad input parameter
-E_MISC=11                     # exit code if miscellaneous (unspecified) error
-
 #<-- function declaration -->
 
-function indent02() { sed 's/^/  /'; }
-
-function indent10() { sed 's/^/          /'; }
+# indent
+indent02() { sed 's/^/  /'; }
+indent10() { sed 's/^/          /'; }
 
 function gcreds-help(){
     cat <<EOM
@@ -53,7 +53,7 @@ function gcreds-help(){
 
     To generate temporary credentials:
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} : 
+    ${white}${BOLD}Usage${UNBOLD}${reset} :
         $pkg [OPTION] [*.accounts] --profile [IAM_PROFILE] --mfa-code [MFA_CODE]
 
     ${white}${BOLD}Options${UNBOLD}${reset} :
@@ -261,7 +261,7 @@ function gcreds-clean(){
 
 function gcreds-revert-creds(){
     # deletes temp credentials from local awscli config
-    # 
+    #
     local silent=$1
     #
     # log out start
@@ -421,7 +421,7 @@ function gcreds-validate-parameter(){
     local min_value=$4          # min value in range
     local max_value=$5          # max value in range
     local units="$6"            # units, min_value (minutes, lbs, kg, etc)
-    
+
     ## validate parameter type, integer or decimal ##
     case $type in
         int)
