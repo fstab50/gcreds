@@ -459,6 +459,74 @@ function gcreds-validate-parameter(){
     #
 }
 
+function gcreds-generate-creds(){
+    # generate actual credentials
+    # log out, start
+    gcreds-logger "[INFO]: Attempting to generate session token for iam profile [gcreds-$MFA_PROFILE]"
+
+    # generate temp creds for MFA_PROFILE
+    aws sts get-session-token \
+        --duration-seconds $(($TIMEOUT*60)) \
+        --serial-number "$MFA_ARN" \
+        --token-code "$MFA_CODE" \
+        --output json \
+        --profile $MFA_PROFILE 2>/dev/null > .aua.creds.json
+
+    # create temp profile
+    AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .aua.creds.json)
+    AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .aua.creds.json)
+    AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .aua.creds.json)
+
+    # validate authentication
+    gcreds-authentication $AWS_ACCESS_KEY $AWS_SECRET_KEY $AWS_SESSION_TOKEN
+
+    echo " " > ./.new.profile
+    echo "[gcreds-$MFA_PROFILE]" >> ./.new.profile
+    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
+    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
+    echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
+    cat ./.new.profile >> ~/.aws/credentials
+
+    # success, log out
+    gcreds-logger "[INFO]: Generated temp credentials for iam profile [gcreds-$MFA_PROFILE]"
+
+    # create temp credentials for each profile in ACCTFILE
+    for profile in $(cat $ACCTFILE); do
+        # assign arn from local config
+        role_arn=$(aws configure get $profile.role_arn)
+
+        if gcreds-profile-exists $role_arn; then
+            echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}" | indent02
+            echo -e "Assuming role: ${lgray}$role_arn${reset}\n" | indent02
+
+            # call assume role to gen temp creds
+            aws sts assume-role \
+                --duration-seconds $(($TIMEOUT*60)) \
+                --role-arn "$role_arn" \
+                --role-session-name "gcreds-$profile" \
+                --output json \
+                --profile "gcreds-$MFA_PROFILE" > .creds.json
+
+            # create temp profile
+            AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .creds.json)
+            AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .creds.json)
+            AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .creds.json)
+
+            echo " " > ./.new.profile
+            echo "[gcreds-$profile]" >> ./.new.profile
+            echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
+            echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
+            echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
+
+            # add to local config
+            cat ./.new.profile >> ~/.aws/credentials
+            # success, log out
+            gcreds-logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
+        fi
+    done
+    # <-- end function gcreds-generate-creds -->
+}
+
 #<-- start MAIN -->
 
 # check deps
@@ -473,69 +541,8 @@ gcreds-parse-parameters $@
 # check for active temp credentials before generating new creds
 gcreds-preexisting-creds
 
-# log out
-gcreds-logger "[INFO]: Attempting to generate session token for iam profile [gcreds-$MFA_PROFILE]"
-
-# generate temp creds for MFA_PROFILE
-aws sts get-session-token \
-    --duration-seconds $(($TIMEOUT*60)) \
-    --serial-number "$MFA_ARN" \
-    --token-code "$MFA_CODE" \
-    --output json \
-    --profile $MFA_PROFILE 2>/dev/null > .aua.creds.json
-
-# create temp profile
-AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .aua.creds.json)
-AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .aua.creds.json)
-AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .aua.creds.json)
-
-# validate authentication
-gcreds-authentication $AWS_ACCESS_KEY $AWS_SECRET_KEY $AWS_SESSION_TOKEN
-
-echo " " > ./.new.profile
-echo "[gcreds-$MFA_PROFILE]" >> ./.new.profile
-echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
-echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
-echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
-cat ./.new.profile >> ~/.aws/credentials
-
-# success, log out
-gcreds-logger "[INFO]: Generated temp credentials for iam profile [gcreds-$MFA_PROFILE]"
-
-# create temp credentials for each profile in ACCTFILE
-for profile in $(cat $ACCTFILE); do
-    # assign arn from local config
-    role_arn=$(aws configure get $profile.role_arn)
-
-    if gcreds-profile-exists $role_arn; then
-        echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}" | indent02
-        echo -e "Assuming role: ${lgray}$role_arn${reset}\n" | indent02
-
-        # call assume role to gen temp creds
-        aws sts assume-role \
-            --duration-seconds $(($TIMEOUT*60)) \
-            --role-arn "$role_arn" \
-            --role-session-name "gcreds-$profile" \
-            --output json \
-            --profile "gcreds-$MFA_PROFILE" > .creds.json
-
-        # create temp profile
-        AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .creds.json)
-        AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .creds.json)
-        AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .creds.json)
-
-        echo " " > ./.new.profile
-        echo "[gcreds-$profile]" >> ./.new.profile
-        echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
-        echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
-        echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
-
-        # add to local config
-        cat ./.new.profile >> ~/.aws/credentials
-        # success, log out
-        gcreds-logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
-    fi
-done
+# generate credentials
+gcreds-generate-creds
 
 # clean up temp files
 gcreds-clean .aua.creds.json .creds.json .new.profile
