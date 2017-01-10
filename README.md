@@ -1,4 +1,4 @@
-# README :  gcreds (v1.2)
+# README :  gcreds (v1.3)
 * * *
 
 ## Purpose ##
@@ -11,14 +11,14 @@ credentials for programmatic use by automation tools running on your local machi
 
 See [v1.2 Release Notes](./notes/release_v1.2.md)
 
-* * * 
+* * *
 
 ## Deployment Owner/ Author ##
 
 Blake Huber  
 Slack: [@blake](https://mpcaws.slack.com/team/blake)  
 
-* * * 
+* * *
 
 ## Contents ##
 
@@ -26,7 +26,7 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 * [gcreds](./gcreds):  gcreds main executable
 * [notes/](./notes/):  Directory containing all release notes
 
-* * * 
+* * *
 
 ## Dependencies ##
 
@@ -58,11 +58,11 @@ Help Menu
     $ sudo apt-get install jq    # Ubuntu, most Debian-based distributions
 ```
 ```bash
-    $ sudo yum install jq        # RedHat, Fedora, CentOS 
+    $ sudo yum install jq        # RedHat, Fedora, CentOS
 ```
 
 * Install [awscli](https://github.com/aws/aws-cli/)
-    
+
     Detailed instructions can be found in the README located at:
     https://github.com/aws/aws-cli/
 
@@ -114,7 +114,15 @@ Help Menu
 
 ![example usage](./.images/example-usage.png)
 
-**Log output** (colors provided by pkg source-highlight):
+**Show Option** -- show credential expiration
+
+```bash
+    $ gcreds --show
+```
+
+![option show](./.images/gcreds-show.png)  
+
+**Log output** (colors courtesy of pkg source-highlight):
 
 ```bash
     $ less ~/gcreds/logs/gcreds.log
@@ -122,7 +130,7 @@ Help Menu
 
 ![example gcreds.log](./.images/log-output.png)  
 
-* * * 
+* * *
 
 ## Enhancement Roadmap ##
 
