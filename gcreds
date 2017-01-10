@@ -45,7 +45,7 @@ UNBOLD=`tput sgr0`
 indent02() { sed 's/^/  /'; }
 indent10() { sed 's/^/          /'; }
 
-function gcreds-help(){
+function gcreds_help(){
     cat <<EOM
 
  Help Contents
@@ -89,22 +89,22 @@ function gcreds-help(){
 EOM
     exit 0
     #
-    #<-- end function gcreds-help -->
+    #<-- end function gcreds_help -->
     #
 }
 
-function gcreds-logger(){
+function gcreds_logger(){
     local msg="$1"
     if [[ ! $gcreds_log ]]; then
-        echo "$pkg: failure to call gcreds-logger, $gcreds_log location undefined"
+        echo "$pkg: failure to call gcreds_logger, $gcreds_log location undefined"
         exit $E_NOLOG
     fi
     echo "$(date +'%b %d %T') $host $pkg: $msg" >> "$gcreds_log"
 }
 
-function gcreds-message(){
+function gcreds_message(){
     local msg="$1"
-    gcreds-logger "[INFO]: $msg"
+    gcreds_logger "[INFO]: $msg"
     [[ $quiet ]] && return
     shift
     pref="----"
@@ -115,15 +115,15 @@ function gcreds-message(){
     echo -e "\n${yellow}[ $cyan$pref$yellow ]$reset  $msg\n" | indent02
 }
 
-function gcreds-error(){
+function gcreds_error(){
     local msg="$1"
-    gcreds-logger "[ERRR]: $msg"
+    gcreds_logger "[ERRR]: $msg"
     echo -e "\n${yellow}[ ${red}ERRR${yellow} ]$reset  $msg\n" | indent02
 }
 
-function gcreds-warn(){
+function gcreds_warn(){
     local msg="$1"
-    gcreds-logger "[WARN]: $msg"
+    gcreds_logger "[WARN]: $msg"
     if [ "$3" ]; then
         # there is a second line of the msg, to be printed by the caller
         echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg" | indent02
@@ -133,61 +133,61 @@ function gcreds-warn(){
     fi
 }
 
-function gcreds-error-exit(){
+function gcreds_error_exit(){
     local msg="$1"
     local status="$2"
-    gcreds-error "$msg"
+    gcreds_error "$msg"
     exit $status
 }
 
-function gcreds-env-info(){
+function gcreds_env_info(){
     local msg_header=$1
     local dep=$2
 
     if [[ $dep == "aws" ]]; then
         version_info=$(aws --version 2>&1)
-        gcreds-logger "[$msg_header]: awscli version detected: $(echo $version_info | awk '{print $1}')"
-        gcreds-logger "[$msg_header]: Python version detected: $(echo $version_info | awk '{print $2}')"
-        gcreds-logger "[$msg_header]: Kernel detected: $(echo $version_info | awk '{print $3}')"
-        gcreds-logger "[$msg_header]: awscli library detected: $(echo $version_info | awk '{print $4}')"
+        gcreds_logger "[$msg_header]: awscli version detected: $(echo $version_info | awk '{print $1}')"
+        gcreds_logger "[$msg_header]: Python version detected: $(echo $version_info | awk '{print $2}')"
+        gcreds_logger "[$msg_header]: Kernel detected: $(echo $version_info | awk '{print $3}')"
+        gcreds_logger "[$msg_header]: awscli library detected: $(echo $version_info | awk '{print $4}')"
     elif [[ $dep == "jq" ]]; then
         version_info=$(jq --version 2>&1)
-        gcreds-logger "[$msg_header]: json parser detected: $(echo $version_info)"
+        gcreds_logger "[$msg_header]: json parser detected: $(echo $version_info)"
     else
-        gcreds-logger "[$msg_header]: detected: $($prog --version | head -1)"
+        gcreds_logger "[$msg_header]: detected: $($prog --version | head -1)"
     fi
     #
-    #<-- end function gcreds-env-info -->
+    #<-- end function gcreds_env_info -->
     #
 }
 
-function gcreds-depcheck(){
+function gcreds_depcheck(){
     ## test default shell ##
     if [ ! -n "$BASH" ]; then
         # shell other than bash
-        gcreds-error-exit "Default shell appears to be something other than bash. Please rerun with bash. Aborting (code $E_BADSHELL)" $E_BADSHELL
+        gcreds_error_exit "Default shell appears to be something other than bash. Please rerun with bash. Aborting (code $E_BADSHELL)" $E_BADSHELL
     fi
 
     ## create log dir for gcreds ##
     if [[ ! -d $pkg_path/logs ]]; then
         if ! mkdir -p "$pkg_path/logs"; then
-            gcreds-error-exit "$pkg: failed to make log directory: $pkg_path/logs" $E_NOLOG
+            gcreds_error_exit "$pkg: failed to make log directory: $pkg_path/logs" $E_NOLOG
         fi
     fi
 
     ## check for required cli tools ##
     for prog in aws jq hostname awk grep cat; do
         if ! type "$prog" > /dev/null 2>&1; then
-            gcreds-error-exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
+            gcreds_error_exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
         if [ $debugMode ]; then
-            gcreds-env-info "DBUG" $prog
+            gcreds_env_info "DBUG" $prog
         fi
     done
 
     ## check if awscli tools are configured ##
     if [[ ! -f $HOME/.aws/config ]]; then
-        gcreds-error-exit "awscli not configured, run 'aws configure'. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
+        gcreds_error_exit "awscli not configured, run 'aws configure'. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
     fi
 
     ## check for jq, use system installed version if found, otherwise use bundled ##
@@ -196,7 +196,7 @@ function gcreds-depcheck(){
     else
         jq="assets/jq/$system/jq"
         if [[ ! -f $jq ]]; then
-            gcreds-error-exit "no viable json parser binary (jq) found, Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
+            gcreds_error_exit "no viable json parser binary (jq) found, Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
     fi
 
@@ -210,62 +210,62 @@ function gcreds-depcheck(){
             cd $TMPDIR
     fi
     #
-    # <-- end function gcreds-depcheck -->
+    # <-- end function gcreds_depcheck -->
     #
 }
 
-function gcreds-authentication(){
+function gcreds_authentication(){
     # validate authenthentication to aws apis before writing to awscli config
     if [ ! $1 ] || [ ! $2 ] || [ ! $3 ]; then
         # authenication failed, most likely invalid mfa token
-        gcreds-clean .aua.creds.json
-        gcreds-error-exit "Authentication Failure: MFA code incorrect. (code $E_AUTHFAIL)" $E_AUTHFAIL
+        gcreds_clean .aua.creds.json
+        gcreds_error_exit "Authentication Failure: MFA code incorrect. (code $E_AUTHFAIL)" $E_AUTHFAIL
     fi
     #
-    #<-- end function gcreds-authentication -->
+    #<-- end function gcreds_authentication -->
     #
 }
 
-function gcreds-backup(){
+function gcreds_backup(){
     # backup existing awscli config
     if [[ ! -e ~/.aws/credentials.orig ]]; then
         # no config bkup, create
         cp ~/.aws/credentials ~/.aws/credentials.orig
     fi
     #
-    #<-- end functions gcreds-backup -->
+    #<-- end functions gcreds_backup -->
     #
 }
 
-function gcreds-profile-exists(){
+function gcreds_profile_exists(){
     # validate if profile exists in local awscli config
     if [[ $1 == "" ]] && [[ $1 == $MFA_ARN ]]; then
-        gcreds-error "Invalid MFA profile name provided ($MFA_PROFILE) Exiting code $E_BADARG." $E_BADARG
-        gcreds-help
+        gcreds_error "Invalid MFA profile name provided ($MFA_PROFILE) Exiting code $E_BADARG." $E_BADARG
+        gcreds_help
     elif [[ $1 == "" ]]; then
-        gcreds-warn "Profile name ($profile) not in your local config. (code $E_BADPROFILE)." $E_BADPROFILE
+        gcreds_warn "Profile name ($profile) not in your local config. (code $E_BADPROFILE)." $E_BADPROFILE
         return 1
     fi
     #
-    #<-- end function gcreds-profile-exists -->
+    #<-- end function gcreds_profile_exists -->
     #
 }
 
-function gcreds-clean(){
+function gcreds_clean(){
     # delete all files given as parameters
     rm $@
     #
-    #<-- end function gcreds-clean -->
+    #<-- end function gcreds_clean -->
     #
 }
 
-function gcreds-revert-creds(){
+function gcreds_revert_creds(){
     # deletes temp credentials from local awscli config
     #
     local silent=$1
     #
     # log out start
-    gcreds-logger "[INFO]: Attempting to remove temp credentials from local config"
+    gcreds_logger "[INFO]: Attempting to remove temp credentials from local config"
     # header
     echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
@@ -280,35 +280,35 @@ function gcreds-revert-creds(){
         # restore clean config from backup
         if [[ -e ~/.aws/credentials.orig ]]; then
             mv ~/.aws/credentials.orig ~/.aws/credentials
-            gcreds-message "Your local config has been cleaned." INFO
+            gcreds_message "Your local config has been cleaned." INFO
         else
             # no backup exists, clean
-            gcreds-message "Nothing done. Your config appears to be clean already." INFO
+            gcreds_message "Nothing done. Your config appears to be clean already." INFO
         fi
     else
-        gcreds-message "Temporary credentials remain in your config. Nothing done." INFO
+        gcreds_message "Temporary credentials remain in your config. Nothing done." INFO
     fi
     #
-    # <-- end function gcreds-revert-creds -->
+    # <-- end function gcreds_revert_creds -->
     #
 }
 
-function gcreds-parse-parameters(){
+function gcreds_parse_parameters(){
     ## help requested ##
     if [[ ! $@ ]]; then
         # display help
-        gcreds-help
+        gcreds_help
     else
         while [ $# -gt 0 ]; do
             case $1 in
                 -h | --help | -help)
                     # display help
-                    gcreds-help
+                    gcreds_help
                     ;;
                 -r | --revert | -revert | --Revert)
                     revert=1    # flag indicating direct call to clear config
-                    if ! gcreds-preexisting-creds $revert; then
-                        gcreds-message "You do not have temporary credentials in your config. Nothing to do." INFO
+                    if ! gcreds_preexisting_creds $revert; then
+                        gcreds_message "You do not have temporary credentials in your config. Nothing to do." INFO
                     fi
                     exit 0
                     ;;
@@ -323,7 +323,7 @@ function gcreds-parse-parameters(){
                         MFA_PROFILE=$2
                         shift 2
                     else
-                        gcreds-error-exit "You must provide an IAM profile name. Exiting (code $E_BADARG)" $E_BADARG
+                        gcreds_error_exit "You must provide an IAM profile name. Exiting (code $E_BADARG)" $E_BADARG
                     fi
                     ;;
                 --mfa-code | --mfacode | --mfa | --code | -c)
@@ -332,7 +332,7 @@ function gcreds-parse-parameters(){
                         MFA_CODE=$2
                         shift 2
                     else
-                        gcreds-error-exit "You must enter a valid 6 digit mfa code. Exiting (code $E_BADARG)" $E_BADARG
+                        gcreds_error_exit "You must enter a valid 6 digit mfa code. Exiting (code $E_BADARG)" $E_BADARG
                     fi
                     ;;
                 -t | --timeout)     # optional
@@ -340,71 +340,71 @@ function gcreds-parse-parameters(){
                         TIMEOUT=$2
                         shift 2
                     else
-                        gcreds-error-exit "You must provide a timeout value. Exiting (code $E_BADARG)" $E_BADARG
+                        gcreds_error_exit "You must provide a timeout value. Exiting (code $E_BADARG)" $E_BADARG
                     fi
                     ;;
                 *)
                     # invalid argument
-                    gcreds-error-exit "Unrecognized argument [ $1 ] given. Exiting (code $E_BADARG)" $E_BADARG
+                    gcreds_error_exit "Unrecognized argument [ $1 ] given. Exiting (code $E_BADARG)" $E_BADARG
             esac
         done
     fi
     ## check that min required parameters have been supplied ##
     if [ ! $ACCTFILE ]; then
-        gcreds-error "You must provide an account list, exiting (code $E_BADARG)." $E_BADARG
-        gcreds-help
+        gcreds_error "You must provide an account list, exiting (code $E_BADARG)." $E_BADARG
+        gcreds_help
     fi
     if [ ! $MFA_PROFILE ]; then
-        gcreds-error "You must enter an IAM user used to assume roles. Exiting (code $E_BADARG)" $E_BADARG
-        gcreds-help
+        gcreds_error "You must enter an IAM user used to assume roles. Exiting (code $E_BADARG)" $E_BADARG
+        gcreds_help
     fi
     if [ ! $MFA_CODE ]; then
-        gcreds-error "You must enter a valid 6 digit mfa code. Exiting (code $E_BADARG)" $E_BADARG
-        gcreds-help
+        gcreds_error "You must enter a valid 6 digit mfa code. Exiting (code $E_BADARG)" $E_BADARG
+        gcreds_help
     fi
 
     # set remaining assignments
     MFA_ARN=$(aws configure get $MFA_PROFILE.mfa_serial)
     # verify valid mfa_profile
-    gcreds-profile-exists $MFA_ARN
+    gcreds_profile_exists $MFA_ARN
 
     # set timeout
     if [[ ! $TIMEOUT ]]; then
         TIMEOUT=15         # default temp creds expiration, 15 minutes
     else
-        gcreds-validate-parameter $TIMEOUT int "Temp credential lifetime" $STS_MIN $STS_MAX "minutes"
+        gcreds_validate_parameter $TIMEOUT int "Temp credential lifetime" $STS_MIN $STS_MAX "minutes"
     fi
     #
-    # <-- end function gcreds-parse-parameters -->
+    # <-- end function gcreds_parse_parameters -->
     #
 }
 
-function gcreds-preexisting-creds(){
+function gcreds_preexisting_creds(){
     # verify existence of previous temp credentials
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
         if [ ! $1 ]; then
             # not a direct call via revert parameter
             line2=1     # flag indicating a 2 line msg
-            gcreds-warn "You appear to have active temp credentials already in your local config." WARN $line2
+            gcreds_warn "You appear to have active temp credentials already in your local config." WARN $line2
             echo -e "These should be cleared before generating new credentials." | indent10
             # clear active creds by restoring from backup, silent mode
-            gcreds-revert-creds -s
+            gcreds_revert_creds -s
         else
             # clear active creds by restoring from backup, interactive mode
-            gcreds-revert-creds
+            gcreds_revert_creds
         fi
         # restor backup of awscli
-        gcreds-backup
+        gcreds_backup
     else
         # no preexisting credentials in local config
         return 1
     fi
     #
-    #<-- end function gcreds-preexisting-creds -->
+    #<-- end function gcreds_preexisting_creds -->
     #
 }
 
-function gcreds-test(){
+function gcreds_test(){
     # output for testing purposes only
     echo -e "\nACCTFILE: "$ACCTFILE
     echo -e "MFA_PROFILE: "$MFA_PROFILE
@@ -412,9 +412,10 @@ function gcreds-test(){
     echo -e "TIMEOUT: $TIMEOUT minutes"
     echo -e "MFA_ARN: $MFA_ARN\n"
     exit 0
+    # <-- end function greds_test
 }
 
-function gcreds-validate-parameter(){
+function gcreds_validate_parameter(){
     local parameter=$1          # parameter value to validate range
     local type=$2               # type of value expected
     local msg_description="$3"  # error msg leading description
@@ -428,19 +429,19 @@ function gcreds-validate-parameter(){
             # integer required
             if ! [[ $parameter =~ ^[0-9]+$ ]]; then
                 # parameter is not integer
-                gcreds-error-exit "$msg_description must be an integer. Exiting (code $E_BADARG)" $E_BADARG
+                gcreds_error_exit "$msg_description must be an integer. Exiting (code $E_BADARG)" $E_BADARG
             fi
             ;;
         float)
             # floating pt decimal required
             if [[ $parameter =~ ^[0-9]+$ ]]; then
                 # parameter is integer
-                gcreds-error-exit "$msg_description must be a floating point decimal. Exiting (code $E_BADARG)" $E_BADARG
+                gcreds_error_exit "$msg_description must be a floating point decimal. Exiting (code $E_BADARG)" $E_BADARG
             fi
             ;;
         *)
             # Unrecognized type
-            gcreds-error-exit "Unrecognized argument in gcreds-validate-parameter [ $type ]. \
+            gcreds_error_exit "Unrecognized argument in gcreds_validate_parameter [ $type ]. \
             Exiting (code $E_BADARG)" $E_BADARG
             ;;
     esac
@@ -448,21 +449,21 @@ function gcreds-validate-parameter(){
     if [ $4 ] && [ $5 ] && [ $6 ]; then
         if [[ $parameter -lt $min_value ]]; then
             # timeout < sts minimum limit
-            gcreds-error-exit "$msg_description must be $min_value $units or more. Exiting (code $E_BADARG)" $E_BADARG
+            gcreds_error_exit "$msg_description must be $min_value $units or more. Exiting (code $E_BADARG)" $E_BADARG
         elif [[ $parameter -gt $max_value ]]; then
             # timeout is > sts maximum
-            gcreds-error-exit "$msg_description must be less than $max_value $units. Exiting (code $E_BADARG)" $E_BADARG
+            gcreds_error_exit "$msg_description must be less than $max_value $units. Exiting (code $E_BADARG)" $E_BADARG
         fi
     fi
     #
-    #<-- end function gcreds-validate-parameter -->
+    #<-- end function gcreds_validate_parameter -->
     #
 }
 
-function gcreds-generate-creds(){
+function gcreds_generate_creds(){
     # generate actual credentials
     # log out, start
-    gcreds-logger "[INFO]: Attempting to generate session token for iam profile [gcreds-$MFA_PROFILE]"
+    gcreds_logger "[INFO]: Attempting to generate session token for iam profile [gcreds-$MFA_PROFILE]"
 
     # generate temp creds for MFA_PROFILE
     aws sts get-session-token \
@@ -478,7 +479,7 @@ function gcreds-generate-creds(){
     AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .aua.creds.json)
 
     # validate authentication
-    gcreds-authentication $AWS_ACCESS_KEY $AWS_SECRET_KEY $AWS_SESSION_TOKEN
+    gcreds_authentication $AWS_ACCESS_KEY $AWS_SECRET_KEY $AWS_SESSION_TOKEN
 
     echo " " > ./.new.profile
     echo "[gcreds-$MFA_PROFILE]" >> ./.new.profile
@@ -488,14 +489,14 @@ function gcreds-generate-creds(){
     cat ./.new.profile >> ~/.aws/credentials
 
     # success, log out
-    gcreds-logger "[INFO]: Generated temp credentials for iam profile [gcreds-$MFA_PROFILE]"
+    gcreds_logger "[INFO]: Generated temp credentials for iam profile [gcreds-$MFA_PROFILE]"
 
     # create temp credentials for each profile in ACCTFILE
     for profile in $(cat $ACCTFILE); do
         # assign arn from local config
         role_arn=$(aws configure get $profile.role_arn)
 
-        if gcreds-profile-exists $role_arn; then
+        if gcreds_profile_exists $role_arn; then
             echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}" | indent02
             echo -e "Assuming role: ${lgray}$role_arn${reset}\n" | indent02
 
@@ -521,31 +522,31 @@ function gcreds-generate-creds(){
             # add to local config
             cat ./.new.profile >> ~/.aws/credentials
             # success, log out
-            gcreds-logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
+            gcreds_logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
         fi
     done
-    # <-- end function gcreds-generate-creds -->
+    # <-- end function gcreds_generate_creds -->
 }
 
 #<-- start MAIN -->
 
 # check deps
-gcreds-depcheck
+gcreds_depcheck
 
 # verify backup of existing awscli config
-gcreds-backup
+gcreds_backup
 
 # parse inputs
-gcreds-parse-parameters $@
+gcreds_parse_parameters $@
 
 # check for active temp credentials before generating new creds
-gcreds-preexisting-creds
+gcreds_preexisting_creds
 
 # generate credentials
-gcreds-generate-creds
+gcreds_generate_creds
 
 # clean up temp files
-gcreds-clean .aua.creds.json .creds.json .new.profile
+gcreds_clean .aua.creds.json .creds.json .new.profile
 
 #<-- end -->
 
