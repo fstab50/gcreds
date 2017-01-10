@@ -3,6 +3,7 @@
 # global variables
 pkg=$(basename $0)
 pkg_path=$(cd $(dirname $0); pwd -P)
+config_path="$HOME/.$pkg"
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
@@ -15,7 +16,7 @@ STS_MAX=2160    # minutes, equivalent to 36 hours
 
 # error codes
 E_DEPENDENCY=1                # exit code if missing required dependency
-E_NOLOG=2                     # exit code if failure to create log dir, log file
+E_DIR=2                     # exit code if failure to create log dir, log file
 E_BADSHELL=3                  # exit code if incorrect shell detected
 E_AUTHFAIL=5                  # exit code if authentication failure
 E_BADPROFILE=6                # exit code if profile name/ role not found in local config
@@ -56,8 +57,9 @@ function gcreds_help(){
     ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS] <*.accounts> --profile <IAM_PROFILE> -c <MFA_CODE>
 
     ${white}${BOLD}OPTIONS${UNBOLD}${reset} :
-        -t, --timeout :  temp credential expiration in minutes (15 minute default)
-        -c, --mfa-code : (required, see IAM_PROFILE)
+        -t, --timeout  : temp credential expiration in minutes (15 minute default)
+        -c, --mfa-code : required, see IAM_PROFILE
+        -s, --show     : display info about temp credentials in local config
 
     <${white}${BOLD}*.accounts${reset}${UNBOLD}> (required)
         text file listing of profile names in your local awscli configuration, one
@@ -97,7 +99,7 @@ function gcreds_logger(){
     local msg="$1"
     if [[ ! $gcreds_log ]]; then
         echo "$pkg: failure to call gcreds_logger, $gcreds_log location undefined"
-        exit $E_NOLOG
+        exit $E_DIR
     fi
     echo "$(date +'%b %d %T') $host $pkg: $msg" >> "$gcreds_log"
 }
@@ -167,14 +169,19 @@ function gcreds_depcheck(){
         # shell other than bash
         gcreds_error_exit "Default shell appears to be something other than bash. Please rerun with bash. Aborting (code $E_BADSHELL)" $E_BADSHELL
     fi
-
     ## create log dir for gcreds ##
     if [[ ! -d $pkg_path/logs ]]; then
         if ! mkdir -p "$pkg_path/logs"; then
-            gcreds_error_exit "$pkg: failed to make log directory: $pkg_path/logs" $E_NOLOG
+            gcreds_error_exit "$pkg: failed to make log directory: $pkg_path/logs" $E_DIR
         fi
     fi
-
+    ## create gcreds config dir ##
+    if [[ ! -d $config_path ]]; then
+        echo "config_path NOT FOUND"
+        if ! mkdir -p $config_path; then
+            gcreds_error_exit "$pkg: failed to create local config file directory: ~/.$pkg" $E_DIR
+        fi
+    fi
     ## check for required cli tools ##
     for prog in aws jq hostname awk grep cat; do
         if ! type "$prog" > /dev/null 2>&1; then
@@ -184,12 +191,10 @@ function gcreds_depcheck(){
             gcreds_env_info "DBUG" $prog
         fi
     done
-
     ## check if awscli tools are configured ##
     if [[ ! -f $HOME/.aws/config ]]; then
         gcreds_error_exit "awscli not configured, run 'aws configure'. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
     fi
-
     ## check for jq, use system installed version if found, otherwise use bundled ##
     if which jq > /dev/null; then
         jq=$(which jq)
@@ -199,7 +204,6 @@ function gcreds_depcheck(){
             gcreds_error_exit "no viable json parser binary (jq) found, Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
     fi
-
     ## set fs pointer to writeable temp location ##
     if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
             # in-memory
@@ -237,6 +241,14 @@ function gcreds_backup(){
     #
 }
 
+function gcreds_clean(){
+    # delete all files given as parameters
+    rm $@
+    #
+    #<-- end function gcreds_clean -->
+    #
+}
+
 function gcreds_profile_exists(){
     # validate if profile exists in local awscli config
     if [[ $1 == "" ]] && [[ $1 == $MFA_ARN ]]; then
@@ -248,14 +260,6 @@ function gcreds_profile_exists(){
     fi
     #
     #<-- end function gcreds_profile_exists -->
-    #
-}
-
-function gcreds_clean(){
-    # delete all files given as parameters
-    rm $@
-    #
-    #<-- end function gcreds_clean -->
     #
 }
 
@@ -335,6 +339,12 @@ function gcreds_parse_parameters(){
                         gcreds_error_exit "You must enter a valid 6 digit mfa code. Exiting (code $E_BADARG)" $E_BADARG
                     fi
                     ;;
+                -s | --show)
+                    # display info on current credentials, if exist
+                    gcreds_show_creds
+                    shift 1
+                    exit 0
+                    ;;
                 -t | --timeout)     # optional
                     if [ $2 ]; then
                         TIMEOUT=$2
@@ -404,6 +414,31 @@ function gcreds_preexisting_creds(){
     #
 }
 
+function gcreds_show_creds(){
+    # display credentials in local config
+    local msg
+    if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
+        msg="\n${BOLD}${white}Credentials contained in local config:${reset}${UNBOLD}\n"
+        echo -e $msg | indent02
+        grep --color=auto "gcreds" ~/.aws/credentials | indent10
+        EXPIRE=$(cat $config_path/credential.expiration)
+        TIMELEFT=$(( $EXPIRE - $(date +%s) ))
+        if [ $TIMELEFT -lt 0 ]; then
+            # Credentials have expired
+            echo -e "\n    Your credentials have expired.\n" | indent02
+        else
+            TIMEEXPIRE=$(date --date=@$(( $TIMELEFT + $(date +%s) )))
+            TIMELEFT=$(( $TIMELEFT/60 ))    # convert timeleft from sec to min
+            echo -e "\nCredential Expiration in ${BOLD}${white}$TIMELEFT${reset}${UNBOLD} minutes." | indent02
+            echo -e "Expiration: $TIMEEXPIRE\n" | indent02
+        fi
+    else
+        # no existing credentials
+        gcreds_message "Your local configuration does not contain credentials." INFO
+    fi
+    # <-- end function gcreds_show_creds -->
+}
+
 function gcreds_test(){
     # output for testing purposes only
     echo -e "\nACCTFILE: "$ACCTFILE
@@ -413,6 +448,14 @@ function gcreds_test(){
     echo -e "MFA_ARN: $MFA_ARN\n"
     exit 0
     # <-- end function greds_test
+}
+
+function gcreds_update_expiration(){
+    # timestamps for tracking credential expiration
+    echo $(date +%s) > $config_path/credential.start
+    EXPIRE=$(( $(($TIMEOUT*60)) + $(date +%s) ))
+    echo $EXPIRE > $config_path/credential.expiration
+    # <-- end function gcreds_update_expiration -->
 }
 
 function gcreds_validate_parameter(){
@@ -457,7 +500,6 @@ function gcreds_validate_parameter(){
     fi
     #
     #<-- end function gcreds_validate_parameter -->
-    #
 }
 
 function gcreds_generate_creds(){
@@ -523,12 +565,13 @@ function gcreds_generate_creds(){
             cat ./.new.profile >> ~/.aws/credentials
             # success, log out
             gcreds_logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
+            gcreds_update_expiration
         fi
     done
     # <-- end function gcreds_generate_creds -->
 }
 
-#<-- start MAIN -->
+#<-- start MAIN -------------------------------------------------------------->
 
 # check deps
 gcreds_depcheck
@@ -548,6 +591,6 @@ gcreds_generate_creds
 # clean up temp files
 gcreds_clean .aua.creds.json .creds.json .new.profile
 
-#<-- end -->
+#<-- end MAIN ---------------------------------------------------------------->
 
 exit 0
