@@ -53,13 +53,13 @@ function gcreds_help(){
 
     To generate temporary credentials:
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} :
-        $pkg [OPTION] [*.accounts] --profile [IAM_PROFILE] --mfa-code [MFA_CODE]
+    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS] <*.accounts> --profile <IAM_PROFILE> -c <MFA_CODE>
 
-    ${white}${BOLD}Options${UNBOLD}${reset} :
+    ${white}${BOLD}OPTIONS${UNBOLD}${reset} :
         -t, --timeout :  temp credential expiration in minutes (15 minute default)
+        -c, --mfa-code : (required, see IAM_PROFILE)
 
-    <${white}${BOLD}filename$reset$UNBOLD>$white$BOLD.accounts${reset}${UNBOLD} (required)
+    <${white}${BOLD}*.accounts${reset}${UNBOLD}> (required)
         text file listing of profile names in your local awscli configuration, one
         per line corresponding to IAM roles and accounts for which you wish to
         generate temporary credentials. File must be located in gcreds root directory
@@ -74,13 +74,13 @@ function gcreds_help(){
 
                                  -----------
 
-        New profiles added to your awscli config prepended with '${BOLD}gcreds-${UNBOLD}'
+        New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
 
     ---------------------------------------------------------------------------
 
     To remove temporary credentials:
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTION]
+    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS]
 
         -r, --revert  :  Clears temporary credentials from your local
                          awscli configuration, returning your config to
