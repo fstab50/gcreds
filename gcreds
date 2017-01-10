@@ -565,9 +565,12 @@ function gcreds_generate_creds(){
             cat ./.new.profile >> ~/.aws/credentials
             # success, log out
             gcreds_logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
-            gcreds_update_expiration
         fi
     done
+    gcreds_update_expiration
+    # log info about aws version used to generate creds
+    gcreds_env_info "INFO" aws
+    #
     # <-- end function gcreds_generate_creds -->
 }
 
