@@ -114,7 +114,7 @@ Help Menu
 
 ![example usage](./.images/example-usage.png)
 
-**Show Option** -- show credential expiration
+**Show Option** -- show current temporary credentials; associated lifetime
 
 ```bash
     $ gcreds --show
@@ -122,7 +122,7 @@ Help Menu
 
 ![option show](./.images/gcreds-show.png)  
 
-**Log output** (colors courtesy of pkg source-highlight):
+**Log output** (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
 
 ```bash
     $ less ~/gcreds/logs/gcreds.log
