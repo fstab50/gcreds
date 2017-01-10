@@ -12,7 +12,7 @@ debugMode=""    # change this value to "True" to turn on verbose \
 
 # Amazon Sercurity Token Service (STS) limits
 STS_MIN=15      # minutes, equivalent to 900 seconds
-STS_MAX=2160    # minutes, equivalent to 36 hours
+STS_MAX=60    # minutes, check STS max equivalent to 36 hours
 
 # error codes
 E_DEPENDENCY=1                # exit code if missing required dependency
@@ -183,7 +183,7 @@ function gcreds_depcheck(){
         fi
     fi
     ## check for required cli tools ##
-    for prog in aws jq hostname awk grep cat; do
+    for prog in aws jq date hostname awk grep cat; do
         if ! type "$prog" > /dev/null 2>&1; then
             gcreds_error_exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
@@ -246,7 +246,6 @@ function gcreds_clean(){
     rm $@
     #
     #<-- end function gcreds_clean -->
-    #
 }
 
 function gcreds_profile_exists(){
@@ -260,41 +259,6 @@ function gcreds_profile_exists(){
     fi
     #
     #<-- end function gcreds_profile_exists -->
-    #
-}
-
-function gcreds_revert_creds(){
-    # deletes temp credentials from local awscli config
-    #
-    local silent=$1
-    #
-    # log out start
-    gcreds_logger "[INFO]: Attempting to remove temp credentials from local config"
-    # header
-    echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
-    echo -e "All temp credentials from your local config will be discarded." | indent02
-    echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
-    if [ $silent ]; then
-        # clean config, no user input
-        CHOICE="y"
-    else
-        read -p "  ${yellow}Purge existing temporary credentials?${reset} [y]:  " CHOICE
-    fi
-    if [[ -z "$CHOICE" ]] || [[ "$CHOICE" == "y" ]] || [[ "$CHOICE" == "yes" ]]; then
-        # restore clean config from backup
-        if [[ -e ~/.aws/credentials.orig ]]; then
-            mv ~/.aws/credentials.orig ~/.aws/credentials
-            gcreds_message "Your local config has been cleaned." INFO
-        else
-            # no backup exists, clean
-            gcreds_message "Nothing done. Your config appears to be clean already." INFO
-        fi
-    else
-        gcreds_message "Temporary credentials remain in your config. Nothing done." INFO
-    fi
-    #
-    # <-- end function gcreds_revert_creds -->
-    #
 }
 
 function gcreds_parse_parameters(){
@@ -414,6 +378,41 @@ function gcreds_preexisting_creds(){
     #
 }
 
+function gcreds_revert_creds(){
+    # deletes temp credentials from local awscli config
+    #
+    local silent=$1
+    #
+    # log out start
+    gcreds_logger "[INFO]: Attempting to remove temp credentials from local config"
+    # header
+    echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
+    echo -e "All temp credentials from your local config will be discarded." | indent02
+    echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
+    if [ $silent ]; then
+        # clean config, no user input
+        CHOICE="y"
+    else
+        read -p "  ${yellow}Purge existing temporary credentials?${reset} [y]:  " CHOICE
+    fi
+    if [[ -z "$CHOICE" ]] || [[ "$CHOICE" == "y" ]] || [[ "$CHOICE" == "yes" ]]; then
+        # restore clean config from backup
+        if [[ -e ~/.aws/credentials.orig ]]; then
+            mv ~/.aws/credentials.orig ~/.aws/credentials
+            gcreds_message "Your local config has been cleaned." INFO
+            # clear existing credential expiration values
+            gcreds_update_expiration 0
+        else
+            # no backup exists, clean
+            gcreds_message "Nothing done. Your config appears to be clean already." INFO
+        fi
+    else
+        gcreds_message "Temporary credentials remain in your config. Nothing done." INFO
+    fi
+    #
+    # <-- end function gcreds_revert_creds -->
+}
+
 function gcreds_show_creds(){
     # display credentials in local config
     local msg
@@ -452,9 +451,20 @@ function gcreds_test(){
 
 function gcreds_update_expiration(){
     # timestamps for tracking credential expiration
-    echo $(date +%s) > $config_path/credential.start
-    EXPIRE=$(( $(($TIMEOUT*60)) + $(date +%s) ))
-    echo $EXPIRE > $config_path/credential.expiration
+    # state Legend:
+    #       0 = clear credential expiration
+    #       1 = new credential expiration
+    #       2 = expire expiration, but keep config files (not used)
+    local state=$1
+    if [[ $1 == 0 ]]; then
+        rm $config_path/credential.*
+        gcreds_logger "[INFO]: Credential expiration values cleared"
+    elif [[ $1 == 1 ]]; then
+        echo $(date +%s) > $config_path/credential.start
+        EXPIRE=$(( $(($TIMEOUT*60)) + $(date +%s) ))
+        echo $EXPIRE > $config_path/credential.expiration
+        gcreds_logger "[INFO]: Created new credential expiration values in $config_path"
+    fi
     # <-- end function gcreds_update_expiration -->
 }
 
@@ -567,7 +577,7 @@ function gcreds_generate_creds(){
             gcreds_logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
         fi
     done
-    gcreds_update_expiration
+    gcreds_update_expiration 1
     # log info about aws version used to generate creds
     gcreds_env_info "INFO" aws
     #
