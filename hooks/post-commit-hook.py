@@ -8,7 +8,7 @@ target = '../cfcli/lib/gcreds.fcn'
 
 try:
     with open(source) as f1:
-        with open(target,'a') as f2:
+        with open(target,'w') as f2:
             lines = f1.readlines()
             for line in lines:
                 f2.write(line)
