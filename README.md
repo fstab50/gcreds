@@ -1,4 +1,4 @@
-# README :  gcreds (v1.3)
+# README :  gcreds (v1.2.2)
 * * *
 
 ## Purpose ##
