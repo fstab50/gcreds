@@ -60,7 +60,7 @@ function gcreds_help(){
          -f, --file     : required, see filename
          -p, --profile  : required, see IAM_PROFILE
          -c, --mfa-code : required, see MFA_CODE
-        [-s, --show     : optional, credential expiration info]
+        [-s, --show     : optional, show credential expiration info]
         [-t, --timeout  : optional, credential lifetime in min (15 min default)]
 
     <${white}${BOLD}filename${reset}${UNBOLD}> (required)
