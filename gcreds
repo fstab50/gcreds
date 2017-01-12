@@ -177,7 +177,7 @@ function gcreds_depcheck(){
     fi
     ## create gcreds config dir ##
     if [[ ! -d $config_path ]]; then
-        echo "config_path NOT FOUND"
+        gcreds_logger "[WARN]: config_path not found, creating config dir $config_path"
         if ! mkdir -p $config_path; then
             gcreds_error_exit "$pkg: failed to create local config file directory: ~/.$pkg" $E_DIR
         fi
