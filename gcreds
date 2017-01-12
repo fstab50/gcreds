@@ -54,24 +54,28 @@ function gcreds_help(){
 
     To generate temporary credentials:
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS] <*.accounts> --profile <IAM_PROFILE> -c <MFA_CODE>
+    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS] -f <filename> --profile <IAM_PROFILE> -c <MFA_CODE>
 
     ${white}${BOLD}OPTIONS${UNBOLD}${reset} :
-        -t, --timeout  : temp credential expiration in minutes (15 minute default)
-        -c, --mfa-code : required, see IAM_PROFILE
-        -s, --show     : display info about temp credentials in local config
+         -f, --file     : required, see filename
+         -p, --profile  : required, see IAM_PROFILE
+         -c, --mfa-code : required, see MFA_CODE
+        [-s, --show     : optional, credential expiration info]
+        [-t, --timeout  : optional, credential lifetime in min (15 min default)]
 
-    <${white}${BOLD}*.accounts${reset}${UNBOLD}> (required)
+    <${white}${BOLD}filename${reset}${UNBOLD}> (required)
         text file listing of profile names in your local awscli configuration, one
         per line corresponding to IAM roles and accounts for which you wish to
-        generate temporary credentials. File must be located in gcreds root directory
+        generate temporary credentials. File must be located in gcreds root directory.
+        For backward compatibility, <filename>.accounts may also be used if the -f /
+        --file option qualifier is omitted
 
     ${white}${BOLD}IAM_PROFILE${reset}${UNBOLD} (required)
         profile name of the IAM user in your local awscli configuration that
         contains the ARN of your mfa_serial used to assume roles
 
     ${white}${BOLD}MFA_CODE${reset}${UNBOLD} (required)
-        6 digit otp code from either a hardware or virtual mfa device
+        6 digit otp integer code from either a hardware or virtual mfa device
         MFA code must correspond to the IAM_PROFILE given
 
                                  -----------
@@ -280,10 +284,15 @@ function gcreds_parse_parameters(){
                     fi
                     exit 0
                     ;;
-                *.accounts | *.accts)
+                -f | --file | *.accounts | *.accts)
                     # list of accts to gen temp creds, one per line
-                    ACCTFILE=$pkg_path/$1
-                    shift 1
+                    if [ $1 == "-f" ] || [ $1 == "--file" ]; then
+                        ACCTFILE=$pkg_path/$2
+                        shift 2
+                    else
+                        ACCTFILE=$pkg_path/$1
+                        shift 1
+                    fi
                     ;;
                 --profile)
                     # iam user profile used to assume roles
