@@ -435,9 +435,9 @@ function gcreds_show_creds(){
             EXPIRE=$(cat $config_path/credential.expiration)
             TIMELEFT=$(( $EXPIRE - $(date +%s) ))
         else
-            TIMELEFT=-1
+            TIMELEFT=0
         fi
-        if [ $TIMELEFT -lt 0 ]; then
+        if [ $TIMELEFT -le 0 ]; then
             # Credentials have expired
             echo -e "\n    Your credentials have expired.\n" | indent02
         else
