@@ -6,13 +6,17 @@
 source = 'gcreds'
 target = '../cfcli/lib/gcreds.fcn'
 
+# str markers
+start_marker='function declaration start'
+end_marker='start MAIN'
+
 try:
     with open(source) as f1:
         lines = f1.readlines()
         for i, line in enumerate(lines):
-            if 'function declaration start' in line:
+            if start_marker in line:
                 start = i
-            if 'start MAIN' in line:
+            if end_marker in line:
                 end = i
     with open(target,'w') as f2:
         for line in range(start, end + 1):
