@@ -7,22 +7,22 @@ config_path="$HOME/.$pkg"
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
-debugMode=""    # change this value to "True" to turn on verbose \
-                # log output to aid debugging
+debugMode=""          # change this value to "True" to turn on verbose \
+                      # log output to aid debugging
 
 # Amazon Sercurity Token Service (STS) limits
-STS_MIN=15      # minutes, equivalent to 900 seconds
-STS_MAX=60    # minutes, check STS max equivalent to 36 hours
+STS_MIN=15            # minutes, equivalent to 900 seconds
+STS_MAX=60            # minutes, check STS max equivalent to 36 hours
 
 # error codes
-E_DEPENDENCY=1                # exit code if missing required dependency
-E_DIR=2                     # exit code if failure to create log dir, log file
-E_BADSHELL=3                  # exit code if incorrect shell detected
-E_AUTHFAIL=5                  # exit code if authentication failure
-E_BADPROFILE=6                # exit code if profile name/ role not found in local config
-E_USER_CANCEL=7               # exit code if user cancel
-E_BADARG=8                    # exit code if bad input parameter
-E_MISC=11                     # exit code if miscellaneous (unspecified) error
+E_DEPENDENCY=1        # exit code if missing required dependency
+E_DIR=2               # exit code if failure to create log dir, log file
+E_BADSHELL=3          # exit code if incorrect shell detected
+E_AUTHFAIL=5          # exit code if authentication failure
+E_BADPROFILE=6        # exit code if profile name/ role not found in local config
+E_USER_CANCEL=7       # exit code if user cancel
+E_BADARG=8            # exit code if bad input parameter
+E_MISC=11             # exit code if miscellaneous (unspecified) error
 
 # Formatting
 blue=$(tput setaf 4)
@@ -33,14 +33,16 @@ red=$(tput setaf 1)
 white=$(tput setaf 7)
 yellow=$(tput setaf 3)
 gray=$(tput setaf 008)
-lgray='\033[0;37m'      # light gray
-dgray='\033[1;30m'       # dark gray
+lgray='\033[0;37m'    # light gray
+dgray='\033[1;30m'    # dark gray
 reset=$(tput sgr0)
 #
 BOLD=`tput bold`
 UNBOLD=`tput sgr0`
 
-#<-- function declaration -->
+#
+# function declaration  ------------------------------------------------------
+#
 
 # indent
 indent02() { sed 's/^/  /'; }
@@ -593,7 +595,9 @@ function gcreds_generate_creds(){
     # <-- end function gcreds_generate_creds -->
 }
 
-#<-- start MAIN -------------------------------------------------------------->
+#
+#<-- start MAIN ---------------------------------------------------------------
+#
 
 # check deps
 gcreds_depcheck
@@ -613,6 +617,7 @@ gcreds_generate_creds
 # clean up temp files
 gcreds_clean .aua.creds.json .creds.json .new.profile
 
-#<-- end MAIN ---------------------------------------------------------------->
-
+#
+# END (MAIN) ------------------------------------------------------------------
+#
 exit 0
