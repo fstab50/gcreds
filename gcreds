@@ -431,8 +431,12 @@ function gcreds_show_creds(){
         msg="\n${BOLD}${white}Credentials contained in local config:${reset}${UNBOLD}\n"
         echo -e $msg | indent02
         grep --color=auto "gcreds" ~/.aws/credentials | indent10
-        EXPIRE=$(cat $config_path/credential.expiration)
-        TIMELEFT=$(( $EXPIRE - $(date +%s) ))
+        if [[ -e $config_path/credential.expiration ]]; then
+            EXPIRE=$(cat $config_path/credential.expiration)
+            TIMELEFT=$(( $EXPIRE - $(date +%s) ))
+        else
+            TIMELEFT=-1
+        fi
         if [ $TIMELEFT -lt 0 ]; then
             # Credentials have expired
             echo -e "\n    Your credentials have expired.\n" | indent02
