@@ -564,7 +564,7 @@ function gcreds_generate_creds(){
         role_arn=$(aws configure get $profile.role_arn)
 
         if gcreds_profile_exists $role_arn; then
-            echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}" | indent02
+            echo -e "\nGenerating temp credentials for profile ${white}${BOLD}gcreds-$profile${reset}${UNBOLD}" | indent02
             echo -e "Assuming role: ${lgray}$role_arn${reset}\n" | indent02
 
             # call assume role to gen temp creds
