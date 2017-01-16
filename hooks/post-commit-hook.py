@@ -13,11 +13,11 @@ end_marker='start MAIN'
 try:
     with open(source) as f1:
         lines = f1.readlines()
-        for i, line in enumerate(lines):
+        for index, line in enumerate(lines):
             if start_marker in line:
-                start = i
+                start = index
             if end_marker in line:
-                end = i
+                end = index
     with open(target,'w') as f2:
         for line in range(start, end + 1):
                 f2.write(lines[line])
