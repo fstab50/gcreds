@@ -8,11 +8,15 @@ target = '../cfcli/lib/gcreds.fcn'
 
 try:
     with open(source) as f1:
-        with open(target,'w') as f2:
-            lines = f1.readlines()
-            for line in lines:
-                f2.write(line)
-                if 'MAIN' in line:
-                    break
+        lines = f1.readlines()
+        for i, line in enumerate(lines):
+            if 'function declaration start' in line:
+                start = i
+            if 'start MAIN' in line:
+                end = i
+    with open(target,'w') as f2:
+        for line in range(start, end + 1):
+                f2.write(lines[line])
 except FileNotFoundError:
-    print("\nEither " + source + " not found to open or " + target + " file not accessible\n")
+    print("\nPost-Commit-Hook ERROR")
+    print("Either " + source + " not found to open or " + target + " file not accessible\n")
