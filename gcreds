@@ -41,7 +41,7 @@ BOLD=`tput bold`
 UNBOLD=`tput sgr0`
 
 #
-# function declaration  ------------------------------------------------------
+# function declaration start --------------(do not modify this line)-----------
 #
 
 # indent
@@ -596,7 +596,7 @@ function gcreds_generate_creds(){
 }
 
 #
-#<-- start MAIN ---------------------------------------------------------------
+#<-- start MAIN ----------------------(do not modify this line)----------------
 #
 
 # check deps
