@@ -428,7 +428,7 @@ function gcreds_show_creds(){
     # display credentials in local config
     local msg
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
-        msg="\n${BOLD}${white}Credentials contained in local config:${reset}${UNBOLD}\n"
+        msg="\n${BOLD}${white}Temporary Credentials in local config:${reset}${UNBOLD}\n"
         echo -e $msg | indent02
         grep --color=auto "gcreds" ~/.aws/credentials | indent10
         if [[ -e $config_path/credential.expiration ]]; then
@@ -564,7 +564,7 @@ function gcreds_generate_creds(){
         role_arn=$(aws configure get $profile.role_arn)
 
         if gcreds_profile_exists $role_arn; then
-            echo -e "\nGenerating temp credentials for profile ${white}${BOLD}gcreds-$profile${reset}${UNBOLD}" | indent02
+            echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}" | indent02
             echo -e "Assuming role: ${lgray}$role_arn${reset}\n" | indent02
 
             # call assume role to gen temp creds
@@ -593,6 +593,7 @@ function gcreds_generate_creds(){
         fi
     done
     gcreds_update_expiration 1
+    gcreds_show_creds
     # log info about aws version used to generate creds
     gcreds_env_info "INFO" aws
     #
