@@ -296,7 +296,7 @@ function gcreds_parse_parameters(){
                         shift 1
                     fi
                     ;;
-                --profile)
+                -p | --profile)
                     # iam user profile used to assume roles
                     if [ $2 ]; then
                         MFA_PROFILE=$2
