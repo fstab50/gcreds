@@ -88,13 +88,11 @@ Help Menu
     $ git clone <domain>/gcreds.git
 ```
 
-* Add an alias to your local shell profile
+* Add an alias to your local shell profile (.bashrc OR .bash_profile)
 
 ```bash
     $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bashrc
 ```
-
-&nbsp;&nbsp;&nbsp;&nbsp;or dskfjdlkfjdlkjsflkdjflkdj
 
 ```bash
     $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bash_profile
