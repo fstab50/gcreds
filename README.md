@@ -94,7 +94,7 @@ Help Menu
     $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bashrc
 ```
 
-&nbsp;&nbsp;&nbsp;&nbsp; OR
+&nbsp;&nbsp;&nbsp;&nbsp;or dskfjdlkfjdlkjsflkdjflkdj
 
 ```bash
     $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bash_profile
