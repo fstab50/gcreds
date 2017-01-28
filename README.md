@@ -1,4 +1,4 @@
-# README :  gcreds (v1.2.5)
+# README :  gcreds (v1.3)
 * * *
 
 ## Purpose ##
@@ -9,7 +9,12 @@ for roles that normally require mfa credentials in order to authenticate.
 The primary use case for **gcreds** is for generating a temporary set of AWS access  
 credentials for programmatic use by automation tools running on your local machine.
 
-See [v1.2 Release Notes](./notes/release_v1.2.md)
+See [v1.3 Release Notes](./notes/release_v1.3.md)
+
+### Previous Releases ###
+
+[v1.2 Release Notes](./notes/release_v1.2.md)
+[v1.0 Release Notes](./notes/release_v1.0.md)
 
 * * *
 
