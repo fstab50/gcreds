@@ -12,9 +12,8 @@ credentials for programmatic use by automation tools running on your local machi
 See [v1.3 Release Notes](./notes/release_v1.3.md)
 
 ### Previous Releases ###
-
-[v1.2 Release Notes](./notes/release_v1.2.md)
-[v1.0 Release Notes](./notes/release_v1.0.md)
+* [v1.2 Release Notes](./notes/release_v1.2.md)
+* [v1.0 Release Notes](./notes/release_v1.0.md)
 
 * * *
 
