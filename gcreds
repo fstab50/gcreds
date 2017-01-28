@@ -285,8 +285,9 @@ function gcreds_parse_parameters(){
                     fi
                     exit 0
                     ;;
-                -a | --accounts | *.accounts | *.accts)
+                -a | --accounts | -f | --file | *.accounts | *.accts)
                     # list of accts to gen temp creds, one per line
+                    # -f, --file, *.accounts, *.accts for backward compatibility
                     if [ $1 == "-a" ] || [ $1 == "--accounts" ]; then
                         ACCTFILE=$2
                         shift 2
