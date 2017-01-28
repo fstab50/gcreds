@@ -3,6 +3,7 @@
 # global variables
 pkg=$(basename $0)
 pkg_path=$(cd $(dirname $0); pwd -P)
+pwd_path=$(pwd)
 config_path="$HOME/.$pkg"
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
@@ -56,25 +57,23 @@ function gcreds_help(){
 
     To generate temporary credentials:
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS] -f <filename> --profile <IAM_PROFILE> -c <MFA_CODE>
+    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg -a <ACCTFILE> --profile <IAM_PROFILE> -c <MFA_CODE>
 
     ${white}${BOLD}OPTIONS${UNBOLD}${reset} :
-         -f, --file     : required, see filename
+         -a, --accounts : required, see ACCTFILE
          -p, --profile  : required, see IAM_PROFILE
          -c, --mfa-code : required, see MFA_CODE
         [-s, --show     : optional, show credential expiration info]
-        [-t, --timeout  : optional, credential lifetime in min (15 min default)]
+        [-t, --timeout  : optional, credential lifetime (minutes, default=15)]
 
-    <${white}${BOLD}filename${reset}${UNBOLD}> (required)
-        text file listing of profile names in your local awscli configuration, one
-        per line corresponding to IAM roles and accounts for which you wish to
-        generate temporary credentials. File must be located in gcreds root directory.
-        For backward compatibility, <filename>.accounts may also be used if the -f /
-        --file option qualifier is omitted
+    ${white}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
+        text file listing of profile names in your local awscli configuration,
+        one per line. Profiles correspond to IAM roles in AWS accounts for
+        which you wish to generate temporary credentials.
 
     ${white}${BOLD}IAM_PROFILE${reset}${UNBOLD} (required)
         profile name of the IAM user in your local awscli configuration that
-        contains the ARN of your mfa_serial used to assume roles
+        contains the ARN of the mfa_serial used to assume roles
 
     ${white}${BOLD}MFA_CODE${reset}${UNBOLD} (required)
         6 digit otp integer code from either a hardware or virtual mfa device
@@ -88,7 +87,7 @@ function gcreds_help(){
 
     To remove temporary credentials:
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg [OPTIONS]
+    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg -r
 
         -r, --revert  :  Clears temporary credentials from your local
                          awscli configuration, returning your config to
@@ -98,7 +97,6 @@ EOM
     exit 0
     #
     #<-- end function gcreds_help -->
-    #
 }
 
 function gcreds_logger(){
@@ -166,7 +164,6 @@ function gcreds_env_info(){
     fi
     #
     #<-- end function gcreds_env_info -->
-    #
 }
 
 function gcreds_depcheck(){
@@ -210,18 +207,15 @@ function gcreds_depcheck(){
             gcreds_error_exit "no viable json parser binary (jq) found, Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
     fi
-    ## set fs pointer to writeable temp location ##
+    ## set temp to writeable ocation in physical memory ##
     if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
             # in-memory
             TMPDIR="/dev/shm"
-            cd $TMPDIR
     else
             TMPDIR="/tmp"
-            cd $TMPDIR
     fi
     #
     # <-- end function gcreds_depcheck -->
-    #
 }
 
 function gcreds_authentication(){
@@ -233,7 +227,6 @@ function gcreds_authentication(){
     fi
     #
     #<-- end function gcreds_authentication -->
-    #
 }
 
 function gcreds_backup(){
@@ -244,12 +237,18 @@ function gcreds_backup(){
     fi
     #
     #<-- end functions gcreds_backup -->
-    #
 }
 
 function gcreds_clean(){
     # delete all files given as parameters
-    rm $@
+    if [[ $1 = .* ]]; then
+        # temp files
+        cd $TMPDIR
+        rm $@
+        cd $pwd_path
+    else
+        rm $@
+    fi
     #
     #<-- end function gcreds_clean -->
 }
@@ -286,13 +285,13 @@ function gcreds_parse_parameters(){
                     fi
                     exit 0
                     ;;
-                -f | --file | *.accounts | *.accts)
+                -a | --accounts | *.accounts | *.accts)
                     # list of accts to gen temp creds, one per line
-                    if [ $1 == "-f" ] || [ $1 == "--file" ]; then
-                        ACCTFILE=$pkg_path/$2
+                    if [ $1 == "-a" ] || [ $1 == "--accounts" ]; then
+                        ACCTFILE=$2
                         shift 2
                     else
-                        ACCTFILE=$pkg_path/$1
+                        ACCTFILE=$1
                         shift 1
                     fi
                     ;;
@@ -361,7 +360,6 @@ function gcreds_parse_parameters(){
     fi
     #
     # <-- end function gcreds_parse_parameters -->
-    #
 }
 
 function gcreds_preexisting_creds(){
@@ -386,7 +384,6 @@ function gcreds_preexisting_creds(){
     fi
     #
     #<-- end function gcreds_preexisting_creds -->
-    #
 }
 
 function gcreds_revert_creds(){
@@ -450,6 +447,7 @@ function gcreds_show_creds(){
         # no existing credentials
         gcreds_message "Your local configuration does not contain credentials." INFO
     fi
+    #
     # <-- end function gcreds_show_creds -->
 }
 
@@ -461,6 +459,7 @@ function gcreds_test(){
     echo -e "TIMEOUT: $TIMEOUT minutes"
     echo -e "MFA_ARN: $MFA_ARN\n"
     exit 0
+    #
     # <-- end function greds_test
 }
 
@@ -480,6 +479,7 @@ function gcreds_update_expiration(){
         echo $EXPIRE > $config_path/credential.expiration
         gcreds_logger "[INFO]: Created new credential expiration values in $config_path"
     fi
+    #
     # <-- end function gcreds_update_expiration -->
 }
 
@@ -538,22 +538,22 @@ function gcreds_generate_creds(){
         --serial-number "$MFA_ARN" \
         --token-code "$MFA_CODE" \
         --output json \
-        --profile $MFA_PROFILE 2>/dev/null > .aua.creds.json
+        --profile $MFA_PROFILE 2>/dev/null > $TMPDIR/.aua.creds.json
 
     # create temp profile
-    AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .aua.creds.json)
-    AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .aua.creds.json)
-    AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .aua.creds.json)
+    AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId $TMPDIR/.aua.creds.json)
+    AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey $TMPDIR/.aua.creds.json)
+    AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken $TMPDIR/.aua.creds.json)
 
     # validate authentication
     gcreds_authentication $AWS_ACCESS_KEY $AWS_SECRET_KEY $AWS_SESSION_TOKEN
 
-    echo " " > ./.new.profile
-    echo "[gcreds-$MFA_PROFILE]" >> ./.new.profile
-    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
-    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
-    echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
-    cat ./.new.profile >> ~/.aws/credentials
+    echo " " > $TMPDIR/.new.profile
+    echo "[gcreds-$MFA_PROFILE]" >> $TMPDIR/.new.profile
+    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> $TMPDIR/.new.profile
+    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> $TMPDIR/.new.profile
+    echo "aws_security_token = $AWS_SESSION_TOKEN" >> $TMPDIR/.new.profile
+    cat $TMPDIR/.new.profile >> ~/.aws/credentials
 
     # success, log out
     gcreds_logger "[INFO]: Generated temp credentials for iam profile [gcreds-$MFA_PROFILE]"
@@ -573,21 +573,21 @@ function gcreds_generate_creds(){
                 --role-arn "$role_arn" \
                 --role-session-name "gcreds-$profile" \
                 --output json \
-                --profile "gcreds-$MFA_PROFILE" > .creds.json
+                --profile "gcreds-$MFA_PROFILE" > $TMPDIR/.creds.json
 
             # create temp profile
-            AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId .creds.json)
-            AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey .creds.json)
-            AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken .creds.json)
+            AWS_ACCESS_KEY=$(jq -r .Credentials.AccessKeyId $TMPDIR/.creds.json)
+            AWS_SECRET_KEY=$(jq -r .Credentials.SecretAccessKey $TMPDIR/.creds.json)
+            AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken $TMPDIR/.creds.json)
 
-            echo " " > ./.new.profile
-            echo "[gcreds-$profile]" >> ./.new.profile
-            echo "aws_access_key_id = $AWS_ACCESS_KEY" >> ./.new.profile
-            echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ./.new.profile
-            echo "aws_security_token = $AWS_SESSION_TOKEN" >> ./.new.profile
+            echo " " > $TMPDIR/.new.profile
+            echo "[gcreds-$profile]" >> $TMPDIR/.new.profile
+            echo "aws_access_key_id = $AWS_ACCESS_KEY" >> $TMPDIR/.new.profile
+            echo "aws_secret_access_key = $AWS_SECRET_KEY" >> $TMPDIR/.new.profile
+            echo "aws_security_token = $AWS_SESSION_TOKEN" >> $TMPDIR/.new.profile
 
             # add to local config
-            cat ./.new.profile >> ~/.aws/credentials
+            cat $TMPDIR/.new.profile >> ~/.aws/credentials
             # success, log out
             gcreds_logger "[INFO]: Generated temp credentials for role profile [gcreds-$profile]"
         fi
@@ -623,6 +623,6 @@ gcreds_generate_creds
 gcreds_clean .aua.creds.json .creds.json .new.profile
 
 #
-# END (MAIN) ------------------------------------------------------------------
+#<-- end MAIN -----------------------------------------------------------------
 #
 exit 0
