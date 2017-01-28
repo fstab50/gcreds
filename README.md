@@ -93,6 +93,7 @@ Help Menu
 ```bash
     $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bashrc
 ```
+
     OR
 
 ```bash
