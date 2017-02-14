@@ -1,4 +1,5 @@
 logs/*
-*.list
+*.pyc
+*_env/
+*_env*/
 *.accounts
-*.accts
