@@ -1,4 +1,5 @@
 logs/*
+accounts/*
 *.pyc
 *_env/
 *_env*/
