@@ -4,13 +4,16 @@
 ## Purpose ##
 
 **gcreds** (pronounced "gee-creds" for _get-credentials_) requests temporary credentials  
-from [Amazon Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) for roles that normally require  
-mfa credentials in order to authenticate.  
+from [Amazon Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) for roles that normally require mfa  
+credentials in order to authenticate.  
 
 A primary use case for **gcreds** is generating a temporary set of AWS access  
 credentials for programmatic use by automation tools running on your local machine.  
-**gcreds** then manages temporary credentials it generates to prevent corruption  
-of your local awscli config.
+
+**gcreds** manages temporary credentials it generates to prevent corruption of your  
+local awscli config. When generating new temporary credentials, **gcreds** will  
+automatically clear expired credentials from your local awscli config to block  
+the presence of duplicate sets of credentials.
 
 See [v1.3 Release Notes](./notes/release_v1.3.md)
 
