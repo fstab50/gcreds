@@ -20,7 +20,7 @@ the -a (--accounts) parameter set.
 
 ## Limitations
 
-#### Working with Duplicate Sets of Credentials
+#### Integration Testing
 
 * **gcreds** still needs integration testing in the following environments to  
 determine full compatibility:
