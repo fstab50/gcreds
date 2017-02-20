@@ -94,14 +94,10 @@ Help Menu
     $ git clone <domain>/gcreds.git
 ```
 
-* Add an alias to your local shell profile (.bashrc OR .bash_profile)
+* Add **gcreds** to your PATH in your shell profile (.bashrc OR .bash_profile)
 
 ```bash
-    $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bashrc
-```
-
-```bash
-    $  echo "alias gcreds='~/<directory>/gcreds/gcreds'" >> ~/.bash_profile
+    $  echo "export PATH=$PATH:$HOME/<gcreds dir>/gcreds" >> ~/.bashrc
 ```
 
 * * *
