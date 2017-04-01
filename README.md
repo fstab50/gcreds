@@ -3,7 +3,7 @@
 
 ## Purpose ##
 
-**gcreds** (pronounced "gee-creds" for _get-credentials_) requests temporary credentials  
+**gcreds** (pronounced "gee-creds" for _generate credentials_) requests temporary credentials  
 from [Amazon Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) for roles that normally require mfa  
 credentials in order to authenticate.  
 
