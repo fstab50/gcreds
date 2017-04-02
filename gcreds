@@ -65,6 +65,7 @@ function gcreds_help(){
          -c, --mfa-code : required, see MFA_CODE
         [-s, --show     : optional, show credential expiration info]
         [-t, --timeout  : optional, credential lifetime (minutes, default=15)]
+        [-h, --help     : optional, display this help menu]
 
     ${white}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
         text file listing of profile names in your local awscli configuration,
