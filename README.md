@@ -137,35 +137,36 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
     ```
 12. Configure credentials and profiles in ~/.aws/credentials
 
-```
-[IAMUSER1]
-aws_access_key_id=XXXXXXXXXXXXXXX
-aws_secret_access_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
+    ```
+    [IAMUSER1]
+    aws_access_key_id=XXXXXXXXXXXXXXX
+    aws_secret_access_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
 
-[tooling-dev]
-role_arn = arn:aws:iam::102512488663:role/Admin-ServiceRole
-source_profile = IAMUSER1
-mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
+    [tooling-dev]
+    role_arn = arn:aws:iam::102512488663:role/Admin-ServiceRole
+    source_profile = IAMUSER1
+    mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
 
-[development-qa]
-role_arn = arn:aws:iam::935229214006:role/S3-ServiceRole
-source_profile = IAMUSER1
-mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
-```
+    [development-qa]
+    role_arn = arn:aws:iam::935229214006:role/S3-ServiceRole
+    source_profile = IAMUSER1
+    mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
+    ```
+
 13. Create a file containing the profile names of the accounts in which you want  
 to generate temporary credentials for roles
 
-```bash
-    $ vim myroles.profiles    # call this file anything you wish
-```
-```bash
-    $ cat myroles.profiles
+    ```bash
+        $ vim myroles.profiles    # call this file anything you wish
+    ```
+    ```bash
+        $ cat myroles.profiles
 
-    tooling-dev
-    tooling-qa
-    development-qa
-```    
+        tooling-dev
+        tooling-qa
+        development-qa
+    ```    
 
 * * *
 
