@@ -60,7 +60,7 @@ Help Menu
 
 * * *
 
-## Installation ##
+## Installation - Redhat / Ubuntu ##
 
 * Install jq, a JSON parser from your local distribution repository.
 
@@ -99,6 +99,73 @@ Help Menu
 ```bash
     $  echo "export PATH=$PATH:$HOME/<gcreds dir>/gcreds" >> ~/.bashrc
 ```
+
+* * *
+
+## Installation - Cygwin (Windows 7) ##
+
+Cygwin is a Unix-like environment and command-line interface for Microsoft Windows. Cygwin provides native integration of Windows-based applications, data, and other system resources with applications, software tools, and data of the Unix-like environment. Thus it is possible to launch Windows applications from the Cygwin environment, as well as to use Cygwin tools and applications within the Windows operating context.
+
+#### Required steps to install and configure Cygwin:
+1. Download Cygwin installer from official website https://www.cygwin.com/
+2. Run installer
+
+![cygwin project](./.images/cygwin1.png)
+
+3. Choose Install from Internet option in Choose A Download Source
+4. Select Root Install Directory, All Users option is recommended
+5. Select Local Package Directory
+6. Choose Use Internet Explorer Proxy Settings option
+7. Select one of the mirrors
+8. Select packages, required packages: python3, python3-pip, and git
+    a. Change view to Full
+    b. Type package name into Search field
+    c. Click on New field in particular package that you would like to install, Bin? field has to have "X" icon
+
+    ![cygwin python3](./.images/cygwin2.png)
+
+9. Run Cygwin64 Terminal
+10. Run command:
+
+```bash
+    $ pip3 install awscli
+```
+11. clone this repository
+
+```bash
+    $ git clone <domain>/gcreds.git
+```
+12. Configure credentials and profiles in ~/.aws/credentials
+
+```
+[IAMUSER1]
+aws_access_key_id=XXXXXXXXXXXXXXX
+aws_secret_access_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
+
+[tooling-dev]
+role_arn = arn:aws:iam::102512488663:role/Admin-ServiceRole
+source_profile = IAMUSER1
+mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
+
+[development-qa]
+role_arn = arn:aws:iam::935229214006:role/S3-ServiceRole
+source_profile = IAMUSER1
+mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
+```
+13. Create a file containing the profile names of the accounts in which you want  
+to generate temporary credentials for roles
+
+```bash
+    $ vim myroles.profiles    # call this file anything you wish
+```
+```bash
+    $ cat myroles.profiles
+
+    tooling-dev
+    tooling-qa
+    development-qa
+```    
 
 * * *
 
