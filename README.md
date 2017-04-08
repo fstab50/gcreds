@@ -110,7 +110,9 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
 1. Download Cygwin installer from official website https://www.cygwin.com/
 2. Run installer
 
+    -------------------------------------------
     ![cygwin project](./.images/cygwin1.png)
+    -------------------------------------------
 
 3. Choose Install from Internet option in Choose A Download Source
 4. Select Root Install Directory, All Users option is recommended
