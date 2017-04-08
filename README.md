@@ -112,6 +112,7 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
 
     -------------------------------------------
     ![cygwin project](./.images/cygwin1.png)
+
     -------------------------------------------
 
 3. Choose Install from Internet option in Choose A Download Source
