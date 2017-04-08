@@ -136,10 +136,10 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
     ```bash
         $ git clone <domain>/gcreds.git
     ```
-    
+
 12. Configure credentials and profiles in ~/.aws/credentials
 
-    ```
+    ```bash
     [IAMUSER1]
     aws_access_key_id=XXXXXXXXXXXXXXX
     aws_secret_access_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
