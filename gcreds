@@ -208,8 +208,9 @@ function gcreds_depcheck(){
             gcreds_error_exit "no viable json parser binary (jq) found, Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
     fi
-    ## set temp to writeable ocation in physical memory ##
-    if [ "$(df /run | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
+    ## set temp to writeable location in physical memory ##
+    df=$(which df)
+    if [ "$($df /run 2>/dev/null | awk '{print $1, $6}' | grep tmpfs 2>/dev/null)" ]; then
             # in-memory
             TMPDIR="/dev/shm"
     else
