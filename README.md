@@ -139,8 +139,6 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
 
 12. Configure credentials and profiles in ~/.aws/credentials
 
-    ```bash
-
         [IAMUSER1]
         aws_access_key_id=XXXXXXXXXXXXXXX
         aws_secret_access_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -156,7 +154,6 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
         source_profile = IAMUSER1
         mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
 
-    ```
 
 13. Create a file containing the profile names of the accounts in which you want  
 to generate temporary credentials for roles
