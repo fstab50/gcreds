@@ -110,7 +110,7 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
 1. Download Cygwin installer from official website https://www.cygwin.com/
 2. Run installer
 
-![cygwin project](./.images/cygwin1.png)
+    ![cygwin project](./.images/cygwin1.png)
 
 3. Choose Install from Internet option in Choose A Download Source
 4. Select Root Install Directory, All Users option is recommended
@@ -127,14 +127,14 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
 9. Run Cygwin64 Terminal
 10. Run command:
 
-```bash
-    $ pip3 install awscli
-```
+    ```bash
+        $ pip3 install awscli
+    ```
 11. clone this repository
 
-```bash
-    $ git clone <domain>/gcreds.git
-```
+    ```bash
+        $ git clone <domain>/gcreds.git
+    ```
 12. Configure credentials and profiles in ~/.aws/credentials
 
 ```
