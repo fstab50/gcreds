@@ -130,11 +130,13 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
     ```bash
         $ pip3 install awscli
     ```
+
 11. clone this repository
 
     ```bash
         $ git clone <domain>/gcreds.git
     ```
+    
 12. Configure credentials and profiles in ~/.aws/credentials
 
     ```
