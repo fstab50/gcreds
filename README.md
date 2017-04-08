@@ -127,11 +127,11 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
 9. Run Cygwin64 Terminal
 10. Run command:
 
-    $ pip3 install awscli
+        $ pip3 install awscli
 
 11. clone this repository
 
-    $ git clone <domain>/gcreds.git
+        $ git clone <domain>/gcreds.git
 
 12. Configure credentials and profiles in ~/.aws/credentials
 
@@ -153,9 +153,9 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
 13. Create a file containing the profile names of the accounts in which you want  
 to generate temporary credentials for roles
 
-    $ vim myroles.profiles    # call this file anything you wish
+        $ vim myroles.profiles    # call this file anything you wish
 
-    $ cat myroles.profiles
+        $ cat myroles.profiles
 
         tooling-dev
         tooling-qa
