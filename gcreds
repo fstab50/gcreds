@@ -358,7 +358,7 @@ function gcreds_parse_parameters(){
 
     # set timeout
     if [[ ! $TIMEOUT ]]; then
-        TIMEOUT=15         # default temp creds expiration, 15 minutes
+        TIMEOUT=60         # default temp creds expiration, 15 minutes
     else
         gcreds_validate_parameter $TIMEOUT int "Temp credential lifetime" $STS_MIN $STS_MAX "minutes"
     fi
