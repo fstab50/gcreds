@@ -12,8 +12,8 @@ debugMode=""          # change this value to "True" to turn on verbose \
                       # log output to aid debugging
 
 # Amazon Sercurity Token Service (STS) limits
-STS_MIN=15            # minutes, equivalent to 900 seconds
-STS_MAX=480           # minutes, check STS max equivalent to 8 hours
+STS_MIN=15            # minutes, STS min allowed value
+STS_MAX=600           # minutes, STS max equivalent to 10 hours
 LIFETIME_DEFAULT=60   # minutes, lifetime of credentials generated
 
 # error codes
@@ -320,9 +320,10 @@ function gcreds_parse_parameters(){
                     shift 1
                     exit 0
                     ;;
-                -t | --timeout)     # optional
+                -A | --auto)     # optional
                     if [ $2 ]; then
-                        TIMEOUT=$2
+                        # $2 given in hours
+                        TIMEOUT=$(( $2*60 ))
                         shift 2
                     else
                         gcreds_error_exit "You must provide a timeout value. Exiting (code $E_BADARG)" $E_BADARG
@@ -471,6 +472,7 @@ function gcreds_update_expiration(){
     #       1 = new credential expiration
     #       2 = expire expiration, but keep config files (not used)
     local state=$1
+    #
     if [[ $1 == 0 ]]; then
         rm $config_path/credential.*
         gcreds_logger "[INFO]: Credential expiration values cleared"
