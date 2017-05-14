@@ -13,7 +13,8 @@ debugMode=""          # change this value to "True" to turn on verbose \
 
 # Amazon Sercurity Token Service (STS) limits
 STS_MIN=15            # minutes, equivalent to 900 seconds
-STS_MAX=60            # minutes, check STS max equivalent to 36 hours
+STS_MAX=480           # minutes, check STS max equivalent to 8 hours
+LIFETIME_DEFAULT=60   # minutes, lifetime of credentials generated
 
 # error codes
 E_DEPENDENCY=1        # exit code if missing required dependency
@@ -183,7 +184,7 @@ function gcreds_depcheck(){
     fi
     ## create gcreds config dir ##
     if [[ ! -d $config_path ]]; then
-        gcreds_logger "[WARN]: config_path not found, creating config dir $config_path"
+        gcreds_warn "config_path not found, creating config dir $config_path"
         if ! mkdir -p $config_path; then
             gcreds_error_exit "$pkg: failed to create local config file directory: ~/.$pkg" $E_DIR
         fi
@@ -289,16 +290,12 @@ function gcreds_parse_parameters(){
                     fi
                     exit 0
                     ;;
-                -a | --accounts | -f | --file | *.accounts | *.accts)
+                -a | --accounts | *.accounts | *.accts)
                     # list of accts to gen temp creds, one per line
                     # -f, --file, *.accounts, *.accts for backward compatibility
-                    if [ $1 == "-a" ] || [ $1 == "--accounts" ] || \
-                       [ $1 == "-f" ] || [ $1 == "--file" ]; then
+                    if [ $1 == "-a" ] || [ $1 == "--accounts" ]; then
                         ACCTFILE=$2
                         shift 2
-                    else
-                        ACCTFILE=$1
-                        shift 1
                     fi
                     ;;
                 -p | --profile)
@@ -393,7 +390,7 @@ function gcreds_preexisting_creds(){
 }
 
 function gcreds_revert_creds(){
-    # deletes temp credentials from local awscli config
+    ## deletes temp credentials from local awscli config ##
     #
     local silent=$1
     #
@@ -428,7 +425,7 @@ function gcreds_revert_creds(){
 }
 
 function gcreds_show_creds(){
-    # display credentials in local config
+    ## display credentials in local config ##
     local msg
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
         msg="\n${BOLD}${white}Temporary Credentials in local config:${reset}${UNBOLD}\n"
@@ -458,7 +455,7 @@ function gcreds_show_creds(){
 }
 
 function gcreds_test(){
-    # output for testing purposes only
+    ## output for testing purposes only ##
     echo -e "\nACCTFILE: "$ACCTFILE
     echo -e "MFA_PROFILE: "$MFA_PROFILE
     echo -e "MFA_CODE: "$MFA_CODE
@@ -490,14 +487,15 @@ function gcreds_update_expiration(){
 }
 
 function gcreds_validate_parameter(){
+    ## validate parameter type, integer or decimal ##
+    #
     local parameter=$1          # parameter value to validate range
     local type=$2               # type of value expected
     local msg_description="$3"  # error msg leading description
     local min_value=$4          # min value in range
     local max_value=$5          # max value in range
     local units="$6"            # units, min_value (minutes, lbs, kg, etc)
-
-    ## validate parameter type, integer or decimal ##
+    #
     case $type in
         int)
             # integer required
@@ -533,11 +531,10 @@ function gcreds_validate_parameter(){
     #<-- end function gcreds_validate_parameter -->
 }
 
-function gcreds_generate_creds(){
-    # generate actual credentials
-    # log out, start
+function gcreds_generate_token() {
+    ## get session token using primary IAM user (MFA_PROFILE) ##
     gcreds_logger "[INFO]: Attempting to generate session token for iam profile [gcreds-$MFA_PROFILE]"
-
+    #
     # generate temp creds for MFA_PROFILE
     aws sts get-session-token \
         --duration-seconds $(($TIMEOUT*60)) \
@@ -554,16 +551,24 @@ function gcreds_generate_creds(){
     # validate authentication
     gcreds_authentication $AWS_ACCESS_KEY $AWS_SECRET_KEY $AWS_SESSION_TOKEN
 
-    echo " " > $TMPDIR/.new.profile
-    echo "[gcreds-$MFA_PROFILE]" >> $TMPDIR/.new.profile
-    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> $TMPDIR/.new.profile
-    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> $TMPDIR/.new.profile
-    echo "aws_security_token = $AWS_SESSION_TOKEN" >> $TMPDIR/.new.profile
-    cat $TMPDIR/.new.profile >> ~/.aws/credentials
+    echo " " > $TMPDIR/.session.profile
+    echo "[gcreds-$MFA_PROFILE]" >> $TMPDIR/.session.profile
+    echo "aws_access_key_id = $AWS_ACCESS_KEY" >> $TMPDIR/.session.profile
+    echo "aws_secret_access_key = $AWS_SECRET_KEY" >> $TMPDIR/.session.profile
+    echo "aws_security_token = $AWS_SESSION_TOKEN" >> $TMPDIR/.session.profile
+    cat $TMPDIR/.session.profile >> ~/.aws/credentials
+    # store on disk for reuse if --auto parameter
+    if [ ! -e $config_path/.session.profile ]; then
+        mv -f $TMPDIR/.session.profile $config_path/
+    fi
+    #
+    # <-- end function gcreds_generate_token -->
+}
 
-    # success, log out
+function gcreds_generate_creds(){
+    ## generate actual credentials ##
     gcreds_logger "[INFO]: Generated temp credentials for iam profile [gcreds-$MFA_PROFILE]"
-
+    #
     # create temp credentials for each profile in ACCTFILE
     for profile in $(cat $ACCTFILE); do
         # assign arn from local config
@@ -575,7 +580,7 @@ function gcreds_generate_creds(){
 
             # call assume role to gen temp creds
             aws sts assume-role \
-                --duration-seconds $(($TIMEOUT*60)) \
+                --duration-seconds $(($LIFETIME_DEFAULT*60)) \
                 --role-arn "$role_arn" \
                 --role-session-name "gcreds-$profile" \
                 --output json \
@@ -621,6 +626,9 @@ gcreds_parse_parameters $@
 
 # check for active temp credentials before generating new creds
 gcreds_preexisting_creds
+
+# generate session token
+gcreds_generate_token
 
 # generate credentials
 gcreds_generate_creds
