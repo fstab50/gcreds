@@ -23,6 +23,7 @@ E_AUTHFAIL=5          # exit code if authentication failure
 E_BADPROFILE=6        # exit code if profile name/ role not found in local config
 E_USER_CANCEL=7       # exit code if user cancel
 E_BADARG=8            # exit code if bad input parameter
+E_EXPIRED_CREDS=9     # exit code if temporary credentials no longer valid
 E_MISC=11             # exit code if miscellaneous (unspecified) error
 
 # Formatting
