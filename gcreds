@@ -34,6 +34,7 @@ purple=$(tput setaf 5)
 red=$(tput setaf 1)
 white=$(tput setaf 7)
 yellow=$(tput setaf 3)
+orange='\033[0;33m'
 gray=$(tput setaf 008)
 lgray='\033[0;37m'    # light gray
 dgray='\033[1;30m'    # dark gray
