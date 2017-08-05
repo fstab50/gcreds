@@ -661,14 +661,16 @@ gcreds_monitor(){
     $clear_bin
     # session time stats
     expire=$(cat $config_path/token.expiration)
-    session_remaining=$(( $expire - $(date +%s) ))
+    sec_left=$(( $expire - $(date +%s) ))
+    SESSION_REMAINING=$(( $sec_left/60 ))
 
     # credentials time stats
-    CREDENTIAL_EXPIRE=$(cat $config_path/credential.expiration)
-    CREDENTIAL_REMAINING=$(( $CREDENTIAL_EXPIRE - $(date +%s) ))
+    expire=$(cat $config_path/credential.expiration)
+    sec_left=$(( $expire - $(date +%s) ))
+    CREDENTIAL_REMAINING=$(( $sec_left/60 ))
 
     # display
-    gcreds_show_creds  $session_remaining
+    gcreds_show_creds  $SESSION_REMAINING
     #
     # <-- end function gcreds-show-stats -->
 }
@@ -700,7 +702,7 @@ while [ $MONITOR == 'True' ]; do
     # calc and display stats
     gcreds_monitor
     #
-    if [ $CREDENTIAL_REMAINING -le 1 ] && [ $SESSION_REMAINING -ge 60 ]; then
+    if [ $CREDENTIAL_REMAINING -lt 1 ] && [ $SESSION_REMAINING -gt 60 ]; then
         #
         # clear out expiring creds
         gcreds_revert_creds -s
@@ -709,7 +711,7 @@ while [ $MONITOR == 'True' ]; do
         # generate credentials
         gcreds_generate_creds
         #
-    elif [ $CREDENTIAL_REMAINING -lt 1 ] && [ $SESSION_REMAINING -lt 60 ]; then
+    elif [ $CREDENTIAL_REMAINING -le 1 ] && [ $SESSION_REMAINING -le 60 ]; then
         gcreds_message "set MONITOR = False" INFO
         # clean out token, .session.profile from config_path
         rm $config_path/.session.profile $config_path/token.*
