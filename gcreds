@@ -429,6 +429,11 @@ function gcreds_revert_creds(){
 function gcreds_show_creds(){
     ## display credentials in local config ##
     local session_life="$1"     # time remaining in session, seconds
+    local credential_life       # seconds until temporary credential expire
+    local hrs_left              # duration before expiration, hours
+    local min_left              # duration before expiration, min
+    local expire                # expiration timestamp, epoch seconds
+    local expire_datetime       # expiration timestamp, date/time format
     local msg
     #
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
@@ -436,33 +441,35 @@ function gcreds_show_creds(){
         echo -e $msg | indent02
         grep --color=auto "gcreds" ~/.aws/credentials | indent10
         if [[ -e $config_path/credential.expiration ]]; then
-            EXPIRE=$(cat $config_path/credential.expiration)
-            TIMELEFT=$(( $EXPIRE - $(date +%s) ))
+            expire=$(cat $config_path/credential.expiration)
+            credential_life=$(( $expire - $(date +%s) ))
         else
-            TIMELEFT=0
+            credential_life=0
         fi
-        if [ $TIMELEFT -le 0 ]; then
+        if [ $credential_life -le 0 ]; then
             # Credentials have expired
             echo -e "\n    Your credentials have ${red}expired${reset}.\n" | indent02
         else
             # session stats, if auto refresh of credentials
             if [ $session_life ]; then
                 # output session stats
-                TIMEEXPIRE=$(date --date=@$(( $session_life + $(date +%s) )))
-                HRS_LEFT=$(( $session_life/3600 ))    # convert timeleft from sec > hours
-                if [ $HRS_LEFT -lt 1 ]; then
-                    MIN_LEFT=$(( $session_life/60 ))    # convert timeleft from sec to min
-                    echo -e "\nSession Expiration in ${BOLD}${white}$MIN_LEFT${reset}${UNBOLD} minutes." | indent02
+                expire_datetime=$(date --date=@$(( $session_life + $(date +%s) )))
+                #
+                if [ $session_life -le 60 ]; then
+                    min_left=$(( $session_life/60 ))    # convert timeleft from sec to min
+                    echo -e "\nSession Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
                 else
-                    echo -e "\nSession Expiration in ${BOLD}${white}$HRS_LEFT${reset}${UNBOLD} hours." | indent02
+                    # session_life > 1 hr
+                    hrs_left=$(( $session_life/3600 ))    # convert timeleft
+                    echo -e "\nSession Expiration in ${BOLD}${white}$hrs_left${reset}${UNBOLD} hours." | indent02
                 fi
-                echo -e "Expiration: $TIMEEXPIRE\n" | indent02
+                echo -e "Expiration Time: $expire_datetime\n" | indent02
             fi
             # temp credential stats
-            TIMEEXPIRE=$(date --date=@$(( $TIMELEFT + $(date +%s) )))
-            MIN_LEFT=$(( $TIMELEFT/60 ))    # convert timeleft from sec to min
-            echo -e "\nCredential Expiration in ${BOLD}${white}$MIN_LEFT${reset}${UNBOLD} minutes." | indent02
-            echo -e "Expiration: $TIMEEXPIRE\n" | indent02
+            expire_datetime=$(date --date=@$(( $credential_life + $(date +%s) )))
+            min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
+            echo -e "\nCredential Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+            echo -e "Expiration Time: $expire_datetime\n" | indent02
         fi
     else
         # no existing credentials
@@ -645,21 +652,23 @@ function gcreds_generate_creds(){
 
 gcreds_monitor(){
     ## display session & credential lifetime remaining ##
-    local delay=3   # timer delay in seconds
+    local delay=3               # screen refresh delay, seconds
+    local expire                # expiration timestamp, epoch seconds
+    local session_remaining     # time remaining in session, seconds
     #
     sleep $delay
     clear_bin=$(which clear)
     $clear_bin
     # session time stats
-    TOKEN_EXPIRE=$(cat $config_path/token.expiration)
-    SESSION_REMAINING=$(( $TOKEN_EXPIRE - $(date +%s) ))
+    expire=$(cat $config_path/token.expiration)
+    session_remaining=$(( $expire - $(date +%s) ))
 
     # credentials time stats
     CREDENTIAL_EXPIRE=$(cat $config_path/credential.expiration)
     CREDENTIAL_REMAINING=$(( $CREDENTIAL_EXPIRE - $(date +%s) ))
 
     # display
-    gcreds_show_creds
+    gcreds_show_creds  $session_remaining
     #
     # <-- end function gcreds-show-stats -->
 }
