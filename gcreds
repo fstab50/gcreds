@@ -8,13 +8,14 @@ config_path="$HOME/.$pkg"
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
-debugMode=""          # change this value to "True" to turn on verbose \
+DBUGMODE=""          # change this value to "True" to turn on verbose \
                       # log output to aid debugging
 
 # Amazon Sercurity Token Service (STS) limits
 STS_MIN=15            # minutes, STS min allowed value
 STS_MAX=600           # minutes, STS max equivalent to 10 hours
-LIFETIME_DEFAULT=60   # minutes, lifetime of credentials generated
+TOKEN_DEFAULT=60      # minutes, default STS session token lifetime
+CREDENTIAL_DEFAULT=60 # minutes, default lifetime of temp credentials generated
 
 # error codes
 E_DEPENDENCY=1        # exit code if missing required dependency
@@ -194,7 +195,7 @@ function gcreds_depcheck(){
         if ! type "$prog" > /dev/null 2>&1; then
             gcreds_error_exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
-        if [ $debugMode ]; then
+        if [ $DBUGMODE ]; then
             gcreds_env_info "DBUG" $prog
         fi
     done
@@ -358,7 +359,7 @@ function gcreds_parse_parameters(){
 
     # set timeout
     if [[ ! $TIMEOUT ]]; then
-        TIMEOUT=60         # default temp creds expiration, 15 minutes
+        TIMEOUT=$TOKEN_DEFAULT  # default token expiration (minutes)
     else
         gcreds_validate_parameter $TIMEOUT int "Temp credential lifetime" $STS_MIN $STS_MAX "minutes"
     fi
@@ -427,7 +428,9 @@ function gcreds_revert_creds(){
 
 function gcreds_show_creds(){
     ## display credentials in local config ##
+    local session_life="$1"     # time remaining in session, seconds
     local msg
+    #
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
         msg="\n${BOLD}${white}Temporary Credentials in local config:${reset}${UNBOLD}\n"
         echo -e $msg | indent02
@@ -442,9 +445,23 @@ function gcreds_show_creds(){
             # Credentials have expired
             echo -e "\n    Your credentials have ${red}expired${reset}.\n" | indent02
         else
+            # session stats, if auto refresh of credentials
+            if [ $session_life ]; then
+                # output session stats
+                TIMEEXPIRE=$(date --date=@$(( $session_life + $(date +%s) )))
+                HRS_LEFT=$(( $session_life/3600 ))    # convert timeleft from sec > hours
+                if [ $HRS_LEFT -lt 1 ]; then
+                    MIN_LEFT=$(( $session_life/60 ))    # convert timeleft from sec to min
+                    echo -e "\nSession Expiration in ${BOLD}${white}$MIN_LEFT${reset}${UNBOLD} minutes." | indent02
+                else
+                    echo -e "\nSession Expiration in ${BOLD}${white}$HRS_LEFT${reset}${UNBOLD} hours." | indent02
+                fi
+                echo -e "Expiration: $TIMEEXPIRE\n" | indent02
+            fi
+            # temp credential stats
             TIMEEXPIRE=$(date --date=@$(( $TIMELEFT + $(date +%s) )))
-            TIMELEFT=$(( $TIMELEFT/60 ))    # convert timeleft from sec to min
-            echo -e "\nCredential Expiration in ${BOLD}${white}$TIMELEFT${reset}${UNBOLD} minutes." | indent02
+            MIN_LEFT=$(( $TIMELEFT/60 ))    # convert timeleft from sec to min
+            echo -e "\nCredential Expiration in ${BOLD}${white}$MIN_LEFT${reset}${UNBOLD} minutes." | indent02
             echo -e "Expiration: $TIMEEXPIRE\n" | indent02
         fi
     else
@@ -535,7 +552,7 @@ function gcreds_validate_parameter(){
 
 function gcreds_generate_token() {
     ## get session token using primary IAM user (MFA_PROFILE) ##
-    gcreds_logger "[INFO]: Attempting to generate session token for iam profile [gcreds-$MFA_PROFILE]"
+    gcreds_logger "[INFO]: Generate session token for iam profile [gcreds-$MFA_PROFILE]"
     #
     # generate temp creds for MFA_PROFILE
     aws sts get-session-token \
@@ -559,10 +576,19 @@ function gcreds_generate_token() {
     echo "aws_secret_access_key = $AWS_SECRET_KEY" >> $TMPDIR/.session.profile
     echo "aws_security_token = $AWS_SESSION_TOKEN" >> $TMPDIR/.session.profile
     cat $TMPDIR/.session.profile >> ~/.aws/credentials
+
+    # record token lifetime start, end
+    TOKEN_START=$(date +%s)
+    echo $TOKEN_START > $config_path/token.start
+    EXPIRE=$(( $(($TIMEOUT*60)) + $TOKEN_START ))
+    echo $EXPIRE > $config_path/token.expiration
+
     # store on disk for reuse if --auto parameter
     if [ ! -e $config_path/.session.profile ]; then
         mv -f $TMPDIR/.session.profile $config_path/
     fi
+    # clean up
+    gcreds_clean .aua.creds.json
     #
     # <-- end function gcreds_generate_token -->
 }
@@ -582,7 +608,7 @@ function gcreds_generate_creds(){
 
             # call assume role to gen temp creds
             aws sts assume-role \
-                --duration-seconds $(($LIFETIME_DEFAULT*60)) \
+                --duration-seconds $(($CREDENTIAL_DEFAULT*60)) \
                 --role-arn "$role_arn" \
                 --role-session-name "gcreds-$profile" \
                 --output json \
@@ -609,8 +635,33 @@ function gcreds_generate_creds(){
     gcreds_show_creds
     # log info about aws version used to generate creds
     gcreds_env_info "INFO" aws
+    # clean up temp files
+    gcreds_clean .creds.json .new.profile
+    # set monitoring bit
+    MONITOR='True'
     #
     # <-- end function gcreds_generate_creds -->
+}
+
+gcreds_monitor(){
+    ## display session & credential lifetime remaining ##
+    local delay=3   # timer delay in seconds
+    #
+    sleep $delay
+    clear_bin=$(which clear)
+    $clear_bin
+    # session time stats
+    TOKEN_EXPIRE=$(cat $config_path/token.expiration)
+    SESSION_REMAINING=$(( $TOKEN_EXPIRE - $(date +%s) ))
+
+    # credentials time stats
+    CREDENTIAL_EXPIRE=$(cat $config_path/credential.expiration)
+    CREDENTIAL_REMAINING=$(( $CREDENTIAL_EXPIRE - $(date +%s) ))
+
+    # display
+    gcreds_show_creds
+    #
+    # <-- end function gcreds-show-stats -->
 }
 
 #
@@ -632,11 +683,30 @@ gcreds_preexisting_creds
 # generate session token
 gcreds_generate_token
 
-# generate credentials
+# generate temporary credentials
 gcreds_generate_creds
 
-# clean up temp files
-gcreds_clean .aua.creds.json .creds.json .new.profile
+while [ $MONITOR == 'True' ]; do
+    #
+    # calc and display stats
+    gcreds_monitor
+    #
+    if [ $CREDENTIAL_REMAINING -le 1 ] && [ $SESSION_REMAINING -ge 60 ]; then
+        #
+        # clear out expiring creds
+        gcreds_revert_creds -s
+        # reset session credentials
+        cat $config_path/session.profile >> ~/.aws/credentials
+        # generate credentials
+        gcreds_generate_creds
+        #
+    elif [ $CREDENTIAL_REMAINING -lt 1 ] && [ $SESSION_REMAINING -lt 60 ]; then
+        gcreds_message "set MONITOR = False" INFO
+        # clean out token, .session.profile from config_path
+        rm $config_path/.session.profile $config_path/token.*
+        MONITOR='False'
+    fi
+done
 
 #
 #<-- end MAIN -----------------------------------------------------------------
