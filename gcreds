@@ -470,11 +470,11 @@ function gcreds_show_creds(){
                 expire_datetime=$(date --date=@$(( $session_life + $(date +%s) )))
                 #
                 if [ $session_life -le 60 ]; then
-                    min_left=$(( $session_life/60 ))    # convert timeleft from sec to min
+                    min_left=$(( $session_life ))    # convert timeleft from sec to min
                     echo -e "\nSession Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
                 else
                     # session_life > 1 hr
-                    hrs_left=$(( $session_life/3600 ))    # convert timeleft
+                    hrs_left=$(( $session_life/60 ))    # convert timeleft
                     echo -e "\nSession Expiration in ${BOLD}${white}$hrs_left${reset}${UNBOLD} hours." | indent02
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
@@ -671,7 +671,7 @@ gcreds_monitor(){
     # session time stats
     expire=$(cat $config_path/token.expiration)
     sec_left=$(( $expire - $(date +%s) ))
-    SESSION_REMAINING=$(( $sec_left/60 ))
+    SESSION_REMAINING=$(( $sec_left/60 ))   # session duration, minutes
 
     # credentials time stats
     expire=$(cat $config_path/credential.expiration)
@@ -722,9 +722,10 @@ while [[ $MONITOR == True ]]; do
         #
     elif [ $CREDENTIAL_REMAINING -le 1 ] && [ $SESSION_REMAINING -le 60 ]; then
         gcreds_message "set MONITOR = False" INFO
-        # clean out token, .session.profile from config_path
+        gcreds_logger "session monitoring end"
+        # clean out token, .session.profile from config_path (credential.expiration persist)
         rm $config_path/.session.profile $config_path/token.*
-        MONITOR='False'
+        MONITOR=False
     fi
 done
 
