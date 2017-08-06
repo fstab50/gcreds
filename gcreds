@@ -72,7 +72,7 @@ function gcreds_help(){
          -c, --mfa-code : authentication code, see MFA_CODE
         [-A, --auto     : auto refresh credentials]
         [-s, --show     : show credential expiration info]
-        [-C, --conf     : set $pkg configuration options]
+        [-C, --config   : set $pkg configuration options]
         [-h, --help     : display this help menu]
 
     ${white}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
@@ -289,14 +289,16 @@ function gcreds_configure(){
     gcreds_message "Configure Mode Start: Set $pkg configuration options" INFO
     # set default profile (default  [atos-aua1])
     echo -e "\nEnter the iam username you will generally use to generate temporary" | indent02
-    echo -e "credentials. A new iam user may be used at any time by including the" | indent02
-    echo -e "-p | --profile option as a $pkg command line parameter\n" | indent02
-    read -p "  ${yellow}iam username [atos-aua1]:${reset} " CHOICE
+    echo -e "credentials. This user is used to assume roles using temporary credentials" | indent02
+    echo -e "provided by $pkg." | indent02
+    echo -e "A new iam user may be used at any time by including the -p / --profile option" | indent02
+    echo -e "as a $pkg command line parameter.\n" | indent02
+    read -p "  ${yellow}IAM user [atos-aua1]:${reset} " CHOICE
     if [ -z $CHOICE ]; then
         CHOICE="atos-aua1"
     fi
     echo -e "\n"
-    gcreds_message "entering $CHOICE in your local $pkg configuration" INFO
+    gcreds_message "entering [$CHOICE] in your local $pkg configuration" INFO
     # add config dictionary key, value
     config_dict["default_profile"]=$CHOICE
 
@@ -385,7 +387,7 @@ function gcreds_parse_parameters(){
                     # display help
                     gcreds_help
                     ;;
-                -C | --conf)
+                -C | --config)
                     # set configuration options
                     gcreds_configure
                     ;;
