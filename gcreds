@@ -332,6 +332,8 @@ function gcreds_parse_parameters(){
                         # $2 given in hours
                         TIMEOUT=$(( $2*60 ))
                         shift 2
+                        # set monitoring bit
+                        MONITOR='True'
                     else
                         gcreds_error_exit "You must provide a timeout value. Exiting (code $E_BADARG)" $E_BADARG
                     fi
@@ -648,8 +650,6 @@ function gcreds_generate_creds(){
     gcreds_env_info "INFO" aws
     # clean up temp files
     gcreds_clean .creds.json .new.profile
-    # set monitoring bit
-    MONITOR='True'
     #
     # <-- end function gcreds_generate_creds -->
 }
