@@ -72,7 +72,7 @@ function gcreds_help(){
          -c, --mfa-code : authentication code, see MFA_CODE
         [-A, --auto     : auto refresh credentials]
         [-s, --show     : show credential expiration info]
-        [--configure    : set $pkg configuration options]
+        [-C, --conf     : set $pkg configuration options]
         [-h, --help     : display this help menu]
 
     ${white}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
@@ -305,7 +305,8 @@ function gcreds_configure(){
         echo "[$ct]: ${colors[$ct]}"
         ct=$(( $ct + 1))
     done
-    read -p "Select number of the color scheme [0]: " CHOICE
+    echo -e "\n"
+    read -p "Select number of color scheme [0]: " CHOICE
     if [ -z $CHOICE ]; then
         # add config dictionary key, value for 0 element
         config_dict[default_color]=$(echo ${colors[0]} | awk -F ':' '{print $1}')
@@ -313,7 +314,8 @@ function gcreds_configure(){
         # add config dictionary key, value
         config_dict[default_color]=$(echo ${colors[$CHOICE]} | awk -F ':' '{print $1}')
     fi
-
+    echo -e "\n"
+    gcreds_message "entering $CHOICE in your local $pkg configuration" INFO
     # write out config file
     echo -e "{" > $config_path/$gcreds_conf
     ct=1
@@ -357,6 +359,10 @@ function gcreds_parse_parameters(){
                 -h | --help | -help)
                     # display help
                     gcreds_help
+                    ;;
+                -C | --conf)
+                    # set configuration options
+                    gcreds_configure
                     ;;
                 -r | --revert | -revert | --Revert)
                     revert=1    # flag indicating direct call to clear config
@@ -808,9 +814,8 @@ else
             # generate credentials
             gcreds_generate_creds
             #
-        elif [ $CREDENTIAL_REMAINING -le 1 ] && [ $SESSION_REMAINING -le $CREDENTIAL_DEFAULT ]; then
-            gcreds_message "set MONITOR = False" INFO
-            gcreds_logger "[INFO]: session end"
+        elif [ $CREDENTIAL_REMAINING -lt 1 ] && [ $SESSION_REMAINING -le $CREDENTIAL_DEFAULT ]; then
+            gcreds_message "[INFO]: session end" INFO
             # clean out token, .session.profile from config_path (credential.expiration persist)
             rm $config_path/.session.profile $config_path/token.*
             MONITOR=False
