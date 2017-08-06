@@ -852,12 +852,13 @@ else
             #
         elif [ $CREDENTIAL_REMAINING -lt 1 ] && [ $SESSION_REMAINING -le $CREDENTIAL_DEFAULT ]; then
             gcreds_message "[INFO]: session end" INFO
-            # clean out token, .session.profile from config_path (credential.expiration persist)
-            rm $config_path/.session.profile $config_path/token.*
             MONITOR=False
         fi
     done
 fi
+
+# clean out token, .session.profile from config_path (credential.expiration persist)
+rm $config_path/.session.profile $config_path/token.*
 
 #
 #<-- end MAIN -----------------------------------------------------------------
