@@ -713,7 +713,7 @@ gcreds_generate_creds
 if [ $MONITOR == False ]; then
     gcreds_show_creds
 else
-    while [[ $MONITOR == True ]]; do
+    while [ $MONITOR == True ]; do
         #
         # calc and display stats
         gcreds_monitor
