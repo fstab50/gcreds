@@ -332,6 +332,8 @@ function gcreds_configure(){
         ct=$(( $ct + 1 ))
     done
     echo -e "}" >> $config_path/$gcreds_conf
+    echo -e "\n"
+    gcreds_message "Configuration setup for $pkg complete" INFO
     exit 0
     #
     # <-- end function gcreds_configure -->
