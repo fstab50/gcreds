@@ -291,7 +291,7 @@ function gcreds_configure(){
     echo -e "\nEnter the iam username you will generally use to generate temporary" | indent02
     echo -e "credentials. This user is used to assume roles using temporary credentials" | indent02
     echo -e "provided by $pkg." | indent02
-    echo -e "A new iam user may be used at any time by including the -p / --profile option" | indent02
+    echo -e "\nA new iam user may be used at any time by including the -p / --profile option" | indent02
     echo -e "as a $pkg command line parameter.\n" | indent02
     read -p "  ${yellow}IAM user [atos-aua1]:${reset} " CHOICE
     if [ -z $CHOICE ]; then
@@ -306,7 +306,7 @@ function gcreds_configure(){
     colors=(
         "LTDB: Light text on dark background"
         "DTLB: Dark text on light background"
-        "BLUE: Orange Theme"
+        "ORNG: Orange Theme"
         )
     maxct=${#colors[@]}
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n" | indent02
