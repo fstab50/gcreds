@@ -291,11 +291,11 @@ function gcreds_configure(){
     # add config dictionary key, value
     config_dict[default_profile]=$CHOICE
 
-    #sets default color scheme (displays 3 choices)
+    # set default color scheme (display choices)
     colors=(
-        "scheme1: Light text on dark background"
-        "scheme2: Dark text on light background"
-        "scheme3: Surprise me"
+        "LTDB: Light text on dark background"
+        "DTLB: Dark text on light background"
+        "BLUE: Blue accents"
         )
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n"
     ct=0
@@ -305,7 +305,7 @@ function gcreds_configure(){
     done
     read -p "Select number of the color scheme [0]: " CHOICE
     if [ -z $CHOICE ]; then
-        CHOICE="scheme1"
+        CHOICE="LTDB"
     else
         CHOICE=$(echo ${colors[$CHOICE]} | awk ':' '{print $1}')
     fi
@@ -314,9 +314,8 @@ function gcreds_configure(){
 
     # write out config file
     echo -e "{" > $config_path/$gcreds_conf
-    ct=0
+    ct=1
     max_keys=${#config_dict[@]}
-    echo -e "max_keys is: $max_keys\n"
     for key in ${!config_dict[@]}; do
         if [ $ct == $max_keys ]; then
             # last key, no comma
