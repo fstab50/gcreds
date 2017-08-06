@@ -53,6 +53,7 @@ UNBOLD=`tput sgr0`
 
 # indent
 indent02() { sed 's/^/  /'; }
+indent04() { sed 's/^/    /'; }
 indent10() { sed 's/^/          /'; }
 
 function gcreds_help(){
@@ -319,9 +320,9 @@ function gcreds_configure(){
     for key in ${!config_dict[@]}; do
         if [ $ct == $max_keys ]; then
             # last key, no comma
-            echo "\"${key}\": \"${config_dict[${key}]}\"" | indent10 >> $config_path/$gcreds_conf
+            echo "\"${key}\": \"${config_dict[${key}]}\"" | indent04 >> $config_path/$gcreds_conf
         else
-            echo "\"${key}\": \"${config_dict[${key}]}\"," | indent10 >> $config_path/$gcreds_conf
+            echo "\"${key}\": \"${config_dict[${key}]}\"," | indent04 >> $config_path/$gcreds_conf
         fi
         ct=$(( $ct + 1 ))
     done
