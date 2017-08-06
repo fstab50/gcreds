@@ -324,7 +324,7 @@ function gcreds_configure(){
             echo -e "\nYou must enter an integer number between 0 and $(( $maxct-1 ))."
         else
             # valid user entry, exit loop
-            VALID=1
+            valid=1
         fi
     done
     if [ -z $CHOICE ]; then
