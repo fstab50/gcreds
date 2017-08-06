@@ -467,7 +467,7 @@ function gcreds_show_creds(){
             # session stats, if auto refresh of credentials
             if [ $session_life ]; then
                 # output session stats
-                expire_datetime=$(date --date=@$(( $session_life + $(date +%s) )))
+                expire_datetime=$(date --date=@$(cat $config_path/token.expiration))
                 #
                 if [ $session_life -le 60 ]; then
                     min_left=$(( $session_life ))    # convert timeleft from sec to min
