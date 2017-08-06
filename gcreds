@@ -312,19 +312,19 @@ function gcreds_configure(){
     config_dict[default_color]=$CHOICE
 
     # write out config file
-    echo -e "{\n" > $config_path/$gcreds_conf
+    echo -e "{" > $config_path/$gcreds_conf
     ct=0
     max_keys=${#config_dict[@]}
     for key in ${!config_dict[@]}; do
         if [ $ct == $max_keys ]; then
             # last key, no comma
-            echo "\"${key}\": \"${config_dict[${key}]}\"" >> $config_path/$gcreds_conf
+            echo "\"${key}\": \"${config_dict[${key}]}\"" | indent10 >> $config_path/$gcreds_conf
         else
-            echo "\"${key}\": \"${config_dict[${key}]}\"," >> $config_path/$gcreds_conf
+            echo "\"${key}\": \"${config_dict[${key}]}\"," | indent10 >> $config_path/$gcreds_conf
         fi
         ct=$(( $ct + 1 ))
     done
-    echo -e "\n}" >> $config_path/$gcreds_conf
+    echo -e "}" >> $config_path/$gcreds_conf
     exit 0
     #
     # <-- end function gcreds_configure -->
