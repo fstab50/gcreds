@@ -716,7 +716,7 @@ while [[ $MONITOR == True ]]; do
         # clear out expiring creds
         gcreds_revert_creds -s
         # reset session credentials
-        cat $config_path/session.profile >> ~/.aws/credentials
+        cat $config_path/.session.profile >> ~/.aws/credentials
         # generate credentials
         gcreds_generate_creds
         #
