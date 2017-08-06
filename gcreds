@@ -292,9 +292,9 @@ function gcreds_configure(){
 
     #sets default color scheme (displays 3 choices)
     colors=(
-        "scheme1 | Light text on dark background"
-        "scheme2 | Dark text on light background"
-        "scheme3 | Surprise me"
+        "scheme1: Light text on dark background"
+        "scheme2: Dark text on light background"
+        "scheme3: Surprise me"
         )
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n"
     ct=0
@@ -306,7 +306,7 @@ function gcreds_configure(){
     if [ -z $CHOICE ]; then
         CHOICE="scheme1"
     else
-        CHOICE=$(echo ${colors[$CHOICE]} | awk '|' '{print $1}')
+        CHOICE=$(echo ${colors[$CHOICE]} | awk ':' '{print $1}')
     fi
     # add config dictionary key, value
     config_dict[default_color]=$CHOICE
