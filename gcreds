@@ -278,10 +278,11 @@ function gcreds_configure(){
     ## set configuration options ##
     local ct                        # counter
     local valid                     # loop break
-    local declare -A config_dict    # key, value dictionary
-    local declare colors            # color scheme array
+    declare -A config_dict          # key, value dictionary
+    declare colors                  # color scheme array
     local CHOICE                    # user entry var
     local COLOR                     # user entry var
+    local maxct                     # array size counter
     #
     clear
     echo -e "\n"
@@ -303,8 +304,9 @@ function gcreds_configure(){
     colors=(
         "LTDB: Light text on dark background"
         "DTLB: Dark text on light background"
-        "BLUE: Blue accents"
+        "BLUE: Orange Theme"
         )
+    maxct=${#colors[@]}
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n" | indent02
     ct=0
     valid=0     # loop break
@@ -315,15 +317,23 @@ function gcreds_configure(){
         done
         echo -e "\n"
         read -p "  Select number of color scheme [0]: " CHOICE
-        if [ -z $CHOICE ]; then
-            # add config dictionary key, value for 0 element
-            COLOR=$(echo ${colors[0]} | awk -F ':' '{print $1}')
+
+        if [[ -n ${CHOICE//[0-$(( $maxct-1 ))]/} ]]; then
+            # invalid user entry
+            echo "You must enter an integer number between 0 and $(( $maxct-1 ))."
         else
-            # add config dictionary key, value
-            COLOR=$(echo ${colors[$CHOICE]} | awk -F ':' '{print $1}')
+            # valid user entry, exit loop
+            VALID=1
         fi
-        valid=1
     done
+    if [ -z $CHOICE ]; then
+        # add config dictionary key, value for 0 element
+        COLOR=$(echo ${colors[0]} | awk -F ':' '{print $1}')
+    else
+        # add config dictionary key, value
+        COLOR=$(echo ${colors[$CHOICE]} | awk -F ':' '{print $1}')
+    fi
+
     # add config dictionary key, value
     config_dict["default_color"]=$COLOR
     echo -e "\n"
