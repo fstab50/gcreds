@@ -285,8 +285,8 @@ function gcreds_configure(){
     # set default profile (default  [atos-aua1])
     echo -e "\nEnter the iam username you will generally use to generate temporary" | indent02
     echo -e "credentials. A new iam user may be used at any time by including the" | indent02
-    echo -e " -p | --profile option as a $pkg command line parameter\n"
-    read -p "iam username [atos-aua1]: " CHOICE
+    echo -e "-p | --profile option as a $pkg command line parameter\n" | indent02
+    read -p "    iam username [atos-aua1]: " CHOICE
     if [ -z $CHOICE ]; then
         CHOICE="atos-aua1"
     fi
@@ -308,7 +308,7 @@ function gcreds_configure(){
         ct=$(( $ct + 1))
     done
     echo -e "\n"
-    read -p "Select number of color scheme [0]: " CHOICE
+    read -p "    Select number of color scheme [0]: " CHOICE
     if [ -z $CHOICE ]; then
         # add config dictionary key, value for 0 element
         config_dict[default_color]=$(echo ${colors[0]} | awk -F ':' '{print $1}')
