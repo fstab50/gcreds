@@ -604,6 +604,13 @@ function gcreds_show_creds(){
     # <-- end function gcreds_show_creds -->
 }
 
+function gcreds_source_config(){
+    ## source local $pkg configuration options ##
+    return 0
+    #
+    # <-- end function gcreds_source_config -->
+}
+
 function gcreds_test(){
     ## output for testing purposes only ##
     echo -e "\nACCTFILE: "$ACCTFILE
