@@ -475,7 +475,7 @@ function gcreds_show_creds(){
                 else
                     # session_life > 1 hr
                     secs_left=$(( $session_life*60 ))    # convert timeleft
-                    duration_msg=$printf '%dh:%dm:%ds\n' $(($secs_left/3600)) $(($secs_left%3600/60)))
+                    duration_msg=$(printf '%dh:%dm:%ds\n' $(($secs_left/3600)) $(($secs_left%3600/60)))
                     echo -e "Session Expiration in ${BOLD}${white}$duration_msg${reset}${UNBOLD}." | indent02
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
