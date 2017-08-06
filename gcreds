@@ -283,12 +283,14 @@ function gcreds_configure(){
     echo -e "\n\n"
     gcreds_message "Configure mode started. Set $pkg configuration options start" INFO
     # set default profile (default  [atos-aua1])
-    echo -e "\nEnter the iam username you will generally use to generate temporary credentials"
-    echo -e "a new iam user may be used at any time by including the -p | --profile option"
-    read -p " when calling $pkg [atos-aua1]: " CHOICE
+    echo -e "\nEnter the iam username you will generally use to generate temporary" | indent02
+    echo -e "credentials. A new iam user may be used at any time by including the" | indent02
+    echo -e " -p | --profile option as a $pkg command line parameter\n"
+    read -p "iam username [atos-aua1]: " CHOICE
     if [ -z $CHOICE ]; then
         CHOICE="atos-aua1"
     fi
+    echo -e "\n"
     gcreds_message "entering $CHOICE in your local $pkg configuration" INFO
     # add config dictionary key, value
     config_dict[default_profile]=$CHOICE
