@@ -513,7 +513,7 @@ function gcreds_update_expiration(){
         gcreds_logger "[INFO]: Credential expiration values cleared"
     elif [[ $1 == 1 ]]; then
         echo $(date +%s) > $config_path/credential.start
-        EXPIRE=$(( $CREDENTIAL_DEFAULT + $(date +%s) ))
+        EXPIRE=$(( $(($CREDENTIAL_DEFAULT*60)) + $(date +%s) ))
         echo $EXPIRE > $config_path/credential.expiration
         gcreds_logger "[INFO]: Created new credential expiration values in $config_path"
     fi
