@@ -5,6 +5,7 @@ pkg=$(basename $0)
 pkg_path=$(cd $(dirname $0); pwd -P)
 pwd_path=$(pwd)
 config_path="$HOME/.$pkg"
+gcreds_conf="gcreds.cfg"
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
@@ -70,6 +71,7 @@ function gcreds_help(){
          -c, --mfa-code : authentication code, see MFA_CODE
         [-A, --auto     : auto refresh credentials]
         [-s, --show     : show credential expiration info]
+        [--configure    : set $pkg configuration options]
         [-h, --help     : display this help menu]
 
     ${white}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
@@ -225,6 +227,13 @@ function gcreds_depcheck(){
     else
             TMPDIR="/tmp"
     fi
+    ## set parameters based on configuration options ##
+    if [[ -e $config_path/gcreds.cfg ]]; then
+        gcreds_source_config
+    else
+        # configuration options not set
+        gcreds_configure
+    fi
     #
     # <-- end function gcreds_depcheck -->
 }
@@ -262,6 +271,63 @@ function gcreds_clean(){
     fi
     #
     #<-- end function gcreds_clean -->
+}
+
+function gcreds_configure(){
+    ## set configuration options ##
+    declare -A config_dict
+    local declare colors
+    #
+    # set default profile (default  [atos-aua1])
+    gcreds_message "\n$pkg configuration options do not exist - configure start" INFO
+    echo -e "\nEnter the iam username you will generally use to generate temporary credentials"
+    echo -e "a new iam user may be used at any time by including the -p | --profile option"
+    read -p " when calling $pkg [atos-aua1]: " CHOICE
+    if [ -z $CHOICE ]; then
+        CHOICE="atos-aua1"
+    fi
+    gcreds_message "entering $CHOICE in your local $pkg configuration" INFO
+    # add config dictionary key, value
+    config_dict[default_profile]=$CHOICE
+
+    #sets default color scheme (displays 3 choices)
+    colors=(
+        "scheme1 | Light text on dark background"
+        "scheme2 | Dark text on light background"
+        "scheme3 | Surprise me"
+        )
+    echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n"
+    ct=0
+    while [ $ct -le ${#colors[@]} ]; do
+        echo "[$ct]: ${colors[$ct]}"
+        ct=$(( $ct + 1))
+    done
+    read -p "Select number of the color scheme [0]: " CHOICE
+    if [ -z $CHOICE ]; then
+        CHOICE="scheme1"
+    else
+        CHOICE=$(echo ${colors[$CHOICE]} | awk '|' '{print $1}')
+    fi
+    # add config dictionary key, value
+    config_dict[default_color]=$CHOICE
+
+    # write out config file
+    echo -e "{\n" > $config_path/$gcreds_conf
+    ct=0
+    max_keys=${#config_dict[@]}
+    for key in ${!config_dict[@]}; do
+        if [ $ct == $max_keys ]; then
+            # last key, no comma
+            echo "\"${key}\": \"${config_dict[${key}]}\"" >> $config_path/$gcreds_conf
+        else
+            echo "\"${key}\": \"${config_dict[${key}]}\"," >> $config_path/$gcreds_conf
+        fi
+        ct=$(( $ct + 1 ))
+    done
+    echo -e "\n}" >> $config_path/$gcreds_conf
+    exit 0
+    #
+    # <-- end function gcreds_configure -->
 }
 
 function gcreds_profile_exists(){
