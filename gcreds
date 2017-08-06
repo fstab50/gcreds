@@ -279,8 +279,10 @@ function gcreds_configure(){
     declare -A config_dict
     local declare colors
     #
+    clear
+    echo -e "\n\n"
+    gcreds_message "Configure mode started. Set $pkg configuration options start" INFO
     # set default profile (default  [atos-aua1])
-    gcreds_message "\n$pkg configuration options do not exist - configure start" INFO
     echo -e "\nEnter the iam username you will generally use to generate temporary credentials"
     echo -e "a new iam user may be used at any time by including the -p | --profile option"
     read -p " when calling $pkg [atos-aua1]: " CHOICE
@@ -299,18 +301,18 @@ function gcreds_configure(){
         )
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n"
     ct=0
-    while [ $ct -le ${#colors[@]} ]; do
+    while [ $ct -lt ${#colors[@]} ]; do
         echo "[$ct]: ${colors[$ct]}"
         ct=$(( $ct + 1))
     done
     read -p "Select number of the color scheme [0]: " CHOICE
     if [ -z $CHOICE ]; then
-        CHOICE="LTDB"
+        # add config dictionary key, value for 0 element
+        config_dict[default_color]=$(echo ${colors[0]} | awk -F ':' '{print $1}')
     else
-        CHOICE=$(echo ${colors[$CHOICE]} | awk ':' '{print $1}')
+        # add config dictionary key, value
+        config_dict[default_color]=$(echo ${colors[$CHOICE]} | awk -F ':' '{print $1}')
     fi
-    # add config dictionary key, value
-    config_dict[default_color]=$CHOICE
 
     # write out config file
     echo -e "{" > $config_path/$gcreds_conf
