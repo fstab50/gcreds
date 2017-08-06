@@ -331,7 +331,7 @@ function gcreds_parse_parameters(){
                 -A | --auto)     # optional
                     if [ $2 ]; then
                         # $2 given in hours
-                        TIMEOUT=$(( $2*60 ))
+                        TOKEN_LIFE=$(( $2*60 ))
                         shift 2
                         # set monitoring bit
                         MONITOR='True'
@@ -365,10 +365,10 @@ function gcreds_parse_parameters(){
     gcreds_profile_exists $MFA_ARN
 
     # set timeout
-    if [[ ! $TIMEOUT ]]; then
-        TIMEOUT=$TOKEN_DEFAULT  # default token expiration (minutes)
+    if [[ ! $TOKEN_LIFE ]]; then
+        TOKEN_LIFE=$TOKEN_DEFAULT  # default token expiration (minutes)
     else
-        gcreds_validate_parameter $TIMEOUT int "Temp credential lifetime" $STS_MIN $STS_MAX "minutes"
+        gcreds_validate_parameter $TOKEN_LIFE int "Temp credential lifetime" $STS_MIN $STS_MAX "minutes"
     fi
     #
     # <-- end function gcreds_parse_parameters -->
@@ -457,6 +457,13 @@ function gcreds_show_creds(){
             # Credentials have expired
             echo -e "\n    Your credentials have ${red}expired${reset}.\n" | indent02
         else
+            # temp credential stats
+            #expire_datetime=$(date --date=@$(( $credential_life + $(date +%s) )))
+            expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
+            min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
+            echo -e "\nCredential Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+            echo -e "Expiration Time: $expire_datetime\n" | indent02
+
             # session stats, if auto refresh of credentials
             if [ $session_life ]; then
                 # output session stats
@@ -472,11 +479,6 @@ function gcreds_show_creds(){
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
             fi
-            # temp credential stats
-            expire_datetime=$(date --date=@$(( $credential_life + $(date +%s) )))
-            min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
-            echo -e "\nCredential Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
-            echo -e "Expiration Time: $expire_datetime\n" | indent02
         fi
     else
         # no existing credentials
@@ -491,7 +493,7 @@ function gcreds_test(){
     echo -e "\nACCTFILE: "$ACCTFILE
     echo -e "MFA_PROFILE: "$MFA_PROFILE
     echo -e "MFA_CODE: "$MFA_CODE
-    echo -e "TIMEOUT: $TIMEOUT minutes"
+    echo -e "TOKEN_LIFE: $TOKEN_LIFE minutes"
     echo -e "MFA_ARN: $MFA_ARN\n"
     exit 0
     #
@@ -511,7 +513,7 @@ function gcreds_update_expiration(){
         gcreds_logger "[INFO]: Credential expiration values cleared"
     elif [[ $1 == 1 ]]; then
         echo $(date +%s) > $config_path/credential.start
-        EXPIRE=$(( $(($TIMEOUT*60)) + $(date +%s) ))
+        EXPIRE=$(( $CREDENTIAL_DEFAULT + $(date +%s) ))
         echo $EXPIRE > $config_path/credential.expiration
         gcreds_logger "[INFO]: Created new credential expiration values in $config_path"
     fi
@@ -570,7 +572,7 @@ function gcreds_generate_token() {
     #
     # generate temp creds for MFA_PROFILE
     aws sts get-session-token \
-        --duration-seconds $(($TIMEOUT*60)) \
+        --duration-seconds $(($TOKEN_LIFE*60)) \
         --serial-number "$MFA_ARN" \
         --token-code "$MFA_CODE" \
         --output json \
@@ -592,9 +594,9 @@ function gcreds_generate_token() {
     cat $TMPDIR/.session.profile >> ~/.aws/credentials
 
     # record token lifetime start, end
-    TOKEN_START=$(date +%s)
+    TOKEN_START=$(date +%s)     # epoch seconds
     echo $TOKEN_START > $config_path/token.start
-    EXPIRE=$(( $(($TIMEOUT*60)) + $TOKEN_START ))
+    EXPIRE=$(( $(($TOKEN_LIFE*60)) + $TOKEN_START ))
     echo $EXPIRE > $config_path/token.expiration
 
     # store on disk for reuse if --auto parameter
