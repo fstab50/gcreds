@@ -16,7 +16,7 @@ DBUGMODE=""          # change this value to "True" to turn on verbose \
 STS_MIN=15            # minutes, STS min credential lifetime
 STS_MAX=720           # minutes, credential lifetime max limit (12 hours)
 TOKEN_DEFAULT=60      # minutes, default STS session token lifetime
-CREDENTIAL_DEFAULT=60 # minutes, default lifetime of temp credentials generated
+CREDENTIAL_DEFAULT=15 # minutes, default lifetime of temp credentials generated
 
 # error codes
 E_DEPENDENCY=1        # exit code if missing required dependency
@@ -718,7 +718,7 @@ else
         # calc and display stats
         gcreds_monitor
         #
-        if [ $CREDENTIAL_REMAINING -le 57 ] && [ $SESSION_REMAINING -gt 60 ]; then
+        if [ $CREDENTIAL_REMAINING -le 1 ] && [ $SESSION_REMAINING -gt 60 ]; then
             #
             # clear out expiring creds
             gcreds_revert_creds -s
