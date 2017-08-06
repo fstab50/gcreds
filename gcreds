@@ -304,20 +304,23 @@ function gcreds_configure(){
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n"
     ct=0
     while [ $ct -lt ${#colors[@]} ]; do
-        echo "[$ct]: ${colors[$ct]}"
+        echo "[$ct]: ${colors[$ct]}" | indent04
         ct=$(( $ct + 1))
     done
     echo -e "\n"
     read -p "    Select number of color scheme [0]: " CHOICE
     if [ -z $CHOICE ]; then
         # add config dictionary key, value for 0 element
-        config_dict[default_color]=$(echo ${colors[0]} | awk -F ':' '{print $1}')
+        COLOR=$(echo ${colors[0]} | awk -F ':' '{print $1}')
     else
         # add config dictionary key, value
-        config_dict[default_color]=$(echo ${colors[$CHOICE]} | awk -F ':' '{print $1}')
+        COLOR=$(echo ${colors[$CHOICE]} | awk -F ':' '{print $1}')
     fi
+    # add config dictionary key, value
+    config_dict[default_color]=$COLOR
     echo -e "\n"
-    gcreds_message "entering $CHOICE in your local $pkg configuration" INFO
+    gcreds_message "entering $COLOR in your local $pkg configuration" INFO
+
     # write out config file
     echo -e "{" > $config_path/$gcreds_conf
     ct=1
@@ -332,7 +335,6 @@ function gcreds_configure(){
         ct=$(( $ct + 1 ))
     done
     echo -e "}" >> $config_path/$gcreds_conf
-    echo -e "\n"
     gcreds_message "Configuration setup for $pkg complete" INFO
     exit 0
     #
