@@ -310,17 +310,18 @@ function gcreds_configure(){
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n" | indent02
     ct=0
     valid=0     # loop break
+    while [ $ct -lt ${#colors[@]} ]; do
+        echo "[$ct]: ${colors[$ct]}" | indent04
+        ct=$(( $ct + 1))
+    done
     while [ $valid -eq 0 ]; do
-        while [ $ct -lt ${#colors[@]} ]; do
-            echo "[$ct]: ${colors[$ct]}" | indent04
-            ct=$(( $ct + 1))
-        done
+        # validate user input
         echo -e "\n"
         read -p "  Select number of color scheme [0]: " CHOICE
 
         if [[ -n ${CHOICE//[0-$(( $maxct-1 ))]/} ]]; then
             # invalid user entry
-            echo "You must enter an integer number between 0 and $(( $maxct-1 ))."
+            echo -e "\nYou must enter an integer number between 0 and $(( $maxct-1 ))."
         else
             # valid user entry, exit loop
             VALID=1
