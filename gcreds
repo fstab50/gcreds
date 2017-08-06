@@ -315,6 +315,7 @@ function gcreds_configure(){
     echo -e "{" > $config_path/$gcreds_conf
     ct=0
     max_keys=${#config_dict[@]}
+    echo -e "max_keys is: $max_keys\n"
     for key in ${!config_dict[@]}; do
         if [ $ct == $max_keys ]; then
             # last key, no comma
