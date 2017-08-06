@@ -459,9 +459,9 @@ function gcreds_show_creds(){
             # Credentials have expired
             echo -e "\n    Your credentials have ${red}expired${reset}.\n" | indent02
         else
-            # session stats, if auto refresh of credentials
+            # session stats, auto refresh of credentials
             if [ $session_life ]; then
-                # temp credential stats
+                # show temporary credential stats
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
                 min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
                 if [ $session_life -gt $CREDENTIAL_DEFAULT ]; then
@@ -472,7 +472,7 @@ function gcreds_show_creds(){
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
 
-                # output session stats
+                # show session stats
                 expire_datetime=$(date --date=@$(cat $config_path/token.expiration))
                 #
                 if [ $session_life -le 60 ]; then
@@ -486,8 +486,9 @@ function gcreds_show_creds(){
                     echo -e "Session Expiration in ${BOLD}${white}$hrs_left${reset}${UNBOLD} hours ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
+                echo -e "\n{BOLD}$pkg{UNBOLD} Auto-refesh mode. Ctrl + C to quit\n"
             else
-                # temp credential stats
+                # no extended session, show temp credential stats only
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
                 min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
                 echo -e "\nCredential Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
