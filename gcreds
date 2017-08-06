@@ -234,6 +234,7 @@ function gcreds_depcheck(){
     else
         # configuration options not set
         gcreds_configure
+        gcreds_source_config
     fi
     #
     # <-- end function gcreds_depcheck -->
@@ -390,6 +391,7 @@ function gcreds_parse_parameters(){
                 -C | --config)
                     # set configuration options
                     gcreds_configure
+                    exit 0
                     ;;
                 -r | --revert | -revert | --Revert)
                     revert=1    # flag indicating direct call to clear config
