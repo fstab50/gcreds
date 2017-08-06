@@ -422,6 +422,8 @@ function gcreds_revert_creds(){
             gcreds_message "Your local config has been cleaned." INFO
             # clear existing credential expiration values
             gcreds_update_expiration 0
+            # replace backup with new copy
+            gcreds_backup
         else
             # no backup exists, clean
             gcreds_message "Nothing done. Your config appears to be clean already." INFO
