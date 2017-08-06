@@ -8,10 +8,11 @@ config_path="$HOME/.$pkg"
 gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
+MONITOR=False
 DBUGMODE=""          # change this value to "True" to turn on verbose \
                       # log output to aid debugging
 
-# Amazon Sercurity Token Service (STS) limits
+# Amazon Sercurity Token Service (STS) globals
 STS_MIN=15            # minutes, STS min allowed value
 STS_MAX=600           # minutes, STS max equivalent to 10 hours
 TOKEN_DEFAULT=60      # minutes, default STS session token lifetime
@@ -703,7 +704,7 @@ gcreds_generate_token
 # generate temporary credentials
 gcreds_generate_creds
 
-while [ $MONITOR == 'True' ]; do
+while [[ $MONITOR == True ]]; do
     #
     # calc and display stats
     gcreds_monitor
