@@ -291,7 +291,7 @@ function gcreds_configure(){
     echo -e "\nEnter the iam username you will generally use to generate temporary" | indent02
     echo -e "credentials. A new iam user may be used at any time by including the" | indent02
     echo -e "-p | --profile option as a $pkg command line parameter\n" | indent02
-    read -p "  iam username [atos-aua1]: " CHOICE
+    read -p "  ${yellow}iam username [atos-aua1]:${reset} " CHOICE
     if [ -z $CHOICE ]; then
         CHOICE="atos-aua1"
     fi
@@ -317,7 +317,7 @@ function gcreds_configure(){
     while [ $valid -eq 0 ]; do
         # validate user input
         echo -e "\n"
-        read -p "  Select number of color scheme [0]: " CHOICE
+        read -p "  ${yellow}Select number of color scheme [0]:${reset} " CHOICE
 
         if [[ -n ${CHOICE//[0-$(( $maxct-1 ))]/} ]]; then
             # invalid user entry
