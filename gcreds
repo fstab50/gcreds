@@ -64,12 +64,12 @@ function gcreds_help(){
     ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg -a <ACCTFILE> --profile <IAM_PROFILE> -c <MFA_CODE>
 
     ${white}${BOLD}OPTIONS${UNBOLD}${reset} :
-         -a, --accounts : required, see ACCTFILE
-         -p, --profile  : required, see IAM_PROFILE
-         -c, --mfa-code : required, see MFA_CODE
-        [-s, --show     : optional, show credential expiration info]
-        [-t, --timeout  : optional, credential lifetime (minutes, default=15)]
-        [-h, --help     : optional, display this help menu]
+         -a, --accounts : list of accounts, see ACCTFILE
+         -p, --profile  : iam user account, see IAM_PROFILE
+         -c, --mfa-code : authentication code, see MFA_CODE
+        [-A, --auto     : auto refresh credentials]
+        [-s, --show     : show credential expiration info]
+        [-h, --help     : display this help menu]
 
     ${white}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
         text file listing of profile names in your local awscli configuration,
@@ -81,9 +81,13 @@ function gcreds_help(){
         contains the ARN of the mfa_serial used to assume roles
 
     ${white}${BOLD}MFA_CODE${reset}${UNBOLD} (required)
-        6 digit otp integer code from either a hardware or virtual mfa device
-        MFA code must correspond to the IAM_PROFILE given
+        6 digit otp integer code from either a hardware or virtual mfa
+        device MFA code must correspond to the IAM_PROFILE given
 
+    ${white}${BOLD}-A | --auto ${reset}<${white}N${reset}>${UNBOLD} (optional)
+        Auto refresh of temporary credentials for N hours.  If omitted,
+        temporary credentials are generated only once and expire with
+        default timeout = 60 min. N is an integer between 1 and 10
                                  -----------
 
         New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
@@ -591,9 +595,9 @@ function gcreds_generate_token() {
     echo $EXPIRE > $config_path/token.expiration
 
     # store on disk for reuse if --auto parameter
-    if [ ! -e $config_path/.session.profile ]; then
+    #if [ ! -e $config_path/.session.profile ]; then
         mv -f $TMPDIR/.session.profile $config_path/
-    fi
+    #fi
     # clean up
     gcreds_clean .aua.creds.json
     #
@@ -657,8 +661,10 @@ gcreds_monitor(){
     local session_remaining     # time remaining in session, seconds
     #
     sleep $delay
+    # clear screen
     clear_bin=$(which clear)
     $clear_bin
+
     # session time stats
     expire=$(cat $config_path/token.expiration)
     sec_left=$(( $expire - $(date +%s) ))
