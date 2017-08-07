@@ -1,4 +1,4 @@
-# README :  gcreds (v1.3)
+# README :  gcreds (v2.0)
 * * *
 
 ## Purpose ##
@@ -20,6 +20,7 @@ See [v1.3 Release Notes](./notes/release_v1.3.md)
 #### Previous Releases ####
 * [v1.2 Release Notes](./notes/release_v1.2.md)
 * [v1.0 Release Notes](./notes/release_v1.0.md)
+* [v1.3 Release Notes](./notes/release_v1.3.md)
 
 * * *
 
@@ -204,12 +205,7 @@ to generate temporary credentials for roles
 
 ## Enhancement Roadmap ##
 
-1. flag passed at runtime to suppress all stdout msgs, diverting instead to log only.
-
-2. Pass a run time parameter to function gcreds-revert_creds() that will bypass currently  
-required user input to clear or restore credentials.
-
-3. Upon startup, check the $AWS_SHARED_CREDENTIALS_FILE variable for an alternate location of the  
+1. Upon startup, check the $AWS_SHARED_CREDENTIALS_FILE variable for an alternate location of the  
 awscli credentials dir.  Set cred_path = value if found; else use default location (~/.aws).  
 From a cli, see:
 ```bash
