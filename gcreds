@@ -38,7 +38,7 @@ purple=$(tput setaf 5)
 red=$(tput setaf 1)
 white=$(tput setaf 7)
 yellow=$(tput setaf 3)
-orange='\033[0;33m'
+orange='\\033[38;5;95;38;5;214'
 gray=$(tput setaf 008)
 lgray='\033[0;37m'    # light gray
 dgray='\033[1;30m'    # dark gray
@@ -46,6 +46,9 @@ reset=$(tput sgr0)
 #
 BOLD=`tput bold`
 UNBOLD=`tput sgr0`
+
+# default color scheme (blue)
+accent=$(tput setaf 008)
 
 #
 # function declaration start --------------(do not modify this line)-----------
@@ -64,9 +67,9 @@ function gcreds_help(){
 
     To generate temporary credentials:
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg -a <ACCTFILE> --profile <IAM_PROFILE> -c <MFA_CODE>
+    ${accent}${BOLD}Usage${UNBOLD}${reset} : $pkg -a <ACCTFILE> --profile <IAM_PROFILE> -c <MFA_CODE>
 
-    ${white}${BOLD}OPTIONS${UNBOLD}${reset} :
+    ${accent}${BOLD}OPTIONS${UNBOLD}${reset} :
          -a, --accounts : list of accounts, see ACCTFILE
          -p, --profile  : iam user account, see IAM_PROFILE
          -c, --mfa-code : authentication code, see MFA_CODE
@@ -75,20 +78,20 @@ function gcreds_help(){
         [-C, --config   : set $pkg configuration options]
         [-h, --help     : display this help menu]
 
-    ${white}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
+    ${accent}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
         text file listing of profile names in your local awscli configuration,
         one per line. Profiles correspond to IAM roles in AWS accounts for
         which you wish to generate temporary credentials.
 
-    ${white}${BOLD}IAM_PROFILE${reset}${UNBOLD} (required)
+    ${accent}${BOLD}IAM_PROFILE${reset}${UNBOLD} (required)
         profile name of the IAM user in your local awscli configuration that
         contains the ARN of the mfa_serial used to assume roles
 
-    ${white}${BOLD}MFA_CODE${reset}${UNBOLD} (required)
+    ${accent}${BOLD}MFA_CODE${reset}${UNBOLD} (required)
         6 digit otp integer code from either a hardware or virtual mfa
         device MFA code must correspond to the IAM_PROFILE given
 
-    ${white}${BOLD}-A | --auto ${reset}<${white}value${reset}>${UNBOLD} (optional)
+    ${accent}${BOLD}-A | --auto ${reset}<${accent}value${reset}>${UNBOLD} (optional)
         Auto refresh of temporary credentials for specified number of hours.
         If omitted, temporary credentials are generated only once and expire after
         60 min (default timeout).
@@ -100,7 +103,7 @@ function gcreds_help(){
 
     To remove temporary credentials:
 
-    ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg -r
+    ${accent}${BOLD}Usage${UNBOLD}${reset} : $pkg -r
 
         -r, --remove  :  Clears temporary credentials from your local
                          awscli configuration, returning your config to
@@ -333,7 +336,8 @@ function gcreds_configure(){
     colors=(
         "LTDB: Light text on dark background"
         "DTLB: Dark text on light background"
-        "ORNG: Orange Theme"
+        "BLUE: Blue Accent Theme (default)"
+        "RED:  Red Accent Theme"
         )
     maxct=${#colors[@]}
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n" | indent02
@@ -527,7 +531,7 @@ function gcreds_remove_creds(){
     # log out start
     gcreds_logger "[INFO]: Attempting to remove temp credentials from local config"
     # header
-    echo -e "\n--${white}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
+    echo -e "\n--${accent}${BOLD} CLEARING LOCAL CONFIG ${UNBOLD}${reset}--\n" | indent10
     echo -e "All temp credentials from your local config will be discarded." | indent02
     echo -e "Your local awscli config will be returned to previous (clean) state.\n" | indent02
     if [ $silent ]; then
@@ -567,7 +571,7 @@ function gcreds_show_creds(){
     local msg
     #
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
-        msg="\n${BOLD}${white}Temporary Credentials in local awscli config:${reset}${UNBOLD}\n"
+        msg="\n${BOLD}${accent}Temporary Credentials in local awscli config:${reset}${UNBOLD}\n"
         echo -e $msg | indent02
         grep --color=auto "gcreds" ~/.aws/credentials | indent10
         if [[ -e $config_path/credential.expiration ]]; then
@@ -586,11 +590,11 @@ function gcreds_show_creds(){
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
                 min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
                 if [ $session_life -gt $CREDENTIAL_DEFAULT ]; then
-                    echo -e "\nCredential refresh in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+                    echo -e "\nCredential refresh in ${BOLD}${accent}$min_left${reset}${UNBOLD} minutes." | indent02
                     echo -e "Refresh Time: $expire_datetime\n" | indent02
                 else
                     # creds will not be refreshed, not enough time remaining in session
-                    echo -e "\nCredential expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+                    echo -e "\nCredential expiration in ${BOLD}${accent}$min_left${reset}${UNBOLD} minutes." | indent02
                     echo -e "Expiration Time: $expire_datetime\n" | indent02
                 fi
 
@@ -599,13 +603,13 @@ function gcreds_show_creds(){
                 #
                 if [ $session_life -le 60 ]; then
                     min_left=$(( $session_life ))    # convert timeleft from sec to min
-                    echo -e "Session Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+                    echo -e "Session Expiration in ${BOLD}${accent}$min_left${reset}${UNBOLD} minutes." | indent02
                 else
                     # session_life > 1 hr
                     secs_left=$(( $session_life*60 ))    # convert timeleft
                     hrs_left=$(printf '%d\n' $(($secs_left/3600)))
                     min_left=$(printf '%d\n' $(($secs_left%3600/60)))
-                    echo -e "Session Expiration in ${BOLD}${white}$hrs_left${reset}${UNBOLD} hours ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+                    echo -e "Session Expiration in ${BOLD}${accent}$hrs_left${reset}${UNBOLD} hours ${BOLD}${accent}$min_left${reset}${UNBOLD} minutes." | indent02
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
                 echo -e "         ----" | indent10
@@ -615,7 +619,7 @@ function gcreds_show_creds(){
                 # no extended session, show temp credential stats only
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
                 min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
-                echo -e "\nCredential Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+                echo -e "\nCredential Expiration in ${BOLD}${accent}$min_left${reset}${UNBOLD} minutes." | indent02
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
             fi
         fi
@@ -630,6 +634,7 @@ function gcreds_show_creds(){
 function gcreds_source_config(){
     ## source local $pkg configuration options ##
     local choice
+    local log_msg
     #
     if [[ -e $config_path/$gcreds_conf ]]; then
 
@@ -650,18 +655,24 @@ function gcreds_source_config(){
         # set color scheme
         case $COLOR_SCHEME in
             LTDB)
-                accent=white
+                accent=$(tput setaf 7)      # white
+                log_msg="LTDB"
                 ;;
             DTLB)
-                accent=blue
+                accent=$(tput setaf 008)    # gray
+                log_msg="DTLB"
                 ;;
-            ORNG)
-                accent=orange
+            BLUE)
+                accent=$(tput setaf 4)      # blue
+                log_msg="BLUE"
                 ;;
+            RED)
+                accent=$(tput setaf 1)      # cyan
+                log_msg="RED"
         esac
         # log
-        gcreds_logger "[INFO]: gcreds_source_config: MFA_PROFILE set to: $MFA_PROFILE"
-        gcreds_logger "[INFO]: gcreds_source_config: COLOR_SCHEME set to: $COLOR_SCHEME"
+        gcreds_logger "[INFO]: gcreds_source_config: MFA_PROFILE = $MFA_PROFILE"
+        gcreds_logger "[INFO]: gcreds_source_config: COLOR_SCHEME = $log_msg"
     fi
     #
     # <-- end function gcreds_source_config -->
@@ -796,7 +807,7 @@ function gcreds_generate_creds(){
         role_arn=$(aws configure get $profile.role_arn)
 
         if gcreds_profile_exists $role_arn; then
-            echo -e "\nGenerating temp credentials for profile ${white}${BOLD}$profile${reset}${UNBOLD}" | indent02
+            echo -e "\nGenerating temp credentials for profile ${accent}${BOLD}$profile${reset}${UNBOLD}" | indent02
             echo -e "Assuming role: ${lgray}$role_arn${reset}\n" | indent02
 
             # call assume role to gen temp creds
