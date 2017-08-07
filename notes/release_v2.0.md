@@ -6,13 +6,13 @@
 
 ## Features and Fixes Implemented in v2.0
 
-* [**Auto-refresh**]: -A, --auto <# hours>
+* **Auto-refresh**: ```-A, --auto <# hours>```
 When auto parameters are passed, **gcreds** will Auto-refresh temporary credentials  
 in the local awscli config without the user having to authenticate again. Durations  
 up to 12 hours may be used. **gcreds** may still be used without auto refresh to generate  
 temporary credentials that expire in 1 hour.
 
-* [**Configure**]: -C, --config
+* **Configure Mode**: ```-C, --config```
 By invoking the configure option, parameters may be passed automatically to **gcreds**  
 Two parameters are currently supported:
     * default_profile: sets the default iam profile to be used so that -p, --profile  
@@ -20,7 +20,7 @@ Two parameters are currently supported:
     * default_color scheme: color scheme can be changed to improve visibility on screens  
     with white backgrounds, a problem in previous releases.  
 
-* [**help_menu**]: clean up and rewrite of help menu
+* **help_menu**: clean up and rewrite of help menu
 
 * * *
 
