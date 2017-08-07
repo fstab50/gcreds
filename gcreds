@@ -229,6 +229,9 @@ function gcreds_depcheck(){
             TMPDIR="/tmp"
     fi
     ## set parameters based on configuration options ##
+    if [[ -e $config_path/gcreds.cfg ]]; then
+        gcreds_source_config
+    fi
     #if [[ ! -e $config_path/gcreds.cfg ]]; then
         # configuration options not set
     #    msg="$pkg configuration options not currently set. Do you want to set them now? [yes]"
@@ -436,10 +439,9 @@ function gcreds_parse_parameters(){
                 -A | --auto)     # optional
                     if [ $2 ]; then
                         # $2 given in hours
-                        TOKEN_LIFE=$(( $2*60 ))
+                        TOKEN_LIFE=$2
+                        MONITOR=True    # set monitoring bit
                         shift 2
-                        # set monitoring bit
-                        MONITOR=True
                     else
                         gcreds_error_exit "You must provide a timeout value. Exiting (code $E_BADARG)" $E_BADARG
                     fi
@@ -451,10 +453,6 @@ function gcreds_parse_parameters(){
         done
     fi
     ## check that min required parameters have been supplied ##
-    if [[ -e $config_path/gcreds.cfg ]]; then
-        gcreds_source_config
-    fi
-
     if [ ! $ACCTFILE ]; then
         gcreds_error "You must provide an account list, exiting (code $E_BADARG)." $E_BADARG
         gcreds_help
@@ -473,11 +471,15 @@ function gcreds_parse_parameters(){
     # verify valid mfa_profile
     gcreds_profile_exists $MFA_ARN
 
-    # set timeout
+    # set session token
     if [[ ! $TOKEN_LIFE ]]; then
         TOKEN_LIFE=$TOKEN_DEFAULT  # default token expiration (minutes)
     else
-        gcreds_validate_parameter $TOKEN_LIFE int "Temp credential lifetime" $STS_MIN $STS_MAX "minutes"
+        # validate session token lifetime
+        STS_MIN=$(( $STS_MIN/60 ))
+        STS_MAX=$(( $STS_MAX/60 ))
+        gcreds_validate_parameter $TOKEN_LIFE int "Temp credential lifetime" $STS_MIN $STS_MAX "hours"
+        TOKEN_LIFE=$(( $TOKEN_LIFE*60 ))
     fi
     #
     # <-- end function gcreds_parse_parameters -->
@@ -594,8 +596,8 @@ function gcreds_show_creds(){
                     echo -e "Session Expiration in ${BOLD}${white}$hrs_left${reset}${UNBOLD} hours ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
-                echo -e "\n${BOLD}$pkg${UNBOLD} Auto-refesh mode.\n" | indent10
-                echo -e "   Ctrl+C to quit before session end\n" | indent02
+                echo -e "\n\n${BOLD}$pkg${UNBOLD} Auto-refesh mode." | indent10
+                echo -e "   ctrl+c to quit before session end\n" | indent02
             else
                 # no extended session, show temp credential stats only
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
@@ -733,9 +735,7 @@ function gcreds_generate_token() {
     echo $EXPIRE > $config_path/token.expiration
 
     # store on disk for reuse if --auto parameter
-    #if [ ! -e $config_path/.session.profile ]; then
-        mv -f $TMPDIR/.session.profile $config_path/
-    #fi
+    mv -f $TMPDIR/.session.profile $config_path/
     # clean up
     gcreds_clean .aua.creds.json
     #
