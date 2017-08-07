@@ -95,6 +95,11 @@ function gcreds_help(){
         Auto refresh of temporary credentials for specified number of hours.
         If omitted, temporary credentials are generated only once and expire after
         60 min (default timeout).
+
+    ${accent}${BOLD}-C | --config ${reset} (optional)
+        Configure option may be invoked at any time to set (or reset) $pkg
+        configuration options. These options, when set, override program defaults.
+
                                  -----------
 
         New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
