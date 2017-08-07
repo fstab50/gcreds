@@ -62,43 +62,47 @@ indent10() { sed 's/^/          /'; }
 function gcreds_help(){
     cat <<EOM
 
- Help Contents
- -------------
+                    ${BOLD}$pkg${UNBOLD} Help Contents
 
-    To generate temporary credentials:
+ ${accent}${BOLD}DESCRIPTION${UNBOLD}${reset}:
+        $pkg generates temporary credentials used to assume roles across
+        many accounts. It is commonly used for progammatic use cases where
+        avoiding a multi-factor auth prompt in a cli environment is desired
 
-    ${accent}${BOLD}Usage${UNBOLD}${reset} : $pkg -a <ACCTFILE> --profile <IAM_PROFILE> -c <MFA_CODE>
+ ${accent}${BOLD}USAGE${UNBOLD}${reset}:
+        $pkg -a <ACCTFILE> --profile <IAM_PROFILE> -c <MFA_CODE>
 
-    ${accent}${BOLD}OPTIONS${UNBOLD}${reset} :
-         -a, --accounts : list of accounts, see ACCTFILE
-         -p, --profile  : iam user account, see IAM_PROFILE
-         -c, --mfa-code : authentication code, see MFA_CODE
+ ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
+         -a, --accounts : list of accounts
+         -p, --profile  : iam user account
+         -c, --mfa-code : authentication code
         [-A, --auto     : auto refresh credentials]
-        [-s, --show     : show credential expiration info]
         [-C, --config   : set $pkg configuration options]
+        [-s, --show     : show credential expiration info]
         [-h, --help     : display this help menu]
 
-    ${accent}${BOLD}ACCTFILE${reset}${UNBOLD} (required)
+ ${accent}${BOLD}OPTIONS${UNBOLD}${reset}:
+    ${accent}${BOLD}-a, --accounts${reset}${UNBOLD} ${reset}<${accent}value${reset}> (required)
         text file listing of profile names in your local awscli configuration,
         one per line. Profiles correspond to IAM roles in AWS accounts for
         which you wish to generate temporary credentials.
 
-    ${accent}${BOLD}IAM_PROFILE${reset}${UNBOLD} (required)
-        profile name of the IAM user in your local awscli configuration that
-        contains the ARN of the mfa_serial used to assume roles
+    ${accent}${BOLD}-p, --profile${reset}${UNBOLD} ${reset}<${accent}value${reset}> (required)
+        profile name of the IAM user in your local awscli configuration
+        that contains the ARN of the mfa_serial used to assume roles
 
-    ${accent}${BOLD}MFA_CODE${reset}${UNBOLD} (required)
+    ${accent}${BOLD}-c, --mfa-code${reset}${UNBOLD} ${reset}<${accent}value${reset}> (required)
         6 digit otp integer code from either a hardware or virtual mfa
         device MFA code must correspond to the IAM_PROFILE given
 
-    ${accent}${BOLD}-A | --auto ${reset}<${accent}value${reset}>${UNBOLD} (optional)
+    ${accent}${BOLD}-A | --auto ${reset}<${accent}value${reset}> (optional)
         Auto refresh of temporary credentials for specified number of hours.
-        If omitted, temporary credentials are generated only once and expire after
-        60 min (default timeout).
+        If omitted, temporary credentials are generated only once and expire
+        after 60 min (default timeout).
 
     ${accent}${BOLD}-C | --config ${reset} (optional)
-        Configure option may be invoked at any time to set (or reset) $pkg
-        configuration options. These options, when set, override program defaults.
+        Configure may be invoked at any time to set (or reset) $pkg parameter
+        options. Config options, when set, override program defaults.
 
                                  -----------
 
@@ -108,7 +112,7 @@ function gcreds_help(){
 
     To remove temporary credentials:
 
-    ${accent}${BOLD}Usage${UNBOLD}${reset} : $pkg -r
+    ${accent}${BOLD}USAGE${UNBOLD}${reset} : $pkg -r
 
         -r, --remove  :  Clears temporary credentials from your local
                          awscli configuration, returning your config to
