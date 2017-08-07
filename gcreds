@@ -102,7 +102,7 @@ function gcreds_help(){
 
     ${white}${BOLD}Usage${UNBOLD}${reset} : $pkg -r
 
-        -r, --revert  :  Clears temporary credentials from your local
+        -r, --remove  :  Clears temporary credentials from your local
                          awscli configuration, returning your config to
                          a pre-gcreds state.
 
@@ -110,6 +110,30 @@ EOM
     exit 0
     #
     #<-- end function gcreds_help -->
+}
+
+array2json(){
+    ## converts associative array to json file output ##
+    local -n array_dict=$1      # local assoc array must use -n opt
+    local output_file=$2        # location
+    local ct                    # counter
+    local max_keys              # num keys in array
+    #
+    echo -e "{" > $output_file
+    ct=1
+    max_keys=${#array_dict[@]}
+    for key in ${!array_dict[@]}; do
+        if [ $ct == $max_keys ]; then
+            # last key, no comma
+            echo "\"${key}\": \"${array_dict[${key}]}\"" | indent04 >> $output_file
+        else
+            echo "\"${key}\": \"${array_dict[${key}]}\"," | indent04 >> $output_file
+        fi
+        ct=$(( $ct + 1 ))
+    done
+    echo -e "}" >> $output_file
+    #
+    # <-- end function array2json -->
 }
 
 function gcreds_logger(){
@@ -229,9 +253,7 @@ function gcreds_depcheck(){
             TMPDIR="/tmp"
     fi
     ## set parameters based on configuration options ##
-    if [[ -e $config_path/gcreds.cfg ]]; then
-        gcreds_source_config
-    fi
+    gcreds_source_config
     #if [[ ! -e $config_path/gcreds.cfg ]]; then
         # configuration options not set
     #    msg="$pkg configuration options not currently set. Do you want to set them now? [yes]"
@@ -348,19 +370,9 @@ function gcreds_configure(){
     gcreds_message "entering color scheme [$COLOR] in your local $pkg configuration" INFO
 
     # write out config file
-    echo -e "{" > $config_path/$gcreds_conf
-    ct=1
-    max_keys=${#config_dict[@]}
-    for key in ${!config_dict[@]}; do
-        if [ $ct == $max_keys ]; then
-            # last key, no comma
-            echo "\"${key}\": \"${config_dict[${key}]}\"" | indent04 >> $config_path/$gcreds_conf
-        else
-            echo "\"${key}\": \"${config_dict[${key}]}\"," | indent04 >> $config_path/$gcreds_conf
-        fi
-        ct=$(( $ct + 1 ))
-    done
-    echo -e "}" >> $config_path/$gcreds_conf
+    array2json config_dict $config_path/$gcreds_conf
+
+    # log
     gcreds_message "Configuration setup for $pkg complete" INFO
     exit 0
     #
@@ -397,9 +409,9 @@ function gcreds_parse_parameters(){
                     gcreds_configure
                     exit 0
                     ;;
-                -r | --revert | -revert | --Revert)
-                    revert=1    # flag indicating direct call to clear config
-                    if ! gcreds_preexisting_creds $revert; then
+                -r | --remove)
+                    rm=1    # flag indicating direct call to clear config
+                    if ! gcreds_preexisting_creds $rm; then
                         gcreds_message "You do not have temporary credentials in your config. Nothing to do." INFO
                     fi
                     exit 0
@@ -492,10 +504,10 @@ function gcreds_preexisting_creds(){
             # not a direct call via revert parameter
             gcreds_message "Temporary credentials found in your local awscli config." INFO
             # clear active creds by restoring from backup, silent mode
-            gcreds_revert_creds -s
+            gcreds_remove_creds -s
         else
             # clear active creds by restoring from backup, interactive mode
-            gcreds_revert_creds
+            gcreds_remove_creds
         fi
         # restor backup of awscli
         gcreds_backup
@@ -507,7 +519,7 @@ function gcreds_preexisting_creds(){
     #<-- end function gcreds_preexisting_creds -->
 }
 
-function gcreds_revert_creds(){
+function gcreds_remove_creds(){
     ## deletes temp credentials from local awscli config ##
     #
     local silent=$1
@@ -541,7 +553,7 @@ function gcreds_revert_creds(){
         gcreds_message "Temporary credentials remain in your config. Nothing done." INFO
     fi
     #
-    # <-- end function gcreds_revert_creds -->
+    # <-- end function gcreds_remove_creds -->
 }
 
 function gcreds_show_creds(){
@@ -616,8 +628,40 @@ function gcreds_show_creds(){
 
 function gcreds_source_config(){
     ## source local $pkg configuration options ##
-    if [ -e $config_path/$gcreds_conf ]; then
+    local choice
+    #
+    if [[ -e $config_path/$gcreds_conf ]]; then
+
         MFA_PROFILE=$(cat $config_path/$gcreds_conf | jq -r .default_profile)
+        COLOR_SCHEME=$(cat $config_path/$gcreds_conf | jq -r .default_color)
+
+        # validate config values
+        if [ $MFA_PROFILE == null ] || [ $COLOR_SCHEME == null ]; then
+            gcreds_warn "Problem reading $pkg config parameters."
+            read -p "${yellow}  Do you want to configure $pkg? [yes]:${reset} " choice
+            if [ $choice == 'yes' ]; then
+                gcreds_configure
+            else
+                return 0
+            fi
+        fi
+
+        # set color scheme
+        case $COLOR_SCHEME in
+            LTDB)
+                accent=white
+                ;;
+            DTLB)
+                accent=blue
+                ;;
+            ORNG)
+                accent=orange
+                ;;
+        esac
+        # log
+        gcreds_logger "[INFO]: MFA_PROFILE set to: $MFA_PROFILE"
+        gcreds_logger "[INFO]: COLOR_SCHEME set to: $COLOR_SCHEME"
+        gcreds_logger "[INFO]: accent set to: $accent"
     fi
     #
     # <-- end function gcreds_source_config -->
@@ -850,7 +894,7 @@ else
         if [ $CREDENTIAL_REMAINING -lt 1 ] && [ $SESSION_REMAINING -gt $CREDENTIAL_DEFAULT ]; then
             #
             # clear out expiring creds
-            gcreds_revert_creds -s
+            gcreds_remove_creds -s
             # reset session credentials
             cat $config_path/.session.profile >> ~/.aws/credentials
             # generate credentials
