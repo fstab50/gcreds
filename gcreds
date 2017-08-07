@@ -488,9 +488,7 @@ function gcreds_preexisting_creds(){
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
         if [ ! $1 ]; then
             # not a direct call via revert parameter
-            line2=1     # flag indicating a 2 line msg
-            gcreds_warn "You appear to have active temp credentials already in your local config." WARN $line2
-            echo -e "These should be cleared before generating new credentials." | indent10
+            gcreds_message "Temporary credentials found in your local awscli config." INFO
             # clear active creds by restoring from backup, silent mode
             gcreds_revert_creds -s
         else
@@ -555,7 +553,7 @@ function gcreds_show_creds(){
     local msg
     #
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
-        msg="\n${BOLD}${white}Temporary Credentials in local config:${reset}${UNBOLD}\n"
+        msg="\n${BOLD}${white}Temporary Credentials in local awscli config:${reset}${UNBOLD}\n"
         echo -e $msg | indent02
         grep --color=auto "gcreds" ~/.aws/credentials | indent10
         if [[ -e $config_path/credential.expiration ]]; then
@@ -596,7 +594,8 @@ function gcreds_show_creds(){
                     echo -e "Session Expiration in ${BOLD}${white}$hrs_left${reset}${UNBOLD} hours ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
-                echo -e "\n${BOLD}$pkg${UNBOLD} Auto-refesh mode. Ctrl + C to quit\n"
+                echo -e "\n${BOLD}$pkg${UNBOLD} Auto-refesh mode.\n" | indent10
+                echo -e "   Ctrl+C to quit before session end\n" | indent02
             else
                 # no extended session, show temp credential stats only
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
