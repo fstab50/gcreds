@@ -10,12 +10,12 @@ gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
 MONITOR=False
-DBUGMODE=""          # change this value to "True" to turn on verbose \
+DBUGMODE=""           # change this value to "True" to turn on verbose \
                       # log output to aid debugging
 
 # Amazon Sercurity Token Service (STS) globals
-STS_MIN=15            # minutes, STS min credential lifetime
-STS_MAX=720           # minutes, credential lifetime max limit (12 hours)
+STS_MIN=60             # minutes, STS min credential lifetime
+STS_MAX=720            # minutes, credential lifetime max limit (12 hours)
 TOKEN_DEFAULT=60      # minutes, default STS session token lifetime
 CREDENTIAL_DEFAULT=60 # minutes, default lifetime of temp credentials generated
 
@@ -88,10 +88,10 @@ function gcreds_help(){
         6 digit otp integer code from either a hardware or virtual mfa
         device MFA code must correspond to the IAM_PROFILE given
 
-    ${white}${BOLD}-A | --auto ${reset}<${white}N${reset}>${UNBOLD} (optional)
-        Auto refresh of temporary credentials for N hours.  If omitted,
-        temporary credentials are generated only once and expire with
-        default timeout = 60 min. N is an integer between 1 and 10
+    ${white}${BOLD}-A | --auto ${reset}<${white}value${reset}>${UNBOLD} (optional)
+        Auto refresh of temporary credentials for specified number of hours.
+        If omitted, temporary credentials are generated only once and expire after
+        60 min (default timeout).
                                  -----------
 
         New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
@@ -229,13 +229,13 @@ function gcreds_depcheck(){
             TMPDIR="/tmp"
     fi
     ## set parameters based on configuration options ##
-    if [[ -e $config_path/gcreds.cfg ]]; then
-        gcreds_source_config
-    else
+    #if [[ ! -e $config_path/gcreds.cfg ]]; then
         # configuration options not set
-        gcreds_configure
-        gcreds_source_config
-    fi
+    #    msg="$pkg configuration options not currently set. Do you want to set them now? [yes]"
+    #    read -p "$msg" CHOICE
+    #    gcreds_configure
+    #fi
+
     #
     # <-- end function gcreds_depcheck -->
 }
@@ -279,11 +279,12 @@ function gcreds_configure(){
     ## set configuration options ##
     local ct                        # counter
     local valid                     # loop break
-    declare -A config_dict          # key, value dictionary
-    declare colors                  # color scheme array
     local CHOICE                    # user entry var
     local COLOR                     # user entry var
     local maxct                     # array size counter
+    #
+    declare -A config_dict          # key, value dictionary
+    declare colors                  # color scheme array
     #
     clear
     echo -e "\n"
@@ -450,6 +451,10 @@ function gcreds_parse_parameters(){
         done
     fi
     ## check that min required parameters have been supplied ##
+    if [[ -e $config_path/gcreds.cfg ]]; then
+        gcreds_source_config
+    fi
+
     if [ ! $ACCTFILE ]; then
         gcreds_error "You must provide an account list, exiting (code $E_BADARG)." $E_BADARG
         gcreds_help
@@ -565,18 +570,19 @@ function gcreds_show_creds(){
         else
             # session stats, auto refresh of credentials
             if [ $session_life ]; then
-                # show temporary credential stats
+                ## show credential stats ##
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
                 min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
                 if [ $session_life -gt $CREDENTIAL_DEFAULT ]; then
                     echo -e "\nCredential refresh in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+                    echo -e "Refresh Time: $expire_datetime\n" | indent02
                 else
                     # creds will not be refreshed, not enough time remaining in session
                     echo -e "\nCredential expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
+                    echo -e "Expiration Time: $expire_datetime\n" | indent02
                 fi
-                echo -e "Expiration Time: $expire_datetime\n" | indent02
 
-                # show session stats
+                ## show session stats ##
                 expire_datetime=$(date --date=@$(cat $config_path/token.expiration))
                 #
                 if [ $session_life -le 60 ]; then
@@ -590,14 +596,13 @@ function gcreds_show_creds(){
                     echo -e "Session Expiration in ${BOLD}${white}$hrs_left${reset}${UNBOLD} hours ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
-                echo -e "\n{BOLD}$pkg{UNBOLD} Auto-refesh mode. Ctrl + C to quit\n"
+                echo -e "\n${BOLD}$pkg${UNBOLD} Auto-refesh mode. Ctrl + C to quit\n"
             else
                 # no extended session, show temp credential stats only
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
                 min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
                 echo -e "\nCredential Expiration in ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
-
             fi
         fi
     else
@@ -610,7 +615,9 @@ function gcreds_show_creds(){
 
 function gcreds_source_config(){
     ## source local $pkg configuration options ##
-    return 0
+    if [ -e $config_path/$gcreds_conf ]; then
+        MFA_PROFILE=$(cat $config_path/$gcreds_conf | jq -r .default_profile)
+    fi
     #
     # <-- end function gcreds_source_config -->
 }
@@ -786,7 +793,7 @@ function gcreds_generate_creds(){
 
 gcreds_monitor(){
     ## display session & credential lifetime remaining ##
-    local delay=3               # screen refresh delay, seconds
+    local delay=5               # screen refresh delay, seconds
     local expire                # expiration timestamp, epoch seconds
     local session_remaining     # time remaining in session, seconds
     #
