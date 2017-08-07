@@ -14,8 +14,8 @@ DBUGMODE=""           # change this value to "True" to turn on verbose \
                       # log output to aid debugging
 
 # Amazon Sercurity Token Service (STS) globals
-STS_MIN=60             # minutes, STS min credential lifetime
-STS_MAX=720            # minutes, credential lifetime max limit (12 hours)
+STS_MIN=60            # minutes, STS min credential lifetime
+STS_MAX=720           # minutes, credential lifetime max limit (12 hours)
 TOKEN_DEFAULT=60      # minutes, default STS session token lifetime
 CREDENTIAL_DEFAULT=60 # minutes, default lifetime of temp credentials generated
 
@@ -608,7 +608,8 @@ function gcreds_show_creds(){
                     echo -e "Session Expiration in ${BOLD}${white}$hrs_left${reset}${UNBOLD} hours ${BOLD}${white}$min_left${reset}${UNBOLD} minutes." | indent02
                 fi
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
-                echo -e "\n\n${BOLD}$pkg${UNBOLD} Auto-refesh mode." | indent10
+                echo -e "         ----" | indent10
+                echo -e "\n${BOLD}$pkg${UNBOLD} Auto-refesh mode." | indent10
                 echo -e "   ctrl+c to quit before session end\n" | indent02
             else
                 # no extended session, show temp credential stats only
@@ -659,9 +660,8 @@ function gcreds_source_config(){
                 ;;
         esac
         # log
-        gcreds_logger "[INFO]: MFA_PROFILE set to: $MFA_PROFILE"
-        gcreds_logger "[INFO]: COLOR_SCHEME set to: $COLOR_SCHEME"
-        gcreds_logger "[INFO]: accent set to: $accent"
+        gcreds_logger "[INFO]: gcreds_source_config: MFA_PROFILE set to: $MFA_PROFILE"
+        gcreds_logger "[INFO]: gcreds_source_config: COLOR_SCHEME set to: $COLOR_SCHEME"
     fi
     #
     # <-- end function gcreds_source_config -->
