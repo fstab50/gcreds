@@ -62,7 +62,7 @@ indent10() { sed 's/^/          /'; }
 function gcreds_help(){
     cat <<EOM
 
-                    ${BOLD}$pkg${UNBOLD} Help Contents
+                      ${accent}${BOLD}$pkg${UNBOLD}${reset} help contents
 
  ${accent}${BOLD}DESCRIPTION${UNBOLD}${reset}:
         $pkg generates temporary credentials used to assume roles across
@@ -82,27 +82,30 @@ function gcreds_help(){
         [-h, --help     : display this help menu]
 
  ${accent}${BOLD}OPTIONS${UNBOLD}${reset}:
-    ${accent}${BOLD}-a, --accounts${reset}${UNBOLD} ${reset}<${accent}value${reset}> (required)
-        text file listing of profile names in your local awscli configuration,
-        one per line. Profiles correspond to IAM roles in AWS accounts for
-        which you wish to generate temporary credentials.
+    ${accent}${BOLD}-a, --accounts${reset} ${reset}<${accent}value${reset}> (required)
+        Text file listing of account profile names in your local awscli config,
+        one per line. Profiles correspond to IAM roles in AWS accounts for which
+        you wish to generate temporary credentials.
 
-    ${accent}${BOLD}-p, --profile${reset}${UNBOLD} ${reset}<${accent}value${reset}> (required)
-        profile name of the IAM user in your local awscli configuration
+    ${accent}${BOLD}-p, --profile${reset} ${reset}<${accent}value${reset}> (required)
+        Profile name of the IAM user in your local awscli configuration
         that contains the ARN of the mfa_serial used to assume roles
 
-    ${accent}${BOLD}-c, --mfa-code${reset}${UNBOLD} ${reset}<${accent}value${reset}> (required)
+    ${accent}${BOLD}-c, --mfa-code${reset} ${reset}<${accent}value${reset}> (required)
         6 digit otp integer code from either a hardware or virtual mfa
         device MFA code must correspond to the IAM_PROFILE given
 
-    ${accent}${BOLD}-A | --auto ${reset}<${accent}value${reset}> (optional)
+    ${accent}${BOLD}-A, --auto ${reset}<${accent}value${reset}> (optional)
         Auto refresh of temporary credentials for specified number of hours.
         If omitted, temporary credentials are generated only once and expire
         after 60 min (default timeout).
 
-    ${accent}${BOLD}-C | --config ${reset} (optional)
+    ${accent}${BOLD}-C, --config ${reset} (optional)
         Configure may be invoked at any time to set (or reset) $pkg parameter
         options. Config options, when set, override program defaults.
+
+    ${accent}${BOLD}-s, --show ${reset} (optional)
+        Display credential expiration datetime as well as time remaining
 
                                  -----------
 
@@ -114,7 +117,7 @@ function gcreds_help(){
 
     ${accent}${BOLD}USAGE${UNBOLD}${reset} : $pkg -r
 
-        -r, --remove  :  Clears temporary credentials from your local
+        ${accent}${BOLD}-r, --remove${reset}  :  Clears temporary credentials from your local
                          awscli configuration, returning your config to
                          a pre-gcreds state.
 
@@ -266,13 +269,6 @@ function gcreds_depcheck(){
     fi
     ## set parameters based on configuration options ##
     gcreds_source_config
-    #if [[ ! -e $config_path/gcreds.cfg ]]; then
-        # configuration options not set
-    #    msg="$pkg configuration options not currently set. Do you want to set them now? [yes]"
-    #    read -p "$msg" CHOICE
-    #    gcreds_configure
-    #fi
-
     #
     # <-- end function gcreds_depcheck -->
 }
@@ -319,11 +315,35 @@ function gcreds_configure(){
     local CHOICE                    # user entry var
     local COLOR                     # user entry var
     local maxct                     # array size counter
+    local clear_bin                 # clear screen bin file
+    local mfa_profile               # value, default_profile key in conf file
+    local color_scheme              # value, default_color key in conf file
+    local tmp_profile               # pre-existing default_profile value in conf file
+    local tmp_scheme                # pre-existing default_color value in conf file
     #
     declare -A config_dict          # key, value dictionary
     declare colors                  # color scheme array
     #
-    clear
+    clear_bin=$(which clear)
+    $clear_bin
+
+    # check if config already exists, if so parse parameters
+    if [ -e $config_path/$gcreds_conf ]; then
+        tmp_profile=$(cat $config_path/$gcreds_conf | jq -r .default_profile)
+        tmp_scheme=$(cat $config_path/$gcreds_conf | jq -r .default_color)
+    fi
+    if [ $tmp_profile ]; then
+        mfa_profile=$tmp_profile
+    else
+        mfa_profile='atos-aua1'
+    fi
+    if [ $tmp_scheme ]; then
+        color_scheme=$tmp_scheme
+    else
+        color_scheme='LTDB'
+    fi
+
+
     echo -e "\n"
     gcreds_message "Configure Mode Start: Set $pkg configuration options" INFO
     # set default profile (default  [atos-aua1])
@@ -332,9 +352,9 @@ function gcreds_configure(){
     echo -e "provided by $pkg." | indent02
     echo -e "\nA new iam user may be used at any time by including the -p / --profile option" | indent02
     echo -e "as a $pkg command line parameter.\n" | indent02
-    read -p "  ${yellow}IAM user [atos-aua1]:${reset} " CHOICE
+    read -p "  ${yellow}IAM user [$mfa_profile]:${reset} " CHOICE
     if [ -z $CHOICE ]; then
-        CHOICE="atos-aua1"
+        CHOICE=$mfa_profile
     fi
     echo -e "\n"
     gcreds_message "entering [$CHOICE] in your local $pkg configuration" INFO
@@ -343,10 +363,10 @@ function gcreds_configure(){
 
     # set default color scheme (display choices)
     colors=(
-        "LTDB: Light text on dark background"
+        "LTDB: Light text on dark background (default)"
         "DTLB: Dark text on light background"
-        "BLUE: Blue Accent Theme (default)"
-        "RED:  Red Accent Theme"
+        "BLUE: Blue Accent Theme"
+        "GREEN: Green Accent Theme"
         )
     maxct=${#colors[@]}
     echo -e "\nChoose a default color scheme based on your cli environemnt. Choices:\n" | indent02
@@ -359,7 +379,14 @@ function gcreds_configure(){
     while [ $valid -eq 0 ]; do
         # validate user input
         echo -e "\n"
-        read -p "  ${yellow}Select number of color scheme [0]:${reset} " CHOICE
+        read -p "  ${yellow}Select number of color scheme [$color_scheme]:${reset} " CHOICE
+
+        case $color_scheme in
+            LTDB) color_choice=0 ;;
+            DTLB) color_choice=1 ;;
+            BLUE) color_choice=2 ;;
+            GREEN) color_choice=3 ;;
+        esac
 
         if [[ -n ${CHOICE//[0-$(( $maxct-1 ))]/} ]]; then
             # invalid user entry
@@ -371,7 +398,7 @@ function gcreds_configure(){
     done
     if [ -z $CHOICE ]; then
         # add config dictionary key, value for 0 element
-        COLOR=$(echo ${colors[0]} | awk -F ':' '{print $1}')
+        COLOR=$(echo ${colors[$color_choice]} | awk -F ':' '{print $1}')
     else
         # add config dictionary key, value
         COLOR=$(echo ${colors[$CHOICE]} | awk -F ':' '{print $1}')
@@ -675,9 +702,9 @@ function gcreds_source_config(){
                 accent=$(tput setaf 4)      # blue
                 log_msg="BLUE"
                 ;;
-            RED)
-                accent=$(tput setaf 1)      # cyan
-                log_msg="RED"
+            GREEN)
+                accent=$(tput setaf 2)      # cyan
+                log_msg="GREEN"
         esac
         # log
         gcreds_logger "[INFO]: gcreds_source_config: MFA_PROFILE = $MFA_PROFILE"
@@ -856,9 +883,10 @@ function gcreds_generate_creds(){
 
 gcreds_monitor(){
     ## display session & credential lifetime remaining ##
-    local delay=5               # screen refresh delay, seconds
-    local expire                # expiration timestamp, epoch seconds
-    local session_remaining     # time remaining in session, seconds
+    local delay=5                   # screen refresh delay, seconds
+    local expire                    # expiration timestamp, epoch seconds
+    local session_remaining         # time remaining in session, seconds
+    local clear_bin                 # clear screen bin file
     #
     sleep $delay
     # clear screen
