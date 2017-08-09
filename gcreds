@@ -175,8 +175,8 @@ function gcreds_message(){
 
 function gcreds_error(){
     local msg="$1"
-    gcreds_logger "[ERRR]: $msg"
-    echo -e "\n${yellow}[ ${red}ERRR${yellow} ]$reset  $msg\n" | indent02
+    gcreds_logger "[EROR]: $msg"
+    echo -e "\n${yellow}[ ${red}EROR${yellow} ]$reset  $msg\n" | indent02
 }
 
 function gcreds_warn(){
