@@ -10,25 +10,25 @@ gcreds_log="$pkg_path/logs/gcreds.log"
 host=$(hostname)
 system=$(uname)
 MONITOR=False
-DBUGMODE=""           # change this value to "True" to turn on verbose \
-                      # log output to aid debugging
+DBUGMODE=""                 # change this value to "True" to turn on verbose \
+                            # log output to aid debugging
 
 # Amazon Sercurity Token Service (STS) globals
-STS_MIN=60            # minutes, STS min credential lifetime
-STS_MAX=720           # minutes, credential lifetime max limit (12 hours)
-TOKEN_DEFAULT=60      # minutes, default STS session token lifetime
-CREDENTIAL_DEFAULT=60 # minutes, default lifetime of temp credentials generated
+STS_MIN=60                  # minutes, STS min credential lifetime
+STS_MAX=720                 # minutes, credential lifetime max limit (12 hours)
+TOKEN_DEFAULT=60            # minutes, default STS session token lifetime
+CREDENTIAL_DEFAULT=60       # minutes, default lifetime of temp credentials generated
 
 # error codes
-E_DEPENDENCY=1        # exit code if missing required dependency
-E_DIR=2               # exit code if failure to create log dir, log file
-E_BADSHELL=3          # exit code if incorrect shell detected
-E_AUTHFAIL=5          # exit code if authentication failure
-E_BADPROFILE=6        # exit code if profile name/ role not found in local config
-E_USER_CANCEL=7       # exit code if user cancel
-E_BADARG=8            # exit code if bad input parameter
-E_EXPIRED_CREDS=9     # exit code if temporary credentials no longer valid
-E_MISC=11             # exit code if miscellaneous (unspecified) error
+E_DEPENDENCY=1              # exit code if missing required dependency
+E_DIR=2                     # exit code if failure to create log dir, log file
+E_BADSHELL=3                # exit code if incorrect shell detected
+E_AUTHFAIL=5                # exit code if authentication failure
+E_BADPROFILE=6              # exit code if profile name/ role not found in local config
+E_USER_CANCEL=7             # exit code if user cancel
+E_BADARG=8                  # exit code if bad input parameter
+E_EXPIRED_CREDS=9           # exit code if temporary credentials no longer valid
+E_MISC=11                   # exit code if miscellaneous (unspecified) error
 
 # Formatting
 blue=$(tput setaf 4)
@@ -316,7 +316,7 @@ function gcreds_configure(){
     local CHOICE                    # user entry var
     local COLOR                     # user entry var
     local maxct                     # array size counter
-    local clear_bin                 # clear screen bin file
+    local clear_bin=$(which clear)  # clear screen bin file
     local mfa_profile               # value, default_profile key in conf file
     local color_scheme              # value, default_color key in conf file
     local tmp_profile               # pre-existing default_profile value in conf file
@@ -325,8 +325,7 @@ function gcreds_configure(){
     declare -A config_dict          # key, value dictionary
     declare colors                  # color scheme array
     #
-    clear_bin=$(which clear)
-    $clear_bin
+    $clear_bin      # clear screen
 
     # check if config already exists, if so parse parameters
     if [ -e $config_path/$gcreds_conf ]; then
@@ -680,7 +679,7 @@ function gcreds_source_config(){
         if [ $MFA_PROFILE == null ] || [ $COLOR_SCHEME == null ]; then
             std_warn "Problem reading $pkg config parameters."
             read -p "${yellow}  Do you want to configure $pkg? [yes]:${reset} " choice
-            if [ $choice == 'yes' ]; then
+            if [ -z $choice ] || [ $choice == 'yes' ]; then
                 gcreds_configure
             else
                 return 0
@@ -694,7 +693,7 @@ function gcreds_source_config(){
                 log_msg="LTDB"
                 ;;
             DTLB)
-                accent=$(tput setaf 008)    # gray
+                accent=$(tput setaf 008)    # dark gray
                 log_msg="DTLB"
                 ;;
             BLUE)
@@ -702,8 +701,9 @@ function gcreds_source_config(){
                 log_msg="BLUE"
                 ;;
             GREEN)
-                accent=$(tput setaf 2)      # cyan
+                accent=$(tput setaf 2)      # green
                 log_msg="GREEN"
+                ;;
         esac
         # log
         std_logger "[INFO]: gcreds_source_config: MFA_PROFILE = $MFA_PROFILE"
@@ -733,7 +733,7 @@ function gcreds_update_expiration(){
     #       2 = expire expiration, but keep config files (not used)
     local state=$1
     #
-    if [[ $1 == 0 ]]; then
+    if [ $1 == 0 ] && [ -e $config_path/credential* ]; then
         rm $config_path/credential.*
         std_logger "[INFO]: Credential expiration values cleared"
     elif [[ $1 == 1 ]]; then
@@ -882,15 +882,13 @@ function gcreds_generate_creds(){
 
 gcreds_monitor(){
     ## display session & credential lifetime remaining ##
-    local delay=5                   # screen refresh delay, seconds
-    local expire                    # expiration timestamp, epoch seconds
-    local session_remaining         # time remaining in session, seconds
-    local clear_bin                 # clear screen bin file
+    local delay=5                     # screen refresh delay, seconds
+    local expire                      # expiration timestamp, epoch seconds
+    local session_remaining           # time remaining in session, seconds
+    local clear_bin=$(which clear)    # clear screen bin file
     #
     sleep $delay
-    # clear screen
-    clear_bin=$(which clear)
-    $clear_bin
+    $clear_bin                        # clear screen
 
     # session time stats
     expire=$(cat $config_path/token.expiration)
@@ -911,9 +909,13 @@ gcreds_monitor(){
 function update_awscli(){
     ## update local awscli iam user credentials ##
     local choice
-    local awscli_bin=$(which aws)
+    local awscli_bin=$(which aws)     # aws binary
+    local clear_bin=$(which clear)    # clear screen bin file
     #
+    $clear_bin         # clear screen
     cat<<EOM
+
+                          ${BOLD}${accent}awscli${reset}${UNBOLD} update
 
     You have entered the menu to update your iam user credentials
     in your local awscli configuration.  Since $pkg modifies your
