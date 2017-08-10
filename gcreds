@@ -171,13 +171,13 @@ function std_message(){
         pref="${1:0:4}"
         shift
     fi
-    echo -e "\n${yellow}[ $cyan$pref$yellow ]$reset  $msg\n" | indent02
+    echo -e "\n${yellow}[ $cyan$pref$yellow ]$reset  $msg\n" | indent04
 }
 
 function std_error(){
     local msg="$1"
     std_logger "[EROR]: $msg"
-    echo -e "\n${yellow}[ ${red}EROR${yellow} ]$reset  $msg\n" | indent02
+    echo -e "\n${yellow}[ ${red}EROR${yellow} ]$reset  $msg\n" | indent04
 }
 
 function std_warn(){
@@ -185,10 +185,10 @@ function std_warn(){
     std_logger "[WARN]: $msg"
     if [ "$3" ]; then
         # there is a second line of the msg, to be printed by the caller
-        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg" | indent02
+        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg" | indent04
     else
         # msg is only 1 line sent by the caller
-        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg\n" | indent02
+        echo -e "\n${yellow}[ ${red}WARN${yellow} ]$reset  $msg\n" | indent04
     fi
 }
 
@@ -490,6 +490,12 @@ function gcreds_parse_parameters(){
                     else
                         std_error_exit "You must provide a timeout value. Exiting (code $E_BADARG)" $E_BADARG
                     fi
+                    ;;
+                -u | --awscli)
+                    # display info on current credentials, if exist
+                    update_awscli
+                    shift 1
+                    exit 0
                     ;;
                 *)
                     # invalid argument
@@ -900,6 +906,49 @@ gcreds_monitor(){
     gcreds_show_creds  $SESSION_REMAINING
     #
     # <-- end function gcreds-show-stats -->
+}
+
+function update_awscli(){
+    ## update local awscli iam user credentials ##
+    local choice
+    local awscli_bin=$(which aws)
+    #
+    cat<<EOM
+
+    You have entered the menu to update your iam user credentials
+    in your local awscli configuration.  Since $pkg modifies your
+    awscli configuration, this menu facility is the safest way to
+    make required changes to iam user configuration.
+
+    $pkg will start by clearing all temporary credentials from
+    your local config.
+
+    Type ${yellow}'y'${reset} when you are ready to begin. Hit ${yellow}'return'${reset} to quit.
+
+EOM
+    read -p "${yellow}    Continue? [quit]${reset} " choice
+    if [ -z $choice ] || [ $choice == 'quit' ]; then
+        echo -e '\n'
+        exit 0
+    fi
+    if gcreds_preexisting_creds; then
+        gcreds_remove_creds -s
+    else
+        std_message "No temporary credentials found in your local config" INFO
+    fi
+    echo -e '\n  What is the iam username associated with the awscli profile' | indent02
+    echo -e '  you wish to update?  If you wish to update the default profile' | indent02
+    echo -e '  hit return.\n' | indent02
+    read -p "${yellow}    iam username to update: [default] ${reset}" choice
+    echo -e '\n'
+    if [ -z $choice ] || [ $choice == 'default' ]; then
+        $awscli_bin configure
+    else
+        $awscli_bin configure --profile $choice
+    fi
+    std_message "awscli configuration update complete" INFO
+    #
+    # <-- end function update_awscli -->
 }
 
 #
