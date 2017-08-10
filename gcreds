@@ -76,10 +76,11 @@ function gcreds_help(){
             -a, --accounts : list of accounts
             -p, --profile  : iam user account
             -c, --mfa-code : authentication code
-           [-A, --auto     : auto refresh credentials]
-           [-C, --config   : set $pkg configuration options]
-           [-s, --show     : show credential expiration info]
-           [-h, --help     : display this help menu]
+           [-A, --auto     : auto refresh credentials ]
+           [-C, --config   : set $pkg configuration options ]
+           [-s, --show     : show credential expiration info ]
+           [-u, --awscli   : update awscli iam credentials ]
+           [-h, --help     : display this help menu ]
 
  ${accent}${BOLD}OPTIONS${UNBOLD}${reset}:
     ${accent}${BOLD}-a, --accounts${reset} ${reset}<${accent}value${reset}> (required)
