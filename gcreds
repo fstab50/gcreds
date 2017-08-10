@@ -412,14 +412,16 @@ function gcreds_configure(){
 }
 
 function gcreds_profile_exists(){
-    # validate if profile exists in local awscli config
+    ## validate if profile exists in local awscli config ##
+    #
     if [[ $1 == "" ]] && [[ $1 == $MFA_ARN ]]; then
-        std_error "Invalid MFA profile name provided ($MFA_PROFILE) Exiting code $E_BADARG." $E_BADARG
-        gcreds_help
-    elif [[ $1 == "" ]]; then
+        std_error_exit "Invalid MFA profile name provided ($MFA_PROFILE) Exiting code $E_BADARG." $E_BADARG
+
+    elif [ ! $1 ]; then
         std_warn "Profile name ($profile) not in your local config. (code $E_BADPROFILE)." $E_BADPROFILE
         return 1
     fi
+    return 0
     #
     #<-- end function gcreds_profile_exists -->
 }
@@ -909,8 +911,10 @@ gcreds_monitor(){
 function update_awscli(){
     ## update local awscli iam user credentials ##
     local choice
+    local profile
     local awscli_bin=$(which aws)     # aws binary
     local clear_bin=$(which clear)    # clear screen bin file
+    local valid
     #
     $clear_bin         # clear screen
     cat<<EOM
@@ -938,15 +942,32 @@ EOM
     else
         std_message "No temporary credentials found in your local config" INFO
     fi
-    echo -e '\n  What is the iam username associated with the awscli profile' | indent02
-    echo -e '  you wish to update?  If you wish to update the default profile' | indent02
-    echo -e '  hit return.\n' | indent02
-    read -p "${yellow}    iam username to update: [default] ${reset}" choice
-    echo -e '\n'
-    if [ -z $choice ] || [ $choice == 'default' ]; then
+    valid=0
+    while [ $valid -eq 0 ]; do
+        echo -e '\n  What is the iam username associated with the awscli profile' | indent02
+        echo -e '  you wish to update?  If you wish to update the default profile' | indent02
+        echo -e '  hit return.\n' | indent02
+        read -p "${yellow}    iam username to update: [default] ${reset}" choice
+        echo -e '\n'
+
+        if [ -z $choice ]; then
+            profile='default'
+        else
+            profile="$choice"
+        fi
+        # validate username in local config
+        key=$(aws configure get "$profile".aws_access_key_id)
+        if [ ! $key ]; then
+            std_message "Profile name ($profile) not in your local config. " EROR
+        else
+            valid=1
+        fi
+    done
+
+    if [ $profile == 'default' ]; then
         $awscli_bin configure
     else
-        $awscli_bin configure --profile $choice
+        $awscli_bin configure --profile $profile
     fi
     std_message "awscli configuration update complete" INFO
     #
