@@ -163,6 +163,8 @@ function std_logger(){
 
 function std_message(){
     local msg="$1"
+    local format="$3"
+    #
     std_logger "[INFO]: $msg"
     [[ $quiet ]] && return
     shift
@@ -171,7 +173,11 @@ function std_message(){
         pref="${1:0:5}"
         shift
     fi
-    echo -e "\n${yellow}[ $cyan$pref$yellow ]$reset  $msg\n" | indent04
+    if [ $format ]; then
+        echo -e "${yellow}[ $cyan$pref$yellow ]$reset  $msg" | indent04
+    else
+        echo -e "\n${yellow}[ $cyan$pref$yellow ]$reset  $msg\n" | indent04
+    fi
 }
 
 function std_error(){
@@ -202,13 +208,27 @@ function std_error_exit(){
 function gcreds_env_info(){
     local msg_header=$1
     local dep=$2
-
+    local version_info
+    local awscli_ver
+    local boto_ver
+    local python_ver
+    #
+    version_info=$(aws --version 2>&1)
+    awscli_ver=$(echo $version_info | awk '{print $1}')
+    boto_ver=$(echo $version_info | awk '{print $4}')
+    python_ver=$(echo $version_info | awk '{print $2}')
+    #
     if [[ $dep == "aws" ]]; then
-        version_info=$(aws --version 2>&1)
-        std_logger "[$msg_header]: awscli version detected: $(echo $version_info | awk '{print $1}')"
-        std_logger "[$msg_header]: Python version detected: $(echo $version_info | awk '{print $2}')"
+        std_logger "[$msg_header]: awscli version detected: $awscli_ver"
+        std_logger "[$msg_header]: Python runtime detected: $python_ver"
         std_logger "[$msg_header]: Kernel detected: $(echo $version_info | awk '{print $3}')"
-        std_logger "[$msg_header]: awscli library detected: $(echo $version_info | awk '{print $4}')"
+        std_logger "[$msg_header]: boto library detected: $boto_ver"
+
+    elif [[ $dep == "awscli" ]]; then
+        std_message "awscli version detected: ${accent}${BOLD}$awscli_ver${UNBOLD}${reset}" $msg_header "pprint" | indent04
+        std_message "boto library detected: ${accent}${BOLD}$boto_ver${UNBOLD}${reset}" $msg_header "pprint" | indent04
+        std_message "Python runtime detected: ${accent}${BOLD}$python_ver${UNBOLD}${reset}" $msg_header "pprint" | indent04
+
     elif [[ $dep == "jq" ]]; then
         version_info=$(jq --version 2>&1)
         std_logger "[$msg_header]: json parser detected: $(echo $version_info)"
@@ -617,7 +637,7 @@ function gcreds_show_creds(){
         echo -e $msg | indent02
         grep --color=auto "gcreds" ~/.aws/credentials | indent10
         if [[ -e $config_path/credential.expiration ]]; then
-            expire=$(cat $config_path/credential.expiration)
+            expire=$(cat $config_path/credential.expiration 2>/dev/null)
             credential_life=$(( $expire - $(date +%s) ))
         else
             credential_life=0
@@ -629,7 +649,7 @@ function gcreds_show_creds(){
             # session stats, auto refresh of credentials
             if [ $session_life ]; then
                 ## show credential stats ##
-                expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
+                expire_datetime=$(date --date=@$(cat $config_path/credential.expiration 2>/dev/null))
                 min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
                 if [ $session_life -gt $CREDENTIAL_DEFAULT ]; then
                     echo -e "\nCredential refresh in ${BOLD}${accent}$min_left${reset}${UNBOLD} minutes." | indent02
@@ -641,7 +661,7 @@ function gcreds_show_creds(){
                 fi
 
                 ## show session stats ##
-                expire_datetime=$(date --date=@$(cat $config_path/token.expiration))
+                expire_datetime=$(date --date=@$(cat $config_path/token.expiration  2>/dev/null))
                 #
                 if [ $session_life -le 60 ]; then
                     min_left=$(( $session_life ))    # convert timeleft from sec to min
@@ -659,7 +679,7 @@ function gcreds_show_creds(){
                 echo -e "   ctrl+c to quit before session end\n" | indent02
             else
                 # no extended session, show temp credential stats only
-                expire_datetime=$(date --date=@$(cat $config_path/credential.expiration))
+                expire_datetime=$(date --date=@$(cat $config_path/credential.expiration 2>/dev/null))
                 min_left=$(( $credential_life/60 ))    # convert timeleft from sec to min
                 echo -e "\nCredential Expiration in ${BOLD}${accent}$min_left${reset}${UNBOLD} minutes." | indent02
                 echo -e "Expiration Time: $expire_datetime\n" | indent02
@@ -904,7 +924,7 @@ gcreds_monitor(){
     SESSION_REMAINING=$(( $sec_left/60 ))   # session duration, minutes
 
     # credentials time stats
-    expire=$(cat $config_path/credential.expiration)
+    expire=$(cat $config_path/credential.expiration 2>/dev/null)
     sec_left=$(( $expire - $(date +%s) ))
     CREDENTIAL_REMAINING=$(( $sec_left/60 ))
 
@@ -943,11 +963,17 @@ EOM
         echo -e '\n'
         exit 0
     fi
+
     # check if temp credentials; if yes, clear them
     if ! gcreds_preexisting_creds; then
         std_message "No temporary credentials found in your local config" INFO
     fi
-    valid=0
+
+    # print out env stats
+    echo -e "\n${BOLD}${accent}awscli stats:${UNBOLD}${reset}\n" | indent04
+    gcreds_env_info INFO "awscli"; echo -e "\n"
+
+    # loop until given valid iam user in local config
     while [ $valid -eq 0 ]; do
         echo -e '\n  What is the iam username associated with the awscli profile' | indent02
         echo -e '  you wish to update?  If you wish to update the default profile' | indent02
@@ -1033,4 +1059,3 @@ rm $config_path/.session.profile $config_path/token.*
 #<-- end MAIN -----------------------------------------------------------------
 #
 exit 0
-/home/blake/.aws/credentials
