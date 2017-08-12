@@ -419,13 +419,14 @@ function gcreds_configure(){
     # add config dictionary key, value
     config_dict["default_color"]=$COLOR
     echo -e "\n"
-    std_message "entering color scheme [$COLOR] in your local $pkg configuration" INFO
+    std_message "entering color scheme [$COLOR] in your local configuration" INFO "console"
 
     # write out config file
     array2json config_dict $config_path/$gcreds_conf
 
     # log
-    std_message "Configuration setup for $pkg complete" INFO
+    std_message "Configuration setup for $pkg complete" INFO "console"
+    echo -e '\n'
     exit 0
     #
     # <-- end function gcreds_configure -->
