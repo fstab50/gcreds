@@ -1,7 +1,7 @@
 # gcreds v2.0 | Release Notes
 
 * * *
-**Release date**:  August, 2017
+**Release date**:  August 10, 2017
 * * *
 
 ## Features and Fixes Implemented in v2.0
@@ -19,6 +19,11 @@ Two parameters are currently supported:
     option does not need to be provided
     * default_color scheme: color scheme can be changed to improve visibility on screens  
     with white backgrounds, a problem in previous releases.      
+
+* **awscli Update Facility** :  `-u, --awscli`  
+When iam credentials must be updated, corruption is common for **gcreds** users because  
+of the way **gcreds** makes backup copies of local awscli configuration files.  **gcreds** now  
+includes a menu-driven option for updating awscli safely via **gcreds**.
 
 * **help_menu** : clean up and rewrite of help menu
 
