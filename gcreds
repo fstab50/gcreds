@@ -945,17 +945,20 @@ function update_awscli(){
     $clear_bin                        # clear screen
     cat<<EOM
 
-                          ${BOLD}${accent}awscli${reset}${UNBOLD} update
+                        ${BOLD}${accent}awscli${reset}${UNBOLD} update menu
 
-    You have entered the menu to update your iam user credentials
-    in your local awscli configuration.  Since $pkg modifies your
-    awscli configuration, this menu facility is the safest way to
-    make required changes to iam user configuration.
+    You have entered the $pkg menu for updating Identity and Access
+    Management user credentials in your local awscli configuration.
 
-    $pkg will start by clearing all temporary credentials from
-    your local config.
+    Since $pkg modifies your awscli configuration, this facility is
+    the safest way to make required updates to iam user config data
+    without risk of corruption.
 
-    Type ${yellow}'y'${reset} when you are ready to begin. Hit ${yellow}'return'${reset} to quit.
+    $pkg will start by clearing all temporary credentials from your
+    local config.
+
+    Type ${yellow}y${reset} when you are ready to begin. Hit ${yellow}return${reset} to quit.
+
 
 EOM
     read -p "${yellow}    Continue? [quit]:${reset} " choice
@@ -970,14 +973,14 @@ EOM
     fi
 
     # print out env stats
-    echo -e "\n${BOLD}${accent}awscli stats:${UNBOLD}${reset}\n" | indent04
+    echo -e "\n${BOLD}${accent}awscli${UNBOLD}${reset} config stats:\n" | indent04
     gcreds_env_info INFO "awscli"; echo -e "\n"
 
     # loop until given valid iam user in local config
     while [ $valid -eq 0 ]; do
-        echo -e '\n  What is the iam username associated with the awscli profile' | indent02
-        echo -e '  you wish to update?  If you wish to update the default profile' | indent02
-        echo -e '  hit return.\n' | indent02
+        echo -e "\n  What is the iam username associated with the awscli profile" | indent02
+        echo -e "  you wish to update?  Hit ${yellow}return${reset} if you want to update the" | indent02
+        echo -e "  default profile.\n" | indent02
         read -p "${yellow}    iam username to update [default]: ${reset}" choice
         echo -e '\n'
 
