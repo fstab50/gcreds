@@ -200,10 +200,14 @@ to generate temporary credentials for roles
 **Auto Refresh** -- automatic regeneration of temporary credentials
 
 ```bash
-    $ gcreds -p atos-aua1 -a list.accounts --auto 4
+    $ gcreds -p <iam_user> -a list.accounts --auto 4
 ```
 
+Generation of credentials:
+
 ![option auto](./.images/auto-gen.png)  
+
+Monitoring of session statics:
 
 ![option auto](./.images/auto-stats.png)  
 
