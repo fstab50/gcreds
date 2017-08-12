@@ -419,7 +419,7 @@ function gcreds_configure(){
     # add config dictionary key, value
     config_dict["default_color"]=$COLOR
     echo -e "\n"
-    std_message "entering color scheme [$COLOR] in your local configuration" INFO "console"
+    std_message "Entering color scheme [$COLOR] in your local configuration" INFO "console"
 
     # write out config file
     array2json config_dict $config_path/$gcreds_conf
@@ -1050,7 +1050,7 @@ else
             gcreds_generate_creds
             #
         elif [ $CREDENTIAL_REMAINING -lt 1 ] && [ $SESSION_REMAINING -le $CREDENTIAL_DEFAULT ]; then
-            std_message "[INFO]: session end" INFO
+            std_message "$pkg session end" INFO
             MONITOR=False
         fi
     done

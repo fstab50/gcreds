@@ -185,14 +185,6 @@ to generate temporary credentials for roles
 
 ![example usage](./.images/example-usage.png)
 
-**Show Option** -- show current temporary credentials; associated lifetime
-
-```bash
-    $ gcreds --show
-```
-
-![option show](./.images/gcreds-show.png)  
-
 **Log output** (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
 
 ```bash
@@ -200,6 +192,28 @@ to generate temporary credentials for roles
 ```
 
 ![example gcreds.log](./.images/log-output.png)  
+
+* * *
+
+## Options ##
+
+**Auto Refresh** -- automatic regeneration of temporary credentials
+
+```bash
+    $ gcreds -p atos-aua1 -a list.accounts --auto 4
+```
+
+![option auto](./.images/auto-gen.png)  
+
+![option auto](./.images/auto-stats.png)  
+
+**Show Option** -- show current temporary credentials; associated lifetime
+
+```bash
+    $ gcreds --show
+```
+
+![option show](./.images/gcreds-show.png)  
 
 * * *
 
