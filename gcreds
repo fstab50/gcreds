@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # global variables
+VERSION='2.1'
 pkg=$(basename $0)
 pkg_path=$(cd $(dirname $0); pwd -P)
 pwd_path=$(pwd)
@@ -128,7 +129,7 @@ EOM
     #<-- end function gcreds_help -->
 }
 
-array2json(){
+function array2json(){
     ## converts associative array to json file output ##
     local -n array_dict=$1      # local assoc array must use -n opt
     local output_file=$2        # location
@@ -337,6 +338,7 @@ function gcreds_configure(){
     local COLOR                     # user entry var
     local maxct                     # array size counter
     local clear_bin=$(which clear)  # clear screen bin file
+    local version                   # installed gcreds' version in conf file
     local mfa_profile               # value, default_profile key in conf file
     local color_scheme              # value, default_color key in conf file
     local tmp_profile               # pre-existing default_profile value in conf file
@@ -346,6 +348,7 @@ function gcreds_configure(){
     declare colors                  # color scheme array
     #
     $clear_bin      # clear screen
+    version=$VERSION
 
     # check if config already exists, if so parse parameters
     if [ -e $config_path/$gcreds_conf ]; then
@@ -419,7 +422,11 @@ function gcreds_configure(){
     # add config dictionary key, value
     config_dict["default_color"]=$COLOR
     echo -e "\n"
-    std_message "Entering color scheme [$COLOR] in your local configuration" INFO "console"
+    std_message "Entering color scheme [${accent}$COLOR${reset}] in your local configuration" INFO "console"
+
+    # installed version
+    config_dict["version"]=$version
+    std_message "Installed version [$pkg ${accent}v$version${reset}] recorded to your local configuration" INFO
 
     # write out config file
     array2json config_dict $config_path/$gcreds_conf
