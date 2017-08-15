@@ -39,7 +39,8 @@ purple=$(tput setaf 5)
 red=$(tput setaf 1)
 white=$(tput setaf 7)
 yellow=$(tput setaf 3)
-orange='\033[38;5;95;38;5;214m'
+#orange='\033[38;5;95;38;5;214m'
+orange=$(echo -e${'\033[38;5;95;38;5;214m'})
 gray=$(tput setaf 008)
 lgray='\033[38;5;95;38;5;245m'    # light gray
 dgray='\033[38;5;95;38;5;8m'      # dark gray
@@ -48,8 +49,9 @@ reset=$(tput sgr0)
 BOLD=`tput bold`
 UNBOLD=`tput sgr0`
 
-# default color scheme (blue)
+# initialize default color scheme
 accent=$(tput setaf 008)
+accent_ansi=$(echo -e ${orange})   # use for ansi escape color codes
 
 #
 # function declaration start --------------(do not modify this line)-----------
@@ -381,6 +383,7 @@ function gcreds_configure(){
         "LTDB: Light text on dark background (default)"
         "DTLB: Dark text on light background"
         "BLUE: Blue Accent Theme"
+        "ORNG: Orange Accent Theme"
         "GREEN: Green Accent Theme"
         )
     maxct=${#colors[@]}
@@ -400,7 +403,8 @@ function gcreds_configure(){
             LTDB) color_choice=0 ;;
             DTLB) color_choice=1 ;;
             BLUE) color_choice=2 ;;
-            GREEN) color_choice=3 ;;
+            ORNG) color_choice=3 ;;
+            GREEN) color_choice=4 ;;
         esac
 
         if [[ -n ${CHOICE//[0-$(( $maxct-1 ))]/} ]]; then
@@ -739,6 +743,10 @@ function gcreds_source_config(){
             GREEN)
                 accent=$(tput setaf 2)      # green
                 log_msg="GREEN"
+                ;;
+            ORNG)
+                accent=$(echo -e ${orange})      # bright orange (ansi)
+                log_msg="ORNG"
                 ;;
         esac
         # log
