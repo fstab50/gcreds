@@ -1063,7 +1063,7 @@ else
             # generate credentials
             gcreds_generate_creds
             #
-        elif [ $CREDENTIAL_REMAINING -lt 1 ] && [ $SESSION_REMAINING -le $CREDENTIAL_DEFAULT ]; then
+        elif [ $CREDENTIAL_REMAINING -lt 0 ] && [ $SESSION_REMAINING -le $CREDENTIAL_DEFAULT ]; then
             std_message "$pkg session end" INFO
             MONITOR=False
         fi
