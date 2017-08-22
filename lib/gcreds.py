@@ -52,7 +52,7 @@ class gcreds():
     def generate_credentials(self, iam_user, roles):
 
 
-    def calc_remaing_time(self):
+    def calc_time(self):
         """ remaining time left in session and credential lifetime """
 
     def display_time(self):
