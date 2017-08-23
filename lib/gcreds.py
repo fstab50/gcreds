@@ -76,10 +76,9 @@ class gcreds():
         sts_client = boto3.client('sts')
         iam_user = sts_client.get_caller_identity()['Arn'].split('/')[1]
 
-        token_seconds = token_life * 60
-        if self.sts_min < token_seconds < self.sts_max:
+        if self.sts_min < token_life < self.sts_max:
             token = sts_client.get_session_token(
-                DurationSeconds=token_life,
+                DurationSeconds=token_life * 60,
                 SerialNumber=self.arn
                 TokenCode=mfa_code
             )
