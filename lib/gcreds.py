@@ -136,7 +136,7 @@ class gcreds():
                 'SessionToken': 'FQoDYXdzEDMaDHAaP2wi/+77fNJJryKvAdVZjYKk...zQU='
             }
         """
-        # somehow lookup corresponding role_arn for each profile name in roles
+        # somehow lookup corresponding role_arn for each profile name in roles in awscli config
         # arn = $ aws configure get roles[0].role_arn
         try:
             for arn in roles:
