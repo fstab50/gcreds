@@ -50,7 +50,7 @@ UNBOLD=`tput sgr0`
 
 # initialize default color scheme
 accent=$(tput setaf 008)
-accent_ansi=$(echo -e ${orange})   # use for ansi escape color codes
+ansi=$(echo -e ${orange})   # use for ansi escape color codes
 
 #
 # function declaration start --------------(do not modify this line)-----------
@@ -72,7 +72,7 @@ function gcreds_help(){
         avoiding a multi-factor auth prompt in a cli environment is desired
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
-            $pkg -a <ACCTFILE> --profile <IAM_PROFILE> -c <MFA_CODE>
+            ${BOLD}$pkg -a ${UNBOLD}<${ansi}ACCTFILE${reset}> ${BOLD}--profile${UNBOLD} <${ansi}IAM_PROFILE${reset}> ${BOLD}-c${UNBOLD} <${ansi}MFA_CODE${reset}>
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
             -a, --accounts : list of accounts
