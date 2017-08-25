@@ -9,6 +9,7 @@ Returns:
 from __init__ import __version__
 import os
 import json
+import subprocess
 import boto3
 from botocore.exceptions import ClientError
 import loggers
@@ -18,8 +19,10 @@ logger = loggers.getLogger(__version__)
 
 class gcreds():
     """
-    Parse environment variables, validate characters, convert type(s). default
-    should be used to avoid conversion of an variable and retain string type
+    Summary:
+        gcreds generates temporary credentials used to assume roles across
+        many AWS accounts. It is commonly used for progammatic use cases where
+        avoiding a multi-factor auth prompt in a cli environment is desired
 
     Example usage:
 
@@ -28,12 +31,6 @@ class gcreds():
     >>> myvar = read_env_variable('DBUGMODE')
     >>> type(myvar)
     True
-
-    >>> from lambda_utils import read_env_variable
-    >>> os.environ['MYVAR'] = '1345'
-    >>> myvar = read_env_variable('MYVAR', 'default')
-    >>> type(myvar)
-    str
     """
     def __init__(self, iam_user):
         """ initalization
@@ -55,13 +52,25 @@ class gcreds():
         else:
             self.iam_client = boto3.client('iam')
             self.users = self.get_valid_users(self.iam_client)
-            self.serial_numer = self.get_mfa_serial(self.iam_user)
+            self.mfa_serial = self.get_mfa_id(self.iam_user)
             # no way to use boto3 to extract mfa_serial for iam_user, WTF.
             # MAYBE botocore
-    def setup_clients(self, user):
+    def get_mfa_id(self, user):
+        """
+        Extracts the mfa_serial arn (soft token) or mfa_serial (hw token)
+        from the awscli local configuration
+        """
+        awscli = 'aws'
+        cmd = 'type ' + awscli + ' 2>/dev/null'
+        if subprocess.getoutput(cmd):
+            cmd = awscli + ' configure get ' + user + '.mfa_serial'
+            try:
+                mfa_id = subprocess.getoutput(cmd)
+            except Exception as e:
+                logger.waring('failed to identify mfa_serial')
+        return mfa_id
 
-
-    def get_session_token(self, token_life, mfa_code):
+    def generate_session_token(self, token_life, mfa_code):
         """
         Summary:
             generates session token for use in gen temp credentials
@@ -79,7 +88,7 @@ class gcreds():
         if self.sts_min < token_life < self.sts_max:
             token = sts_client.get_session_token(
                 DurationSeconds=token_life * 60,
-                SerialNumber=self.arn
+                SerialNumber=self.arn,
                 TokenCode=mfa_code
             )
         return token['Credentials']
@@ -88,11 +97,11 @@ class gcreds():
         """ generate temporary credentials for profiles """
         return 0
 
-    def calc_time(self, session=''):
+    def calc_session_life(self, session=''):
         """ remaining time left in session and credential lifetime """
         return 0
 
-    def display_time(self):
+    def calc_credenfital_life(self):
         """ return remaining time on credential """
         return 0
 
@@ -100,9 +109,11 @@ class gcreds():
         """ Summary
         Retrieve list valid iam users from local config
 
-        Arg:  iam client object
+        Arg:
+            iam client object
 
-        Returns: list of iam users from the account
+        Returns:
+            list of iam users from the account
         """
         users = [x['UserName'] for x in client.list_users()['Users']]
         return users
