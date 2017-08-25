@@ -111,7 +111,7 @@ class gcreds():
                     )
         except ClientError as e:
             logger(
-                'Problems generating session token in account %s (Code: %s Message: %s)' %
+                'Exception generating session token in account %s (Code: %s Message: %s)' %
                 (str(arn.split(':')[4]), e.response['Error']['Code'],
                 e.response['Error']['Message']
             ))
@@ -146,7 +146,7 @@ class gcreds():
                 )
         except ClientError as e:
             logger(
-                'Problems assuming role in account %s (Code: %s Message: %s)' %
+                'Exception assuming role in account %s (Code: %s Message: %s)' %
                 (str(arn.split(':')[4]), e.response['Error']['Code'],
                 e.response['Error']['Message']
             ))
@@ -171,5 +171,13 @@ class gcreds():
         Returns:
             list of iam users from the account
         """
-        users = [x['UserName'] for x in client.list_users()['Users']]
+        try:
+            users = [x['UserName'] for x in client.list_users()['Users']]
+        except ClientError as e:
+            logger(
+                'Exception listing iam users in account %s (Code: %s Message: %s)' %
+                (str(arn.split(':')[4]), e.response['Error']['Code'],
+                e.response['Error']['Message']
+            ))
+            raise
         return users
