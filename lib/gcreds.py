@@ -54,7 +54,7 @@ class gcreds():
             self.users = self.get_valid_users(self.iam_client)
             self.mfa_serial = self.get_mfa_id(self.iam_user)
             # no way to use boto3 to extract mfa_serial for iam_user, WTF.
-            # MAYBE botocore
+            # iam_user = sts_client.get_caller_identity()['Arn'].split('/')[1]
     def get_mfa_id(self, user):
         """
         Extracts the mfa_serial arn (soft token) or mfa_serial (hw token)
@@ -67,10 +67,10 @@ class gcreds():
             try:
                 mfa_id = subprocess.getoutput(cmd)
             except Exception as e:
-                logger.waring('failed to identify mfa_serial')
+                logger.warning('failed to identify mfa_serial')
         return mfa_id
 
-    def generate_session_token(self, token_life, mfa_code):
+    def generate_session_token(self, token_life, mfa_code=''):
         """
         Summary:
             generates session token for use in gen temp credentials
@@ -83,14 +83,18 @@ class gcreds():
             session token | TYPE: dict
         """
         sts_client = boto3.client('sts')
-        iam_user = sts_client.get_caller_identity()['Arn'].split('/')[1]
 
-        if self.sts_min < token_life < self.sts_max:
-            token = sts_client.get_session_token(
-                DurationSeconds=token_life * 60,
-                SerialNumber=self.arn,
-                TokenCode=mfa_code
-            )
+        if (self.sts_min < token_life < self.sts_max):
+            if self.mfa_serial:
+                token = sts_client.get_session_token(
+                    DurationSeconds=token_life * 60,
+                    SerialNumber=self.mfa_serial,
+                    TokenCode=mfa_code
+                )
+            else:
+                token = sts_client.get_session_token(
+                    DurationSeconds=token_life * 60
+                )
         return token['Credentials']
 
     def generate_credentials(self, iam_user, roles):
