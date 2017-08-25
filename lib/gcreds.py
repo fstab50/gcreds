@@ -32,25 +32,27 @@ class gcreds():
     >>> type(myvar)
     True
     """
-    def __init__(self, iam_user):
+    def __init__(self, iam_user=''):
         """ initalization
         Args:
-            - checks deps, existence of creds, existence of Settings
+            iam_user: username with permissions to assume roles in target aws
+            accounts
 
         Returns:
 
         """
-        self.sts_max = 720              # minutes, 12 hours
-        self.sts_min = 15               # minutes, 0.25 hours
-        self.token_default = 60         # minutes
-        self.credential_default = 60    # minutes
-        self.iam_user = iam_user
+        self.sts_max = 720                      # minutes, 12 hours
+        self.sts_min = 15                       # minutes, 0.25 hours
+        self.token_default = 60                 # minutes
+        self.credential_default = 60            # minutes
+        self.iam_user = iam_user or 'default'
         try:
             boto3.setup_default_session(profile_name=self.iam_user)
         except ProfileNotFound:
             logger.warning('iam user not found in local config')
         else:
             self.iam_client = boto3.client('iam')
+            self.sts_client = boto3.client('sts')
             self.users = self.get_valid_users(self.iam_client)
             self.mfa_serial = self.get_mfa_id(self.iam_user)
             # no way to use boto3 to extract mfa_serial for iam_user, WTF.
@@ -75,31 +77,81 @@ class gcreds():
         Summary:
             generates session token for use in gen temp credentials
         Args:
-            token_life: token duration in minutes
-            SerialNumber:
-            TokenCode:
+            token_life:   token lifetime duration in minutes
+            SerialNumber: mfa device arn (soft token) or mfa_serial
+                          (hardware token)  # this technically not an input - should OMIT?
+            mfa_code:     6 digit authorization code from a multi-factor
+                          (mfa) authentication device
 
         Returns:
-            session token | TYPE: dict
+            session credentials | TYPE: dict
+
+            {
+                'AccessKeyId': 'ASIAI6QV2U3JJAYRHCJQ',
+                'Expiration': datetime.datetime(2017, 8, 25, 20, 5, 37, tzinfo=tzutc()),
+                'SecretAccessKey': 'MdjPAkXTHl12k64LSjmgTWMsmnHk4cJfeMHdXMLA',
+                'SessionToken': 'FQoDYXdzEDMaDHAaP2wi/+77fNJJryKvAdVZjYKk...zQU='
+            }
         """
-        sts_client = boto3.client('sts')
 
-        if (self.sts_min < token_life < self.sts_max):
-            if self.mfa_serial:
-                token = sts_client.get_session_token(
-                    DurationSeconds=token_life * 60,
-                    SerialNumber=self.mfa_serial,
-                    TokenCode=mfa_code
-                )
-            else:
-                token = sts_client.get_session_token(
-                    DurationSeconds=token_life * 60
-                )
-        return token['Credentials']
+        token_life = int(token_life)
+        mfa_code = str(mfa_code)
 
-    def generate_credentials(self, iam_user, roles):
-        """ generate temporary credentials for profiles """
-        return 0
+        try:
+            if (self.sts_min < token_life < self.sts_max):
+                if self.mfa_serial:
+                    self.token = self.sts_client.get_session_token(
+                        DurationSeconds=token_life * 60,
+                        SerialNumber=self.mfa_serial,
+                        TokenCode=mfa_code
+                    )
+                else:
+                    self.token = self.sts_client.get_session_token(
+                        DurationSeconds=token_life * 60
+                    )
+        except ClientError as e:
+            logger(
+                'Problems generating session token in account %s (Code: %s Message: %s)' %
+                (str(arn.split(':')[4]), e.response['Error']['Code'],
+                e.response['Error']['Message']
+            ))
+            raise
+        return self.token['Credentials']
+
+    def generate_credentials(self, roles):
+        """
+        Summary:
+            generate temporary credentials for profiles
+
+        Args:
+            roles: List of profile names from the local awscli configuration
+
+        Returns:
+            iam role temporary credentials | TYPE: dict
+
+            {
+                'AccessKeyId': 'ASIAI6QV2U3JJAYRHCJQ',
+                'Expiration': datetime.datetime(2017, 8, 25, 20, 5, 37, tzinfo=tzutc()),
+                'SecretAccessKey': 'MdjPAkXTHl12k64LSjmgTWMsmnHk4cJfeMHdXMLA',
+                'SessionToken': 'FQoDYXdzEDMaDHAaP2wi/+77fNJJryKvAdVZjYKk...zQU='
+            }
+        """
+        # somehow lookup corresponding role_arn for each profile name in roles
+        # arn = $ aws configure get roles[0].role_arn
+        try:
+            for arn in roles:
+                response = self.sts_client.assume_role(
+                    RoleArn=arn,
+                    DurationSeconds=self.credential_default
+                )
+        except ClientError as e:
+            logger(
+                'Problems assuming role in account %s (Code: %s Message: %s)' %
+                (str(arn.split(':')[4]), e.response['Error']['Code'],
+                e.response['Error']['Message']
+            ))
+            raise
+        return response['Credentials']
 
     def calc_session_life(self, session=''):
         """ remaining time left in session and credential lifetime """
