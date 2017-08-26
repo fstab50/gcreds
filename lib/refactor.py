@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
+from __init__ import __version__
 import os
 import json
 import argparse
+import loggers
 
+logger = loggers.getLogger(__version__)
+
+# globals
 container = []
 dict = {}
 ct = 0
@@ -17,6 +22,10 @@ args = argparser.parse_args()
 input_file = args.file
 output_file = config_dir + '/profiles.json'
 
+# configuration dir
+if not os.path.exists(config_dir):
+    logger.info('Configuration dir [%s] missing, creating it' % config_dir)
+    os.mkdir(config_dir)
 
 try:
     with open(input_file) as f1:
@@ -27,7 +36,7 @@ try:
                     dict['profile'] = profile_name
 
                 elif 'role_arn' in line:
-                    dict['role_arn'] = line.strip()
+                    dict['role_arn'] = line.split('=')[1].strip()
 
                 elif 'mfa_serial' in line:
                     dict['mfa_serial'] = line.split('=')[1].strip()
