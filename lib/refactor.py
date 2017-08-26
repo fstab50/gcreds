@@ -2,17 +2,24 @@
 
 import os
 import json
+import argparse
 
 container = []
 dict = {}
 ct = 0
 home_dir = os.environ['HOME']
+config_dir = home_dir + '/.gcreds'
 
-input_file = home_dir + '/.aws/credentials'
-output_file = 'credential_refactor.json'
+argparser = argparse.ArgumentParser(description='gcreds credential data build')
+argparser.add_argument("-f", "--file", help="Credential Input File", required=True)
+args = argparser.parse_args()
+
+input_file = args.file
+output_file = config_dir + '/profiles.json'
+
 
 try:
-    with open() as f1:
+    with open(input_file) as f1:
         for line in f1:
             if line.strip():
                 if '[' and ']' in line:
@@ -35,7 +42,9 @@ try:
                     ct = 0
         f1.close()
 except IOError as e:
-    print('problem opening file %s. Error %s' % (input_file, str(e))
+    logger.critical('problem opening file %s. Error %s' % (input_file, str(e)))
+except Exception as e:
+    logger.critical('unknown error. Error %s' % str(e))
 
 else:
     # write output file
