@@ -46,17 +46,35 @@ class gcreds():
         self.token_default = 60                 # minutes
         self.credential_default = 60            # minutes
         self.iam_user = iam_user or 'default'
+        self.config_dir = os.environ['HOME'] + '/.gcreds'
+        self.profiles = self.profile_setup()
         try:
-            boto3.setup_default_session(profile_name=self.iam_user)
+            boto3.setup_default_session(profile_name=iam_user)
         except ProfileNotFound:
-            logger.warning('iam user not found in local config')
         else:
+            logger.warning('iam user not found in local config')
             self.iam_client = boto3.client('iam')
             self.sts_client = boto3.client('sts')
-            self.users = self.get_valid_users(self.iam_client)
-            self.mfa_serial = self.get_mfa_id(self.iam_user)
+            self.users = self.get_valid_users(iam_client)
+            self.mfa_serial = self.get_mfa_id(iam_user)
             # no way to use boto3 to extract mfa_serial for iam_user, WTF.
             # iam_user = sts_client.get_caller_identity()['Arn'].split('/')[1]
+    def profile_setup():
+        """ creates profile obj from local configuration file """
+        profile_file = self.config_dir + '/profiles.json'
+        try:
+            with open(profile_file) as f1:
+                profile_obj = json.load(f1)
+        except IOError as e:
+            logger.critical('problem opening file %s. Error %s' %
+                (profile_file, str(e))
+            )
+        except JSONDecodeError as e:
+            logger.critical('%s file not properly formed json. Error %s' %
+                (profile_file, str(e))
+            )
+        return profile_obj
+
     def get_mfa_id(self, user):
         """
         Extracts the mfa_serial arn (soft token) or mfa_serial (hw token)
