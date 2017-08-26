@@ -11,6 +11,7 @@ import os
 import json
 from json import JSONDecodeError
 import subprocess
+import datetime
 import boto3
 from botocore.exceptions import ClientError, ProfileNotFound
 import loggers
@@ -45,6 +46,8 @@ class gcreds():
         self.sts_max = 720                      # minutes, 12 hours
         self.sts_min = 15                       # minutes, 0.25 hours
         self.token_default = 60                 # minutes, 1 hour
+        self.token_expiration = ''
+        self.credential_expiration = ''
         self.credential_default = 60            # minutes, 1 hour (AWS Default)
         self.iam_user = iam_user or 'default'
         self.config_dir = os.environ['HOME'] + '/.gcreds'
@@ -141,6 +144,7 @@ class gcreds():
                         DurationSeconds=token_life * 60
                     )
                 self.token = response['Credentials']
+                self.calc_session_life(self.token['Expiration'])
             else:
                 return logger.warning(
                     'Requested lifetime must be STS service limits (%s - %s minutes)'
@@ -230,23 +234,45 @@ class gcreds():
             logger.exception(ex)
             return False
 
-    def calc_session_life(self, session=''):
-        """ remaining time left in session and credential lifetime """
-        return 0
+    def calc_session_life(self, timestamp=''):
+        """
 
-    def calc_credenfital_life(self):
-        """ return remaining time on credential """
+        Summary:
+            remaining time left in session lifetime. The calc_session_life
+            method can also be used to reset session life to clear remaining time
+
+        Args:
+            timestamp:  datetime object
+
+        Returns:
+            TYPE: session remaining lifetime (minutes)
+
+        """
+
+        now = datetime.datetime.utcnow()    # must make offset aware
+
+        try:
+            if not self.token_expiration:
+                self.token_expiration = self.token['Expiration'] or timestamp    # convert to epoch?
+        except NameError:
+            return logger.warning('there is no active session established')
+        return 0 # now - self.token_expiration
+
+    def calc_credential_life(self):
+        """ return remaining time on temporary credentials """
         return 0
 
     def get_valid_users(self, client):
-        """ Summary
-        Retrieve list valid iam users from local config
+        """
+
+        Summary:
+            Retrieve list valid iam users from local config
 
         Arg:
             iam client object
 
         Returns:
-            list of iam users from the account
+            TYPE list
         """
         try:
             users = [x['UserName'] for x in client.list_users()['Users']]
