@@ -147,21 +147,21 @@ class gcreds():
                     % (self.sts_min, self.sts_max)
                     )
         except ClientError as e:
-            logger(
-                'Exception generating session token in account %s (Code: %s Message: %s)' %
-                (str(arn.split(':')[4]), e.response['Error']['Code'],
-                e.response['Error']['Message']
+            logger.warning(
+                'Exception generating session token with iam user %s (Code: %s Message: %s)' %
+                (self.iam_user, e.response['Error']['Code'], e.response['Error']['Message']
             ))
             return 1
         return self.token
 
-    def generate_credentials(self, profile_names):
+    def generate_credentials(self, accounts):
         """
         Summary:
             generate temporary credentials for profiles
 
         Args:
-            roles: List of profile names from the local awscli configuration
+            accounts: List of account aliases or profile names from the local
+                      awscli configuration in accounts to assume a role
 
         Returns:
             iam role temporary credentials | TYPE: List
@@ -182,14 +182,19 @@ class gcreds():
             aws_session_token=self.token['SessionToken']
         )
         try:
-            for alias in profile_names:
-                for profile in self.profiles:
-                    if profile['account_alias'] == alias:
-                        response = sts_client.assume_role(
-                            RoleArn=profile['role_arn'],
-                            DurationSeconds=self.credential_default * 60
-                        )
-                        temp_credentials.append(response['Credentials'])
+            if self._validate(accounts):
+                for alias in accounts:
+                    for profile in self.profiles:
+                        if profile['account_alias'] == alias:
+                            response = sts_client.assume_role(
+                                RoleArn=profile['role_arn'],
+                                DurationSeconds=self.credential_default * 60,
+                                RoleSessionName='gcreds-' + alias
+                            )
+                            response['Credentials']['profile'] = 'gcreds-' + alias
+                            temp_credentials.append(response['Credentials'])
+            else:
+                return None
         except ClientError as e:
             logger(
                 'Exception assuming role in account %s (Code: %s Message: %s)' %
@@ -198,6 +203,32 @@ class gcreds():
             ))
             return 1
         return temp_credentials
+
+    def _validate(self, list):
+        """
+
+        Summary:
+            validates parameter list is a subsset of profiles list object
+        Args:
+            TYPE: list
+
+        Returns:
+            TYPE: Boolean
+
+        """
+
+        profile_aliases = []
+
+        for profile in self.profiles:
+            profile_aliases.append(profile['account_alias'])
+
+        if set(list).issubset(set(profile_aliases)):
+            return True
+        else:
+            missing = set(list) - set(profile_aliases)
+            ex = Exception('Account profiles not found: %s'% set(missing))
+            logger.exception(ex)
+            return False
 
     def calc_session_life(self, session=''):
         """ remaining time left in session and credential lifetime """
