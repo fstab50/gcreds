@@ -194,7 +194,7 @@ class gcreds():
                             response['Credentials']['profile'] = 'gcreds-' + alias
                             temp_credentials.append(response['Credentials'])
             else:
-                return None
+                return []
         except ClientError as e:
             logger(
                 'Exception assuming role in account %s (Code: %s Message: %s)' %
