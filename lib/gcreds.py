@@ -60,7 +60,9 @@ class gcreds():
         try:
             boto3.setup_default_session(profile_name=profile_user)
         except ProfileNotFound as e:
-            logger.critical('iam user not found in local config. Error %s' % str(e))
+            logger.critical('iam user not found in local awscli config. Error %s' % str(e))
+            # FUTURE: support other local creds configs besides awscli; use real iam
+            # user to establish session, look up mfa_serial, etc before declaring fail
         except Exception:
             logger.critical('Unable to establish session. Error %s' % str(e))
             raise e
