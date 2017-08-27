@@ -11,6 +11,7 @@ import os
 import json
 from json import JSONDecodeError
 import datetime
+import inspect
 import boto3
 from botocore.exceptions import ClientError, ProfileNotFound
 import loggers
@@ -58,13 +59,19 @@ class gcreds():
         self.config_dir = os.environ['HOME'] + '/.gcreds'
         self.profiles = self.parse_profiles(filename)
         try:
-            boto3.setup_default_session(profile_name=profile_user)
+            boto3.setup_default_session(profile_name=self.profile_user)
         except ProfileNotFound as e:
-            logger.critical('iam user not found in local awscli config. Error %s' % str(e))
+            logger.critical(
+                '__init__(): iam user not found in local awscli config. Error %s'
+                % str(e)
+            )
             # FUTURE: support other local creds configs besides awscli; use real iam
             # user to establish session, look up mfa_serial, etc before declaring fail
         except Exception:
-            logger.critical('Unable to establish session. Error %s' % str(e))
+            logger.critical(
+                '%s: Unable to establish session. Error %s' %
+                (inspect.stack()[0][3], str(e))
+            )
             raise e
         else:
             self.iam_client = boto3.client('iam')
@@ -104,12 +111,15 @@ class gcreds():
             with open(profile_file) as f1:
                 profile_list = json.load(f1)
         except IOError as e:
-            logger.critical('problem opening file %s. Error %s' %
-                (profile_file, str(e)))
+            logger.critical(
+                '%s: problem opening file %s. Error %s' %
+                (inspect.stack()[0][3]), profile_file, str(e))
+            )
             return [str(e)]
         except JSONDecodeError as e:
-            logger.critical('%s file not properly formed json. Error %s' %
-                (profile_file, str(e)))
+            logger.critical(
+                '%s: %s file not properly formed json. Error %s' %
+                (inspect.stack()[0][3]), profile_file, str(e)))
             return [str(e)]
         return profile_list
 
@@ -138,8 +148,9 @@ class gcreds():
                 mfa_id = ''
         except ClientError as e:
             logger.warning(
-                'Exception accessing mfa info for profile user %s (Code: %s Message: %s)' %
-                (user, e.response['Error']['Code'], e.response['Error']['Message']
+                '%s: Exception accessing mfa info for local user %s (Code: %s Message: %s)' %
+                (inspect.stack()[0][3]), user, e.response['Error']['Code'],
+                e.response['Error']['Message']
             ))
             return str(e)
         return mfa_id
@@ -188,13 +199,14 @@ class gcreds():
                 self.calc_session_life(self.token['Expiration'])
             else:
                 return logger.warning(
-                    'Requested lifetime must be STS service limits (%s - %s minutes)'
-                    % (self.sts_min, self.sts_max)
+                    '%s: Requested lifetime must be STS service limits (%s - %s minutes)'
+                    % ('generate_session_token()', self.sts_min, self.sts_max)
                     )
         except ClientError as e:
             logger.warning(
-                'Exception generating session token with iam user %s (Code: %s Message: %s)' %
-                (self.iam_user, e.response['Error']['Code'], e.response['Error']['Message']
+                '%s: Exception generating session token with iam user %s (Code: %s Message: %s)' %
+                (inspect.stack()[0][3]), self.iam_user, e.response['Error']['Code'],
+                e.response['Error']['Message']
             ))
             return {'Error': str(e)}
         return self.token
@@ -246,9 +258,9 @@ class gcreds():
                 return {}
         except ClientError as e:
             logger(
-                'Exception assuming role in account %s (Code: %s Message: %s)' %
-                (str(arn.split(':')[4]), e.response['Error']['Code'],
-                e.response['Error']['Message']
+                '%s: Exception assuming role in account %s (Code: %s Message: %s)' %
+                (inspect.stack()[0][3]), str(arn.split(':')[4]),
+                e.response['Error']['Code'], e.response['Error']['Message']
             ))
             return {str(e)}
         return role_credentials
@@ -275,7 +287,9 @@ class gcreds():
             return True
         else:
             missing = set(list) - set(profile_aliases)
-            ex = Exception('Account profiles not found: %s'% set(missing))
+            ex = Exception('%s: Account profiles not found: %s' %
+            (inspect.stack()[0][3]), set(missing))
+            )
             logger.exception(ex)
             return False
 
@@ -300,7 +314,9 @@ class gcreds():
             if not self.token_expiration:
                 self.token_expiration = self.token['Expiration'] or timestamp    # convert to epoch?
         except NameError:
-            return logger.warning('there is no active session established')
+            return logger.warning('%s: there is no active session established' %
+            inspect.stack()[0][3])
+            )
         return 0 # stub in for: now - self.token_expiration
 
     def calc_credential_life(self):
@@ -323,9 +339,9 @@ class gcreds():
             users = [x['UserName'] for x in client.list_users()['Users']]
         except ClientError as e:
             logger(
-                'Exception listing iam users in account %s (Code: %s Message: %s)' %
-                (str(arn.split(':')[4]), e.response['Error']['Code'],
-                e.response['Error']['Message']
+                '%s: Exception listing iam users in account %s (Code: %s Message: %s)' %
+                (inspect.stack()[0][3]), str(arn.split(':')[4]),
+                e.response['Error']['Code'], e.response['Error']['Message']
             ))
             return 1
         return users
