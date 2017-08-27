@@ -34,12 +34,18 @@ class gcreds():
     True
     """
     def __init__(self, filename, profile_user=''):
-        """ initalization
-        Args:
-            iam_user: username with permissions to assume roles in target aws
-            accounts
+        """
 
-        Returns:
+        Summary:
+            initalization, attribute assignment
+
+        Args:
+            filename: name of a json structured file located gcreds config directory
+                in the home directory. File contains information about roles for
+                which you which to generate temporary credentials
+
+            profile_user: username configured in local awscli config with
+                permissions to assume roles in target aws accounts
 
         """
         self.sts_max = 720                      # minutes, 12 hours
@@ -72,11 +78,20 @@ class gcreds():
         Args:
             file: name of json file containing role profiles for which gcreds
                   will generate temporary credentials.  This file must be located
-                  in ~/.gcreds directory
+                  in ~/.gcreds directory and has the following format:
 
+                [
+                    {
+                        "account_alias": "acme-gen-ra1-prod",
+                        "role_arn": "arn:aws:iam::270145492687:role/UR-AcmeAdmin",
+                        "mfa_serial": "arn:aws:iam::354161853056:mfa/IAMAdmin05",
+                        "source_profile": "iam-access1"
+                    }
+                ]
         Returns:
             profile_obj: list of aws account profile role names, role arns
             TYPE: dict
+
         """
         profile_file = self.config_dir + '/' + str(file)
         try:
