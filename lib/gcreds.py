@@ -73,8 +73,10 @@ class gcreds():
 
     def parse_profiles(self, file):
         """
+
         Summary:
-            creates profile obj from local configuration file
+            creates list of account profiles from local configuration file
+
         Args:
             file: name of json file containing role profiles for which gcreds
                   will generate temporary credentials.  This file must be located
@@ -90,22 +92,24 @@ class gcreds():
                 ]
         Returns:
             profile_obj: list of aws account profile role names, role arns
-            TYPE: dict
+            TYPE: list
 
         """
+
         profile_file = self.config_dir + '/' + str(file)
+
         try:
             with open(profile_file) as f1:
-                profile_obj = json.load(f1)
+                profile_list = json.load(f1)
         except IOError as e:
             logger.critical('problem opening file %s. Error %s' %
                 (profile_file, str(e)))
-            return {'Error': str(e)}
+            return [str(e)]
         except JSONDecodeError as e:
             logger.critical('%s file not properly formed json. Error %s' %
                 (profile_file, str(e)))
-            return {'Error': str(e)}
-        return profile_obj
+            return [str(e)]
+        return profile_list
 
     def get_mfa_info(self, user, client):
         """
