@@ -134,8 +134,6 @@ class gcreds():
         try:
             if response['MFADevices']:
                 mfa_id = response['MFADevices'][0]['SerialNumber']
-                # Not sure what to do with user_id yet
-                user_id = response['MFADevices'][0]['UserName']
             else:
                 mfa_id = ''
         except ClientError as e:
