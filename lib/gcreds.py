@@ -10,7 +10,6 @@ from __init__ import __version__
 import os
 import json
 from json import JSONDecodeError
-import subprocess
 import datetime
 import boto3
 from botocore.exceptions import ClientError, ProfileNotFound
@@ -34,7 +33,7 @@ class gcreds():
     >>> type(myvar)
     True
     """
-    def __init__(self, iam_user=''):
+    def __init__(self, filename, profile_user=''):
         """ initalization
         Args:
             iam_user: username with permissions to assume roles in target aws
@@ -49,11 +48,11 @@ class gcreds():
         self.token_expiration = ''
         self.credential_expiration = ''
         self.credential_default = 60            # minutes, 1 hour (AWS Default)
-        self.iam_user = iam_user or 'default'
+        self.profile_user = profile_user or 'default'
         self.config_dir = os.environ['HOME'] + '/.gcreds'
-        self.profiles = self.profile_setup()
+        self.profiles = self.parse_profiles(filename)
         try:
-            boto3.setup_default_session(profile_name=iam_user)
+            boto3.setup_default_session(profile_name=profile_user)
         except ProfileNotFound as e:
             logger.critical('iam user not found in local config. Error %s' % str(e))
         except Exception:
@@ -62,48 +61,68 @@ class gcreds():
         else:
             self.iam_client = boto3.client('iam')
             self.sts_client = boto3.client('sts')
+            self.iam_user = self.sts_client.get_caller_identity()['Arn'].split('/')[1]
             self.users = self.get_valid_users(self.iam_client)
-            self.mfa_serial = self.get_mfa_id(iam_user)
+            self.mfa_serial = self.get_mfa_info(self.iam_user, self.iam_client)
 
-    def profile_setup(self):
+    def parse_profiles(self, file):
         """
         Summary:
             creates profile obj from local configuration file
         Args:
-            None
+            file: name of json file containing role profiles for which gcreds
+                  will generate temporary credentials.  This file must be located
+                  in ~/.gcreds directory
 
         Returns:
             profile_obj: list of aws account profile role names, role arns
             TYPE: dict
         """
-        profile_file = self.config_dir + '/profiles.json'
+        profile_file = self.config_dir + '/' + str(file)
         try:
             with open(profile_file) as f1:
                 profile_obj = json.load(f1)
         except IOError as e:
             logger.critical('problem opening file %s. Error %s' %
                 (profile_file, str(e)))
-            return 1
+            return {'Error': str(e)}
         except JSONDecodeError as e:
             logger.critical('%s file not properly formed json. Error %s' %
                 (profile_file, str(e)))
-            return 1
+            return {'Error': str(e)}
         return profile_obj
 
-    def get_mfa_id(self, user):
+    def get_mfa_info(self, user, client):
         """
-        Extracts the mfa_serial arn (soft token) or mfa_serial (hw token)
-        from the awscli local configuration
+
+        Summary:
+            Extracts the mfa_serial arn (soft token) or SerialNumber
+            (if hardware token assigned)
+
+        Args:
+            user:  iam_user in local awscli profile.  user may be a profile name
+                   which is used exclusively in the awscli but does not represent an
+                   actual iam name recorded in the Amazon Web Services account.
+
+        Returns:
+            TYPE: string
+
         """
-        awscli = 'aws'
-        cmd = 'type ' + awscli + ' 2>/dev/null'
-        if subprocess.getoutput(cmd):
-            cmd = awscli + ' configure get ' + user + '.mfa_serial'
-            try:
-                mfa_id = subprocess.getoutput(cmd)
-            except Exception as e:
-                logger.warning('failed to identify mfa_serial')
-                return 1
+
+        response = client.list_mfa_devices(UserName=user)
+        try:
+            if response['MFADevices']:
+                mfa_id = response['MFADevices'][0]['SerialNumber']
+                # Not sure what to do with user_id yet
+                user_id = response['MFADevices'][0]['UserName']
+            else:
+                mfa_id = ''
+        except ClientError as e:
+            logger.warning(
+                'Exception accessing mfa info for profile user %s (Code: %s Message: %s)' %
+                (user, e.response['Error']['Code'], e.response['Error']['Message']
+            ))
+            return str(e)
         return mfa_id
 
     def generate_session_token(self, token_life, mfa_code=''):
@@ -155,7 +174,7 @@ class gcreds():
                 'Exception generating session token with iam user %s (Code: %s Message: %s)' %
                 (self.iam_user, e.response['Error']['Code'], e.response['Error']['Message']
             ))
-            return 1
+            return {'Error': str(e)}
         return self.token
 
     def generate_credentials(self, accounts):
@@ -205,7 +224,7 @@ class gcreds():
                 (str(arn.split(':')[4]), e.response['Error']['Code'],
                 e.response['Error']['Message']
             ))
-            return 1
+            return [str(e)]
         return temp_credentials
 
     def _validate(self, list):
@@ -256,7 +275,7 @@ class gcreds():
                 self.token_expiration = self.token['Expiration'] or timestamp    # convert to epoch?
         except NameError:
             return logger.warning('there is no active session established')
-        return 0 # now - self.token_expiration
+        return 0 # stub in for: now - self.token_expiration
 
     def calc_credential_life(self):
         """ return remaining time on temporary credentials """
