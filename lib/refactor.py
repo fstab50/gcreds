@@ -16,11 +16,12 @@ home_dir = os.environ['HOME']
 config_dir = home_dir + '/.gcreds'
 
 argparser = argparse.ArgumentParser(description='gcreds credential data build')
-argparser.add_argument("-f", "--file", help="Credential Input File", required=True)
+argparser.add_argument("-i", "--input", help="awscli format Input File", required=True)
+argparser.add_argument("-o", "--output", help="Credential Output File", required=True)
 args = argparser.parse_args()
 
-input_file = args.file
-output_file = config_dir + '/profiles.json'
+input_file = args.input
+output_file = config_dir + '/' + args.output
 
 # configuration dir
 if not os.path.exists(config_dir):
