@@ -156,6 +156,7 @@ class gcreds():
 
             {
                 'AccessKeyId': 'ASIAI6QV2U3JJAYRHCJQ',
+                'StartTime': datetime.datetime(2017, 8, 25, 20, 2, 37, tzinfo=tzutc()),
                 'Expiration': datetime.datetime(2017, 8, 25, 20, 5, 37, tzinfo=tzutc()),
                 'SecretAccessKey': 'MdjPAkXTHl12k64LSjmgTWMsmnHk4cJfeMHdXMLA',
                 'SessionToken': 'FQoDYXdzEDMaDHAaP2wi/+77fNJJryKvAdVZjYKk...zQU='
@@ -164,6 +165,7 @@ class gcreds():
 
         token_life = int(token_life)
         mfa_code = str(mfa_code)
+        now = datetime.datetime.utcnow()    # needs to be converted to offset datetime
 
         try:
             if (self.sts_min < token_life < self.sts_max):
@@ -177,6 +179,7 @@ class gcreds():
                     response = self.sts_client.get_session_token(
                         DurationSeconds=token_life * 60
                     )
+                response['Credentials']['StartTime'] = now
                 self.token = response['Credentials']
                 self.calc_session_life(self.token['Expiration'])
             else:
@@ -202,17 +205,22 @@ class gcreds():
                       awscli configuration in accounts to assume a role
 
         Returns:
-            iam role temporary credentials | TYPE: List
+            iam role temporary credentials | TYPE: Dict
 
             {
-                'AccessKeyId': 'ASIAI6QV2U3JJAYRHCJQ',
-                'Expiration': datetime.datetime(2017, 8, 25, 20, 5, 37, tzinfo=tzutc()),
-                'SecretAccessKey': 'MdjPAkXTHl12k64LSjmgTWMsmnHk4cJfeMHdXMLA',
-                'SessionToken': 'FQoDYXdzEDMaDHAaP2wi/+77fNJJryKvAdVZjYKk...zQU='
+                'gcreds-acme-gen-ra1-prod' : {
+                    'AccessKeyId': 'ASIAI6QV2U3JJAYRHCJQ',
+                    'Expiration': datetime.datetime(2017, 8, 25, 20, 5, 37, tzinfo=tzutc()),
+                    'SecretAccessKey': 'MdjPAkXTHl12k64LSjmgTWMsmnHk4cJfeMHdXMLA',
+                    'SessionToken': 'FQoDYXdzEDMaDHAaP2wi/+77fNJJryKvAdVZjYKk...zQU='
+                },
+                'gcreds-acme-gen-ra1-dev' : {
+                    ...
+                }
             }
         """
 
-        temp_credentials = []
+        role_credentials = {}
         sts_client = boto3.client(
             'sts',
             aws_access_key_id=self.token['AccessKeyId'],
@@ -229,18 +237,17 @@ class gcreds():
                                 DurationSeconds=self.credential_default * 60,
                                 RoleSessionName='gcreds-' + alias
                             )
-                            response['Credentials']['profile'] = 'gcreds-' + alias
-                            temp_credentials.append(response['Credentials'])
+                            role_credentials['gcreds-' + alias] = response['Credentials']
             else:
-                return []
+                return {}
         except ClientError as e:
             logger(
                 'Exception assuming role in account %s (Code: %s Message: %s)' %
                 (str(arn.split(':')[4]), e.response['Error']['Code'],
                 e.response['Error']['Message']
             ))
-            return [str(e)]
-        return temp_credentials
+            return {str(e)}
+        return role_credentials
 
     def _validate(self, list):
         """
