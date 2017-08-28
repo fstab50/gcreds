@@ -221,6 +221,14 @@ class GCreds():
             accounts: List of account aliases or profile names from the local
                       awscli configuration in accounts to assume a role
 
+            strict:   determines if strict membership checking is applied to
+                      aliases found in accounts parameter list. if strict=True
+                      (Default), then if 1 account profilename given in the accounts
+                      list, all accounts will be rejected and no temporary credentials
+                      are generated.  If False, temporary credentials generated
+                      for all profiles that are valid, only invalid profiles will
+                      fail to generate credentials
+
         Returns:
             iam role temporary credentials | TYPE: Dict
 
@@ -245,7 +253,7 @@ class GCreds():
             aws_session_token=self.token['SessionToken']
         )
         try:
-            if self._validate(accounts):
+            if self._validate(accounts, strict):
                 for alias in accounts:
                     for profile in self.profiles:
                         if profile['account_alias'] == alias:
@@ -266,7 +274,7 @@ class GCreds():
             return {str(e)}
         return role_credentials
 
-    def _validate(self, list):
+    def _validate(self, list, check_bit):
         """
 
         Summary:
@@ -286,13 +294,19 @@ class GCreds():
 
         if set(list).issubset(set(profile_aliases)):
             return True
-        else:
+        elif check_bit:
+            # strict checking
             missing = set(list) - set(profile_aliases)
-            ex = Exception('%s: Account profiles not found: %s' %
-            (inspect.stack()[0][3], set(missing))
-            )
+            ex = Exception('%s: Invalid account profiles: %s' %
+            (inspect.stack()[0][3], set(missing)))
             logger.exception(ex)
             return False
+        else:
+            # non-strict
+            missing = set(list) - set(profile_aliases)
+            logger.warning('%s: No creds gen for invalid account profiles: %s' %
+            (inspect.stack()[0][3], set(missing)))
+            return True
 
     def calc_session_life(self, timestamp=''):
         """
