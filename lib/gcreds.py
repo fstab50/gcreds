@@ -292,21 +292,27 @@ class GCreds():
         for profile in self.profiles:
             profile_aliases.append(profile['account_alias'])
 
+        invalid = set(list) - set(profile_aliases)
+        valid = set(list) - set(invalid)
+
         if set(list).issubset(set(profile_aliases)):
+            logger.info('%s: Valid account profile names verified: %s' %
+            (inspect.stack()[0][3], str(list)))
             return True
-        elif check_bit:
-            # strict checking
-            missing = set(list) - set(profile_aliases)
-            ex = Exception('%s: Invalid account profiles: %s' %
-            (inspect.stack()[0][3], set(missing)))
-            logger.exception(ex)
-            return False
         else:
-            # non-strict
-            missing = set(list) - set(profile_aliases)
-            logger.warning('%s: No creds gen for invalid account profiles: %s' %
-            (inspect.stack()[0][3], set(missing)))
-            return True
+            logger.info('%s: Valid account profile names verified: %s' %
+            (inspect.stack()[0][3], str(valid)))
+            if check_bit:
+                # strict checking
+                ex = Exception('%s: Invalid account profiles: %s' %
+                (inspect.stack()[0][3], set(invalid)))
+                logger.exception(ex)
+                return False
+            else:
+                # non-strict
+                logger.warning('%s: No creds gen for invalid account profiles: %s' %
+                (inspect.stack()[0][3], set(invalid)))
+                return True
 
     def calc_session_life(self, timestamp=''):
         """
