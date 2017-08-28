@@ -33,8 +33,7 @@ try:
         for line in f1:
             if line.strip():
                 if '[' and ']' in line:
-                    profile_name = line.split('[')[1].split(']')[0]
-                    dict['account_alias'] = profile_name
+                    dict['account_alias'] = line.split('[')[1].split(']')[0]
 
                 elif 'role_arn' in line:
                     dict['role_arn'] = line.split('=')[1].strip()
