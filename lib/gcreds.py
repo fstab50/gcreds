@@ -60,18 +60,19 @@ class gcreds():
         self.profiles = self.parse_profiles(filename)
         try:
             boto3.setup_default_session(profile_name=self.profile_user)
-        except ProfileNotFound as e:
-            logger.critical(
-                '__init__(): iam user not found in local awscli config. Error %s'
-                % str(e)
-            )
             # FUTURE: support other local creds configs besides awscli; use real iam
             # user to establish session, look up mfa_serial, etc before declaring fail
-        except Exception:
+        except ProfileNotFound as e:
             logger.critical(
-                '%s: Unable to establish session. Error %s' %
+                '%s: iam user not found in local awscli config. Error %s' %
                 (inspect.stack()[0][3], str(e))
             )
+        except ClientError as e:
+            logger.critical(
+                '%s: Unable to establish session - Unknown Error. %s (Code: %s Message: %s)' %
+                (inspect.stack()[0][3], user, e.response['Error']['Code'],
+                e.response['Error']['Message']
+            ))
             raise e
         else:
             self.iam_client = boto3.client('iam')
