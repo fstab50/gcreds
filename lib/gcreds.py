@@ -19,7 +19,7 @@ import loggers
 logger = loggers.getLogger(__version__)
 
 
-class gcreds():
+class GCreds():
     """
     Summary:
         gcreds generates temporary credentials used to assume roles across
@@ -212,7 +212,7 @@ class gcreds():
             return {'Error': str(e)}
         return self.token
 
-    def generate_credentials(self, accounts):
+    def generate_credentials(self, accounts, strict=True):
         """
         Summary:
             generate temporary credentials for profiles
