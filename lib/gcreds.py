@@ -218,16 +218,18 @@ class GCreds():
             generate temporary credentials for profiles
 
         Args:
-            accounts: List of account aliases or profile names from the local
-                      awscli configuration in accounts to assume a role
+            accounts: TYPE: list
+                    List of account aliases or profile names from the local
+                    awscli configuration in accounts to assume a role
 
-            strict:   determines if strict membership checking is applied to
-                      aliases found in accounts parameter list. if strict=True
-                      (Default), then if 1 account profilename given in the accounts
-                      list, all accounts will be rejected and no temporary credentials
-                      are generated.  If False, temporary credentials generated
-                      for all profiles that are valid, only invalid profiles will
-                      fail to generate credentials
+            strict: TYPE: list
+                    Determines if strict membership checking is applied to
+                    aliases found in accounts parameter list. if strict=True
+                    (Default), then if 1 account profilename given in the accounts
+                    list, all accounts will be rejected and no temporary credentials
+                    are generated.  If False, temporary credentials generated
+                    for all profiles that are valid, only invalid profiles will
+                    fail to generate credentials
 
         Returns:
             iam role temporary credentials | TYPE: Dict
