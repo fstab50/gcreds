@@ -26,22 +26,17 @@ if not os.path.exists(config_dir):
     logger.info('Configuration dir [%s] missing, creating it' % config_dir)
     os.mkdir(config_dir)
 
+config = configparser.ConfigParser()
+config.read(input_file)
+
+tmp, tdict = {}, {}
+
 try:
-    config = configparser.ConfigParser()
-    config.read(input_file)
-
-    tmp, tdict = {}, {}
-
     for profile in config.sections():
         tmp['role_arn'] = config[profile]['role_arn']
         tmp['mfa_serial'] = config[profile]['mfa_serial']
         tmp['source_profile'] =  config[profile]['source_profile']
         tdict[profile] = tmp
-
-    # write output file
-    with open(output_file, 'w') as f2:
-        f2.write(json.dumps(tdict, indent=4))
-        f2.close()
 
 except KeyError as e:
     logger.critical('Cannot find Key %s parsing file %s' % (str(e), input_file))
@@ -50,3 +45,8 @@ except IOError as e:
     logger.critical('problem opening file %s. Error %s' % (input_file, str(e)))
 except Exception as e:
     logger.critical('unknown error. Error %s' % str(e))
+
+# write output file
+with open(output_file, 'w') as f2:
+    f2.write(json.dumps(tdict, indent=4))
+    f2.close()
