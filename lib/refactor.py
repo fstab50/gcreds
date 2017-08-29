@@ -44,7 +44,8 @@ try:
         f2.close()
 
 except KeyError as e:
-    logger.critical('Cannot find Key %s parsing file %s' % (str(e)), input_file)
+    logger.critical('Cannot find Key %s parsing file %s' % (str(e), input_file))
+    pass
 except IOError as e:
     logger.critical('problem opening file %s. Error %s' % (input_file, str(e)))
 except Exception as e:
