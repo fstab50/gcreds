@@ -3,15 +3,13 @@
 from __init__ import __version__
 import os
 import json
+import configparser
 import argparse
 import loggers
 
 logger = loggers.getLogger(__version__)
 
 # globals
-container = []
-dict = {}
-ct = 0
 home_dir = os.environ['HOME']
 config_dir = home_dir + '/.gcreds'
 
@@ -29,34 +27,25 @@ if not os.path.exists(config_dir):
     os.mkdir(config_dir)
 
 try:
-    with open(input_file) as f1:
-        for line in f1:
-            if line.strip():
-                if '[' and ']' in line:
-                    dict['account_alias'] = line.split('[')[1].split(']')[0]
+    config = configparser.ConfigParser()
+    config.read(input_file)
 
-                elif 'role_arn' in line:
-                    dict['role_arn'] = line.split('=')[1].strip()
+    tmp, tdict = {}, {}
 
-                elif 'mfa_serial' in line:
-                    dict['mfa_serial'] = line.split('=')[1].strip()
+    for profile in config.sections():
+        tmp['role_arn'] = config[profile]['role_arn']
+        tmp['mfa_serial'] = config[profile]['mfa_serial']
+        tmp['source_profile'] =  config[profile]['source_profile']
+        tdict[profile] = tmp
 
-                elif 'source_profile' in line:
-                    dict['source_profile'] = line.split('=')[1].strip()
-                ct += 1
-                if ct == 4:
-                    print(json.dumps(dict, indent=4))
-                    container.append(dict)
-                    dict = {}
-                    ct = 0
-        f1.close()
+    # write output file
+    with open(output_file, 'w') as f2:
+        f2.write(json.dumps(tdict, indent=4))
+        f2.close()
+
+except KeyError as e:
+    logger.critical('Cannot find Key %s parsing file %s' % (str(e)), input_file)
 except IOError as e:
     logger.critical('problem opening file %s. Error %s' % (input_file, str(e)))
 except Exception as e:
     logger.critical('unknown error. Error %s' % str(e))
-
-else:
-    # write output file
-    with open(output_file, 'w') as f2:
-        f2.write(json.dumps(container, indent=4))
-        f2.close()
