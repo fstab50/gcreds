@@ -72,7 +72,7 @@ function gcreds_help(){
         avoiding a multi-factor auth prompt in a cli environment is desired
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
-            ${BOLD}$pkg -a ${UNBOLD}<${ansi}ACCTFILE${reset}> ${BOLD}--profile${UNBOLD} <${ansi}IAM_PROFILE${reset}> ${BOLD}-c${UNBOLD} <${ansi}MFA_CODE${reset}>
+            ${BOLD}$pkg -a ${UNBOLD}<ACCTFILE$> ${BOLD}--profile${UNBOLD} <IAM_PROFILE> ${BOLD}-c${UNBOLD} <MFA_CODE>
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
             -a, --accounts : list of accounts
