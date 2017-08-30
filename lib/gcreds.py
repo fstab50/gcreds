@@ -327,7 +327,7 @@ class GCreds():
             timestamp:  datetime object
 
         Returns:
-            TYPE: session remaining lifetime (minutes)
+            TYPE: datetime | session remaining lifetime (minutes)
 
         """
 
