@@ -4,6 +4,7 @@ from __init__ import __version__
 import os
 import json
 import configparser
+import sys
 import argparse
 import loggers
 
@@ -13,18 +14,26 @@ logger = loggers.getLogger(__version__)
 home_dir = os.environ['HOME']
 config_dir = home_dir + '/.gcreds'
 
-argparser = argparse.ArgumentParser(description='gcreds credential data build')
-argparser.add_argument("-i", "--input", help="awscli format Input File", required=True)
-argparser.add_argument("-o", "--output", help="Credential Output File", required=True)
-args = argparser.parse_args()
+parser = argparse.ArgumentParser(description='gcreds credential data build')
+parser.add_argument("-i", "--input", help="awscli format Input File", required=True)
+parser.add_argument("-o", "--output", help="Credential Output File", required=True)
+args = parser.parse_args()
 
 input_file = args.input
 output_file = config_dir + '/' + args.output
+
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
 
 # configuration dir
 if not os.path.exists(config_dir):
     logger.info('Configuration dir [%s] missing, creating it' % config_dir)
     os.mkdir(config_dir)
+
+if not os.path.exists(input_file):
+    logger.info('Input file [%s] not found' % input_file)
+    exit(1)
 
 config = configparser.ConfigParser()
 config.read(input_file)
@@ -38,15 +47,14 @@ try:
         tmp['source_profile'] =  config[profile]['source_profile']
         tdict[profile] = tmp
 
+    # write output file
+    with open(output_file, 'w') as f2:
+        f2.write(json.dumps(tdict, indent=4))
+        f2.close()
+
 except KeyError as e:
     logger.critical('Cannot find Key %s parsing file %s' % (str(e), input_file))
-    pass
 except IOError as e:
     logger.critical('problem opening file %s. Error %s' % (input_file, str(e)))
 except Exception as e:
     logger.critical('unknown error. Error %s' % str(e))
-
-# write output file
-with open(output_file, 'w') as f2:
-    f2.write(json.dumps(tdict, indent=4))
-    f2.close()
