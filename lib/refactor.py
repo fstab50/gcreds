@@ -34,10 +34,16 @@ if not os.path.exists(config_dir):
 if not os.path.exists(input_file):
     logger.info('Input file [%s] not found' % input_file)
     exit(1)
+else:
+    config = configparser.ConfigParser()
+    config.read(input_file)
 
-config = configparser.ConfigParser()
-config.read(input_file)
-
+"""
+ini_files = []
+for file in os.listdir('/home/blake/.aws/'):
+    if '.ini' in file:
+        ini_files.append(file)
+"""
 tmp, tdict = {}, {}
 
 try:
