@@ -55,6 +55,7 @@ class GCreds():
         self.token_expiration = ''
         self.credential_expiration = ''
         self.credential_default = 60            # minutes, 1 hour (AWS Default)
+        self.credentials = {}
         self.profile_user = profile_user or 'default'
         self.config_dir = os.environ['HOME'] + '/.gcreds'
         self.profiles = self.parse_profiles(filename)
@@ -274,6 +275,7 @@ class GCreds():
                 e.response['Error']['Code'], e.response['Error']['Message']
             ))
             return {str(e)}
+            self.credentials = role_credentials
         return role_credentials
 
     def _validate(self, list, check_bit):
@@ -298,11 +300,11 @@ class GCreds():
         valid = set(list) - set(invalid)
 
         if set(list).issubset(set(profile_aliases)):
-            logger.info('%s: Valid account profile names verified: %s' %
+            logger.info('%s: Valid account profile names: %s' %
             (inspect.stack()[0][3], str(list)))
             return True
         else:
-            logger.info('%s: Valid account profile names verified: %s' %
+            logger.info('%s: Valid account profile names: %s' %
             (inspect.stack()[0][3], str(valid)))
             if check_bit:
                 # strict checking
@@ -312,7 +314,7 @@ class GCreds():
                 return False
             else:
                 # non-strict
-                logger.warning('%s: No creds gen for invalid account profiles: %s' %
+                logger.warning('%s: No creds gen for profiles: %s' %
                 (inspect.stack()[0][3], set(invalid)))
                 return True
 
