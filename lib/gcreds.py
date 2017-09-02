@@ -42,7 +42,7 @@ class GCreds():
 
         Args:
             filename: name of a json structured file located gcreds config directory
-                in the home directory. File contains information about roles for
+                in users home directory. File contains information about roles for
                 which you which to generate temporary credentials
 
             profile_user: username configured in local awscli config with
@@ -70,18 +70,30 @@ class GCreds():
             )
         except ClientError as e:
             logger.critical(
-                '%s: Unable to establish session - Unknown Error. %s (Code: %s Message: %s)' %
-                (inspect.stack()[0][3], user, e.response['Error']['Code'],
+                '%s: Unable to establish session (Code: %s Message: %s)' %
+                (inspect.stack()[0][3], e.response['Error']['Code'],
                 e.response['Error']['Message']
             ))
             raise e
         else:
             self.iam_client = boto3.client('iam')
             self.sts_client = boto3.client('sts')
-            self.iam_user = self.sts_client.get_caller_identity()['Arn'].split('/')[1]
             self.users = self.get_valid_users(self.iam_client)
+            self.iam_user = self._map_identity(self.iam_user, self.sts_client)
             self.mfa_serial = self.get_mfa_info(self.iam_user, self.iam_client)
 
+    def _map_identity(self, user, client):
+        """ retrieves iam user info for profiles in awscli config """
+            try:
+                iam_user = client.get_caller_identity()['Arn'].split('/')[1]
+            except ClientError as e:
+                logger.critical(
+                    '%s: sts Error (Code: %s Message: %s)' %
+                    (inspect.stack()[0][3], e.response['Error']['Code'],
+                    e.response['Error']['Message']
+                ))
+                raise e
+        return iam_user
     def parse_profiles(self, file):
         """
 
@@ -141,20 +153,27 @@ class GCreds():
             TYPE: string
 
         """
-
-        response = client.list_mfa_devices(UserName=user)
-        try:
-            if response['MFADevices']:
-                mfa_id = response['MFADevices'][0]['SerialNumber']
+        # query local for mfa info
+        if self.profile_user in self.profiles.keys():
+            if 'mfa_serial' in self.profiles[self.profile_user].keys():
+                mfa_id = self.profiles[self.profile_user]['mfa_serial']
             else:
                 mfa_id = ''
-        except ClientError as e:
-            logger.warning(
-                '%s: Exception accessing mfa info for local user %s (Code: %s Message: %s)' %
-                (inspect.stack()[0][3], user, e.response['Error']['Code'],
-                e.response['Error']['Message']
-            ))
-            return str(e)
+        else:
+            # query aws for mfa info
+            try:
+                response = client.list_mfa_devices(UserName=user)
+                if response['MFADevices']:
+                    mfa_id = response['MFADevices'][0]['SerialNumber']
+                else:
+                    mfa_id = ''
+            except ClientError:
+                mfa_id = ''    # no mfa assigned to user
+            except Exception as e:
+                logger.critical(
+                    '%s: Unknown error retrieving mfa device info. Error %s' %
+                    (inspect.stack()[0][3], str(e)))
+                return str(e)
         return mfa_id
 
     def generate_session_token(self, token_life, mfa_code=''):
@@ -248,7 +267,6 @@ class GCreds():
             }
         """
 
-        role_credentials = {}
         sts_client = boto3.client(
             'sts',
             aws_access_key_id=self.token['AccessKeyId'],
@@ -265,7 +283,7 @@ class GCreds():
                                 DurationSeconds=self.credential_default * 60,
                                 RoleSessionName='gcreds-' + alias
                             )
-                            role_credentials['gcreds-' + alias] = response['Credentials']
+                            self.credentials['gcreds-' + alias] = response['Credentials']
             else:
                 return {}
         except ClientError as e:
@@ -275,8 +293,7 @@ class GCreds():
                 e.response['Error']['Code'], e.response['Error']['Message']
             ))
             return {str(e)}
-            self.credentials = role_credentials
-        return role_credentials
+        return self.credentials
 
     def _validate(self, list, check_bit):
         """
