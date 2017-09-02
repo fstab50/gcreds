@@ -10,6 +10,7 @@ import loggers
 
 logger = loggers.getLogger(__version__)
 
+# --- start if __name__ == '__main__': -------------------------------
 # globals
 home_dir = os.environ['HOME']
 config_dir = home_dir + '/.gcreds'
@@ -27,6 +28,7 @@ if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
+# -- start function / Class def here -----------------------------------------
 # configuration dir
 if not os.path.exists(config_dir):
     logger.info('Configuration dir [%s] missing, creating it' % config_dir)
