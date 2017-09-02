@@ -13,6 +13,7 @@ logger = loggers.getLogger(__version__)
 # globals
 home_dir = os.environ['HOME']
 config_dir = home_dir + '/.gcreds'
+awscli_dir = home_dir + '/.aws' or os.environ['AWS_SHARED_CREDENTIALS_FILE']
 
 parser = argparse.ArgumentParser(description='gcreds credential data build')
 parser.add_argument("-i", "--input", help="awscli format Input File", required=True)
@@ -38,24 +39,29 @@ else:
     config = configparser.ConfigParser()
     config.read(input_file)
 
-"""
-ini_files = []
-for file in os.listdir('/home/blake/.aws/'):
-    if '.ini' in file:
-        ini_files.append(file)
-"""
-tmp, tdict = {}, {}
+total_dict, tmp = {}, {}
 
 try:
     for profile in config.sections():
-        tmp['role_arn'] = config[profile]['role_arn']
-        tmp['mfa_serial'] = config[profile]['mfa_serial']
-        tmp['source_profile'] =  config[profile]['source_profile']
-        tdict[profile] = tmp
+        if 'gcreds' in profile:
+            continue
+        elif 'aws_access_key_id' in config[profile].keys():
+            tmp['aws_access_key_id'] = config[profile]['aws_access_key_id']
+            tmp['aws_secret_access_key'] =  config[profile]['aws_secret_access_key']
+            # test if cli secured with mfa
+            if 'mfa_serial' in config[profile].keys():
+                tmp['mfa_serial'] = config[profile]['mfa_serial']
+
+        elif 'role_arn' in config[profile].keys():
+            tmp['role_arn'] = config[profile]['role_arn']
+            tmp['mfa_serial'] = config[profile]['mfa_serial']
+            tmp['source_profile'] =  config[profile]['source_profile']
+        total_dict[profile] = tmp
+        tmp = {}
 
     # write output file
     with open(output_file, 'w') as f2:
-        f2.write(json.dumps(tdict, indent=4))
+        f2.write(json.dumps(total_dict, indent=4))
         f2.close()
 
 except KeyError as e:
