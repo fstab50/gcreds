@@ -65,7 +65,7 @@ class GCreds():
             # user to establish session, look up mfa_serial, etc before declaring fail
         except ProfileNotFound as e:
             logger.critical(
-                '%s: iam user not found in local awscli config. Error %s' %
+                '%s: iam user not found in local awscli config - Error: %s' %
                 (inspect.stack()[0][3], str(e))
             )
         except ClientError as e:
@@ -79,21 +79,21 @@ class GCreds():
             self.iam_client = boto3.client('iam')
             self.sts_client = boto3.client('sts')
             self.users = self.get_valid_users(self.iam_client)
-            self.iam_user = self._map_identity(self.iam_user, self.sts_client)
+            self.iam_user = self._map_identity(self.profile_user, self.sts_client)
             self.mfa_serial = self.get_mfa_info(self.iam_user, self.iam_client)
 
     def _map_identity(self, user, client):
         """ retrieves iam user info for profiles in awscli config """
-            try:
-                iam_user = client.get_caller_identity()['Arn'].split('/')[1]
-            except ClientError as e:
-                logger.critical(
-                    '%s: sts Error (Code: %s Message: %s)' %
-                    (inspect.stack()[0][3], e.response['Error']['Code'],
-                    e.response['Error']['Message']
-                ))
-                raise e
+        try:
+            iam_user = client.get_caller_identity()['Arn'].split('/')[1]
+        except ClientError as e:
+            logger.warning(
+                '%s: Inadequate User permissions (Code: %s Message: %s)' %
+                (inspect.stack()[0][3], e.response['Error']['Code'],
+                e.response['Error']['Message']))
+            raise str(e)
         return iam_user
+
     def parse_profiles(self, file):
         """
 
@@ -377,13 +377,13 @@ class GCreds():
         Returns:
             TYPE list
         """
+        users = []
         try:
             users = [x['UserName'] for x in client.list_users()['Users']]
         except ClientError as e:
-            logger(
-                '%s: Exception listing iam users in account %s (Code: %s Message: %s)' %
-                (inspect.stack()[0][3], str(arn.split(':')[4]),
-                e.response['Error']['Code'], e.response['Error']['Message']
-            ))
-            return 1
+            logger.critical(
+                '%s: User not valid or permissions inadequate (Code: %s Message: %s)' %
+                (inspect.stack()[0][3], e.response['Error']['Code'],
+                e.response['Error']['Message']))
+            raise
         return users
