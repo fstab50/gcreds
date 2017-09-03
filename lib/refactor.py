@@ -10,65 +10,76 @@ import loggers
 
 logger = loggers.getLogger(__version__)
 
-# --- start if __name__ == '__main__': -------------------------------
 # globals
 home_dir = os.environ['HOME']
 config_dir = home_dir + '/.gcreds'
-awscli_dir = home_dir + '/.aws' or os.environ['AWS_SHARED_CREDENTIALS_FILE']
+awscli_dir = os.getenv('AWS_SHARED_CREDENTIALS_FILE') or home_dir + '/.aws'
 
-parser = argparse.ArgumentParser(description='gcreds credential data build')
-parser.add_argument("-i", "--input", help="awscli format Input File", required=True)
-parser.add_argument("-o", "--output", help="Credential Output File", required=True)
-args = parser.parse_args()
 
-input_file = args.input
-output_file = config_dir + '/' + args.output
+# -- function declarations  ----------------------------------------------------
 
-if len(sys.argv) == 1:
-    parser.print_help()
-    sys.exit(1)
+def parse_awscli(parameter_input='', parameter_output=''):
+    """ imports awscli credentials file, refactors format to json """
 
-# -- start function / Class def here -----------------------------------------
-# configuration dir
-if not os.path.exists(config_dir):
-    logger.info('Configuration dir [%s] missing, creating it' % config_dir)
-    os.mkdir(config_dir)
+    awscli_file = parameter_input or awscli_dir + '/credentials'
+    output_file = parameter_output or config_dir + '/profiles.json'
+    total_dict, tmp = {}, {}
 
-if not os.path.exists(input_file):
-    logger.info('Input file [%s] not found' % input_file)
-    exit(1)
-else:
+    if not os.path.exists(config_dir):
+        logger.info('Configuration dir [%s] missing, creating it' % config_dir)
+        os.mkdir(config_dir)
+
     config = configparser.ConfigParser()
-    config.read(input_file)
+    config.read(awscli_file)
 
-total_dict, tmp = {}, {}
+    try:
+        for profile in filter(lambda x: 'gcreds' not in x, config.sections()):
+            if 'aws_access_key_id' in config[profile].keys():
+                tmp['aws_access_key_id'] = config[profile]['aws_access_key_id']
+                tmp['aws_secret_access_key'] =  config[profile]['aws_secret_access_key']
+                # test if cli secured with mfa
+                if 'mfa_serial' in config[profile].keys():
+                    tmp['mfa_serial'] = config[profile]['mfa_serial']
 
-try:
-    for profile in config.sections():
-        if 'gcreds' in profile:
-            continue
-        elif 'aws_access_key_id' in config[profile].keys():
-            tmp['aws_access_key_id'] = config[profile]['aws_access_key_id']
-            tmp['aws_secret_access_key'] =  config[profile]['aws_secret_access_key']
-            # test if cli secured with mfa
-            if 'mfa_serial' in config[profile].keys():
+            elif 'role_arn' in config[profile].keys():
+                tmp['role_arn'] = config[profile]['role_arn']
                 tmp['mfa_serial'] = config[profile]['mfa_serial']
+                tmp['source_profile'] =  config[profile]['source_profile']
+            total_dict[profile] = tmp
+            tmp = {}
 
-        elif 'role_arn' in config[profile].keys():
-            tmp['role_arn'] = config[profile]['role_arn']
-            tmp['mfa_serial'] = config[profile]['mfa_serial']
-            tmp['source_profile'] =  config[profile]['source_profile']
-        total_dict[profile] = tmp
-        tmp = {}
+        # write output file
+        with open(output_file, 'w') as f2:
+            f2.write(json.dumps(total_dict, indent=4))
+            f2.close()
 
-    # write output file
-    with open(output_file, 'w') as f2:
-        f2.write(json.dumps(total_dict, indent=4))
-        f2.close()
+        # secure file permissions
+        os.chmod(output_file, 0o700)
 
-except KeyError as e:
-    logger.critical('Cannot find Key %s parsing file %s' % (str(e), input_file))
-except IOError as e:
-    logger.critical('problem opening file %s. Error %s' % (input_file, str(e)))
-except Exception as e:
-    logger.critical('unknown error. Error %s' % str(e))
+    except KeyError as e:
+        logger.critical('Cannot find Key %s parsing file %s' % (str(e), input_file))
+    except IOError as e:
+        logger.critical('problem opening file %s. Error %s' % (input_file, str(e)))
+    except Exception as e:
+        logger.critical('unknown error. Error %s' % str(e))
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='gcreds credential data build')
+    parser.add_argument("-i", "--input", help="awscli format Input File", required=True)
+    parser.add_argument("-o", "--output", help="Credential Output File", required=True)
+    args = parser.parse_args()
+
+    input_file = args.input
+    output_file = args.output
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+    elif not os.path.exists(input_file):
+        logger.info('Input file [%s] not found\n' % input_file)
+        sys.exit(1)
+
+    # refactor with manual input
+    parse_awscli(parameter_input=input_file, parameter_output=output_file)
