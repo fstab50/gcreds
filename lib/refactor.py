@@ -13,7 +13,7 @@ logger = loggers.getLogger(__version__)
 # globals
 home_dir = os.environ['HOME']
 config_dir = home_dir + '/.gcreds'
-awscli_dir = os.getenv('AWS_SHARED_CREDENTIALS_FILE') or home_dir + '/.aws'
+awscli_default = os.getenv('AWS_SHARED_CREDENTIALS_FILE') or home_dir + '/.aws/credentials'
 
 
 # -- function declarations  ----------------------------------------------------
@@ -21,7 +21,7 @@ awscli_dir = os.getenv('AWS_SHARED_CREDENTIALS_FILE') or home_dir + '/.aws'
 def parse_awscli(parameter_input='', parameter_output=''):
     """ imports awscli credentials file, refactors format to json """
 
-    awscli_file = parameter_input or awscli_dir + '/credentials'
+    awscli_file = parameter_input or awscli_default
     output_file = parameter_output or config_dir + '/profiles.json'
     total_dict, tmp = {}, {}
 
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(0)
     elif not os.path.exists(input_file):
-        logger.info('Input file [%s] not found\n' % input_file)
+        logger.info('Input file [%s] not found' % input_file)
         sys.exit(1)
 
     # refactor with manual input
