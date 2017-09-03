@@ -70,7 +70,7 @@ def parse_awscli(parameter_input='', parameter_output=''):
         os.chmod(output_file, 0o700)
 
     except KeyError as e:
-        logger.critical('%s: Cannot find Key %s parsing file %s' %
+        logger.critical('%s: Cannot find Key %s while parsing file %s' %
             (inspect.stack()[0][3], str(e), input_file))
         return False
     except IOError as e:
