@@ -28,11 +28,10 @@ class GCreds():
 
     Example usage:
 
-    >>> from lambda_utils import read_env_variable
-    >>> os.environ['DBUGMODE'] = 'True'
-    >>> myvar = read_env_variable('DBUGMODE')
-    >>> type(myvar)
-    True
+    >>> from gcreds import GCreds
+    >>> object = GCreds('profiles.json')
+    >>> object.profile_user
+    'default'
     """
     def __init__(self, filename, profile_user=''):
         """
@@ -53,6 +52,7 @@ class GCreds():
         self.sts_min = 15                       # minutes, 0.25 hours
         self.token_default = 60                 # minutes, 1 hour
         self.token_expiration = ''
+        self.token = ''
         self.credential_expiration = ''
         self.credential_default = 60            # minutes, 1 hour (AWS Default)
         self.credentials = {}
@@ -276,16 +276,16 @@ class GCreds():
         try:
             if self._validate(accounts, strict):
                 for alias in accounts:
-                    for profile in self.profiles:
-                        if profile['account_alias'] == alias:
-                            response = sts_client.assume_role(
-                                RoleArn=profile['role_arn'],
-                                DurationSeconds=self.credential_default * 60,
-                                RoleSessionName='gcreds-' + alias
-                            )
-                            self.credentials['gcreds-' + alias] = response['Credentials']
+                    response = sts_client.assume_role(
+                        RoleArn=self.profiles[alias]['role_arn'],
+                        DurationSeconds=self.credential_default * 60,
+                        RoleSessionName='gcreds-' + alias
+                    )
+                    self.credentials['gcreds-' + alias] = response['Credentials']
             else:
                 return {}
+        except KeyError:
+            pass
         except ClientError as e:
             logger(
                 '%s: Exception assuming role in account %s (Code: %s Message: %s)' %
@@ -310,8 +310,8 @@ class GCreds():
 
         profile_aliases = []
 
-        for profile in self.profiles:
-            profile_aliases.append(profile['account_alias'])
+        for profile in self.profiles.keys():
+            profile_aliases.append(profile)
 
         invalid = set(list) - set(profile_aliases)
         valid = set(list) - set(invalid)
@@ -320,20 +320,19 @@ class GCreds():
             logger.info('%s: Valid account profile names: %s' %
             (inspect.stack()[0][3], str(list)))
             return True
-        else:
+        elif check_bit:
+            # strict checking
             logger.info('%s: Valid account profile names: %s' %
             (inspect.stack()[0][3], str(valid)))
-            if check_bit:
-                # strict checking
-                ex = Exception('%s: Invalid account profiles: %s' %
-                (inspect.stack()[0][3], set(invalid)))
-                logger.exception(ex)
-                return False
-            else:
-                # non-strict
-                logger.warning('%s: No creds gen for profiles: %s' %
-                (inspect.stack()[0][3], set(invalid)))
-                return True
+            ex = Exception('%s: Invalid account profiles: %s' %
+            (inspect.stack()[0][3], set(invalid)))
+            logger.exception(ex)
+            return False
+        else:
+            # relaxed checking
+            logger.warning('%s: Valid profile names: %s, Invalid Names: %s' %
+            (inspect.stack()[0][3], str(valid)), str(invalid))
+            return True
 
     def calc_session_life(self, timestamp=''):
         """
