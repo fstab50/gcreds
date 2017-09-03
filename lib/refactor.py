@@ -79,7 +79,7 @@ def parse_awscli(parameter_input='', parameter_output=''):
         return False
     except Exception as e:
         logger.critical('%s: Unknown error. Error %s' %
-            (inspect.stack()[0][3], str(e))
+            (inspect.stack()[0][3], str(e)))
         raise e
     return True
 
