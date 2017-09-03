@@ -45,19 +45,22 @@ def parse_awscli(parameter_input='', parameter_output=''):
     config = configparser.ConfigParser()
     config.read(awscli_file)
 
+    iam_keys = ['aws_access_key_id', 'aws_secret_access_key']
+    role_keys = ['role_arn', 'mfa_serial', 'source_profile']
+
     try:
         for profile in filter(lambda x: 'gcreds' not in x, config.sections()):
-            if 'aws_access_key_id' in config[profile].keys():
-                tmp['aws_access_key_id'] = config[profile]['aws_access_key_id']
-                tmp['aws_secret_access_key'] =  config[profile]['aws_secret_access_key']
+            if set(iam_keys).issubset(config[profile].keys()):
+                for key in iam_keys:
+                    tmp[key] = config[profile][key]
                 # test if cli secured with mfa
                 if 'mfa_serial' in config[profile].keys():
                     tmp['mfa_serial'] = config[profile]['mfa_serial']
 
-            elif 'role_arn' in config[profile].keys():
-                tmp['role_arn'] = config[profile]['role_arn']
-                tmp['mfa_serial'] = config[profile]['mfa_serial']
-                tmp['source_profile'] =  config[profile]['source_profile']
+            elif set(role_keys).issubset(config[profile].keys()):
+                for key in role_keys:
+                    tmp[key] = config[profile][key]
+
             total_dict[profile] = tmp
             tmp = {}
 
