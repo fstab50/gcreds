@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+""" refactor Module Level comments NEEDED HERE """
 
 from __init__ import __version__
 import os
@@ -6,6 +7,7 @@ import json
 import configparser
 import sys
 import argparse
+import inspect
 import loggers
 
 logger = loggers.getLogger(__version__)
@@ -19,8 +21,19 @@ awscli_default = os.getenv('AWS_SHARED_CREDENTIALS_FILE') or home_dir + '/.aws/c
 # -- function declarations  ----------------------------------------------------
 
 def parse_awscli(parameter_input='', parameter_output=''):
-    """ imports awscli credentials file, refactors format to json """
+    """
 
+    Summary:
+        imports awscli credentials file, refactors format to json
+
+    Args:
+        parameter_input: TYPE: string, optional input file if not awscli default
+        parameter_output: TYPE: string, optional ouput file if not gcreds default
+
+    Returns:
+        Success or Failure, TYPE: Boolean
+
+    """
     awscli_file = parameter_input or awscli_default
     output_file = parameter_output or config_dir + '/profiles.json'
     total_dict, tmp = {}, {}
@@ -57,12 +70,18 @@ def parse_awscli(parameter_input='', parameter_output=''):
         os.chmod(output_file, 0o700)
 
     except KeyError as e:
-        logger.critical('Cannot find Key %s parsing file %s' % (str(e), input_file))
+        logger.critical('%s: Cannot find Key %s parsing file %s' %
+            (inspect.stack()[0][3], str(e), input_file))
+        return False
     except IOError as e:
-        logger.critical('problem opening file %s. Error %s' % (input_file, str(e)))
+        logger.critical('%s: problem opening file %s. Error %s' %
+            (inspect.stack()[0][3], input_file, str(e)))
+        return False
     except Exception as e:
-        logger.critical('unknown error. Error %s' % str(e))
-
+        logger.critical('%s: Unknown error. Error %s' %
+            (inspect.stack()[0][3], str(e))
+        raise e
+    return True
 
 if __name__ == '__main__':
 
