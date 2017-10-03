@@ -987,6 +987,9 @@ EOM
         std_message "No temporary credentials found in your local config" INFO
     fi
 
+    # clear credentials backup copy to prevent deprecated creds from being restored
+    rm ~/.aws/*.orig
+
     # print out env stats
     echo -e "\n${BOLD}${accent}awscli${UNBOLD}${reset} config stats:\n" | indent04
     gcreds_env_info INFO "awscli"; echo -e "\n"
