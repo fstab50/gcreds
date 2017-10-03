@@ -1021,6 +1021,9 @@ EOM
     else
         $awscli_bin configure --profile $profile
     fi
+
+    # create new credential backup copy
+    gcreds_backup
     # print footer
     std_message "${reset}awscli configuration update complete" INFO
     #
