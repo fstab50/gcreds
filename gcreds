@@ -109,12 +109,10 @@ function gcreds_help(){
 
     ${accent}${BOLD}-s, --show ${reset} (optional)
         Display credential expiration datetime as well as time remaining
-
-                                 -----------
+    __________________________________________________________________________
 
         New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
-
-    ---------------------------------------------------------------------------
+    __________________________________________________________________________
 
     To remove temporary credentials:
 
