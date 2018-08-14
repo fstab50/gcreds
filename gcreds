@@ -52,6 +52,11 @@ UNBOLD=`tput sgr0`
 accent=$(tput setaf 008)
 ansi=$(echo -e ${orange})   # use for ansi escape color codes
 
+
+# source dependencies
+source $pkg_path/core/std_functions.sh
+
+
 #
 # function declaration start --------------(do not modify this line)-----------
 #
@@ -259,7 +264,7 @@ function gcreds_depcheck(){
         fi
     fi
     ## check for required cli tools ##
-    for prog in aws jq date hostname awk grep cat; do
+    for prog in aws jq date hostname awk grep cat python3; do
         if ! type "$prog" > /dev/null 2>&1; then
             std_error_exit "$prog is required and not found in the PATH. Aborting (code $E_DEPENDENCY)" $E_DEPENDENCY
         fi
@@ -875,7 +880,19 @@ function gcreds_generate_token() {
 
 function gcreds_generate_creds(){
     ## generate actual credentials ##
-    std_logger "[INFO]: Generated temp credentials for iam profile [gcreds-$MFA_PROFILE]"
+    local role_arn
+    local py3bin=$(which python3 2>/dev/null)
+    #
+    # sanity check on list of profile names provided to gcreds
+    if [ "$py3bin" ] && valid_profilelist "$ACCTFILE"; then
+        std_message "Profilename list validated" "INFO"
+    else
+        std_message "Invalid profilenames found. Exit" "INFO"
+        $py3bin $pkg_path/core/precheck-accounts.py --subset $ACCTFILE
+        exit $E_DEPENDENCY
+    fi
+    #
+    std_logger "[INFO]: Generating temp credentials for iam profile [gcreds-$MFA_PROFILE]"
     #
     # create temp credentials for each profile in ACCTFILE
     for profile in $(cat $ACCTFILE); do
@@ -1027,6 +1044,23 @@ EOM
     #
     # <-- end function update_awscli -->
 }
+
+
+function valid_profilelist(){
+    ##
+    ##  check the list of profile names for duplicates
+    ##  and names missing from local awscli configuration
+    ##
+    local acctfile="$1"
+    local py3bin=$(which python3 2>/dev/null)
+    #
+    if [ "$($py3bin $pkg_path/core/precheck-accounts.py --subset $acctfile)" = "True" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 
 #
 #<-- start MAIN ----------------------(do not modify this line)----------------
