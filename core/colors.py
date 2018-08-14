@@ -2,7 +2,7 @@
 Summary:
     ANSI color and formatting code class
     See: http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#256-colors
-    VERSION:  1.12
+    VERSION:  1.13
 Args:
     None
 
@@ -30,11 +30,13 @@ class Colors():
     YELLOW = '\033[93m'
     RED = '\033[91m'
     ORANGE = '\033[38;5;95;38;5;214m'
+    GOLD2 = '\033[38;5;95;38;5;136m'                    # yellow-orange, lighter than GOLD3
     GOLD3 = '\033[38;5;95;38;5;178m'                    # yellow-orange
     WHITE = '\033[37m'
     WHITEGRAY = '\033[38;5;95;38;5;250m'                # white-gray
     LT1GRAY = '\033[38;5;95;38;5;245m'                  # light gray
-    LT2GRAY = '\u001b[38;5;249m'
+    LT2GRAY = '\033[38;5;95;38;5;246m'
+    LT3GRAY = '\u001b[38;5;249m'
     DARKGRAY1 = '\033[90m'
     DARKGRAY2 = '\033[38;5;95;38;5;8m'                  # darkest gray
 
