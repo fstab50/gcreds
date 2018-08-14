@@ -92,19 +92,20 @@ def stdout_message(message, prefix='INFO', quiet=False, multiline=False, indent=
     # prefix color handling
     choices = ('RED', 'BLUE', 'WHITE', 'GREEN', 'ORANGE')
     critical_status = ('ERROR', 'FAIL', 'WTF', 'STOP', 'HALT', 'EXIT', 'F*CK')
+    bracket = Colors.RESET + Colors.UNBOLD + Colors.GOLD2
 
     if quiet:
         return False
     else:
         if prefix in critical_status or severity.upper() == 'CRITICAL':
-            header = (Colors.YELLOW + '\t[ ' + Colors.RED + prefix +
+            header = ('\t' + Colors.YELLOW + '[ ' + Colors.RED + prefix +
                       Colors.YELLOW + ' ]' + Colors.RESET + ': ')
         elif severity.upper() == 'WARNING':
-            header = (Colors.YELLOW + '\t[ ' + Colors.ORANGE + prefix +
-                      Colors.YELLOW + ' ]' + Colors.RESET + ': ')
+            header = ('\t' + bracket + '[ ' + Colors.ORANGE + prefix +
+                      bracket + ' ]' + Colors.RESET + ': ')
         else:    # default color scheme
-            header = (Colors.YELLOW + '\t[ ' + Colors.DARKCYAN + prefix +
-                      Colors.YELLOW + ' ]' + Colors.RESET + ': ')
+            header = ('\t' + bracket + '[ ' + Colors.DARKCYAN + prefix +
+                      bracket + ' ]' + Colors.RESET + ': ')
         if multiline:
             print(header.expandtabs(tabspaces) + str(message))
         else:
