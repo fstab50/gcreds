@@ -884,7 +884,7 @@ function gcreds_generate_creds(){
     local py3bin=$(which python3 2>/dev/null)
     #
     # sanity check on list of profile names provided to gcreds
-    if [ "$py3bin" ] && valid_profilelist "$ACCTFILE"; then
+    if valid_profilelist "$ACCTFILE"; then
         std_message "Profilename list validated" "INFO"
     else
         std_message "Invalid profilenames found. Exit" "INFO"
