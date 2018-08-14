@@ -35,15 +35,17 @@ def duplicates(chklist, silent=not_tty()):
     # find duplicates
     d = [item for item, count in collections.Counter(chklist).items() if count > 1]
 
-    if not d:
+    if d:
+        stdout_message(
+            message='Duplicates identified: %s' % str(list(filter(lambda x: str(x) + '\n', d))),
+            prefix='WARN',
+            severity='WARNING',
+            quiet=silent
+        )
+        return False
+    else:
         stdout_message(message='No duplicates found', quiet=silent)
-        return True
-    stdout_message(
-        message='Duplicates identified: %s' % str(list(filter(lambda x: str(x) + '\n', d))),
-        prefix='WARN',
-        severity='WARNING',
-        quiet=silent)
-    return False
+    return True
 
 
 def options(parser):
@@ -125,7 +127,7 @@ def subset_test(super, sub, silent=not_tty()):
             prefix='WARN',
             severity='WARNING',
             quiet=silent
-            )
+        )
         if not silent:
             for i in set(sub) - set(super):
                 print('\t\t' + str(i))
@@ -168,10 +170,8 @@ def init_cli():
     if subset_test(superset, subset):
         # test subset to determine duplicates
         return duplicates(subset)
-    else:
-        return False
+    return False
 
 
 if __name__ == '__main__':
-    print(init_cli())
-    sys.exit(0)
+    sys.exit(init_cli())
