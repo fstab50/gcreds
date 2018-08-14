@@ -14,19 +14,19 @@ from colors import Colors
 HOME = os.environ["HOME"]
 
 
-def not_tty():
+def tty():
     """
     Summary:
         Determines if output is displayed to the screen or redirected
     Returns:
-        False if tty terminal | True is redirected, TYPE: bool
+        True if tty terminal | False if redirected, TYPE: bool
     """
     if sys.stdout.isatty():
-        return False
-    return True
+        return True
+    return False
 
 
-def duplicates(chklist, silent=not_tty()):
+def duplicates(chklist, silent=tty()):
     """
     Identifies duplicates in a list
     Return:
@@ -40,11 +40,11 @@ def duplicates(chklist, silent=not_tty()):
             message='Duplicates identified: %s' % str(list(filter(lambda x: str(x) + '\n', d))),
             prefix='WARN',
             severity='WARNING',
-            quiet=silent
+            quiet=not silent
         )
         return False
     else:
-        stdout_message(message='No duplicates found', quiet=silent)
+        stdout_message(message='No duplicates found', quiet=not silent)
     return True
 
 
@@ -112,7 +112,7 @@ def stdout_message(message, prefix='INFO', quiet=False, multiline=False, indent=
     return True
 
 
-def subset_test(super, sub, silent=not_tty()):
+def subset_test(super, sub, silent=tty()):
     """
     Args:
         super (list): superset elements
@@ -126,16 +126,16 @@ def subset_test(super, sub, silent=not_tty()):
             message='The following accounts not found in local awscli config:',
             prefix='WARN',
             severity='WARNING',
-            quiet=silent
+            quiet=not silent
         )
-        if not silent:
+        if tty():
             for i in set(sub) - set(super):
                 print('\t\t' + str(i))
         return False
     else:
         stdout_message(
             message='All elements in subset confirmed in local awscli config',
-            quiet=silent
+            quiet=not silent
             )
         return True
 
@@ -153,18 +153,22 @@ def init_cli():
 
     if len(sys.argv) == 1:
         stdout_message('You must provide an acct list using the --subset parameter. Exit')
-        return True
+        return False
 
-    with open(args.subset) as f1:
-        f2 = f1.readlines()
-        for name in f2:
-            subset.append(name[:-1])
+    try:
+        with open(args.subset) as f1:
+            f2 = f1.readlines()
+            for name in f2:
+                subset.append(name[:-1])
 
-    with open(args.superset) as f1:
-        f2 = f1.readlines()
-        for name in f2:
-            if name.startswith('['):
-                superset.append(name[1:-2])
+        with open(args.superset) as f1:
+            f2 = f1.readlines()
+            for name in f2:
+                if name.startswith('['):
+                    superset.append(name[1:-2])
+    except OSError as e:
+        print(str(e))
+        return False
 
     # test subset within superset
     if subset_test(superset, subset):
@@ -174,4 +178,8 @@ def init_cli():
 
 
 if __name__ == '__main__':
-    sys.exit(init_cli())
+    return_code = init_cli()
+    #print(f'Return_code is: {return_code}')
+    if not sys.stdout.isatty():
+        print(return_code)
+    sys.exit(return_code)
