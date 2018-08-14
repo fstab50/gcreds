@@ -180,7 +180,6 @@ def init_cli():
 
 if __name__ == '__main__':
     return_code = init_cli()
-    #print(f'Return_code is: {return_code}')
     if not sys.stdout.isatty():
         print(return_code)
     sys.exit(return_code)
