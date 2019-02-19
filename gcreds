@@ -645,9 +645,11 @@ function display_credential_profilenames(){
     ##  from local awscli configuration if found
     ##
     local awscli_dir="$1"
+    local ct='1'
 
     for row in $(grep gcreds "$awscli_dir" | cut -c 2-80 | rev | cut -c 2-80 | rev); do
-        echo -e "${cyan}$row${reset}" | indent10
+        echo -e "- ${cyan}$row${reset}" | indent10
+        ct=$(( $ct + 1 ))
     done
 }
 
@@ -665,7 +667,7 @@ function gcreds_show_creds(){
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
 
         # title header
-        msg="\n${BOLD}${accent}Temporary Credentials in local awscli config:${reset}${UNBOLD}\n"
+        msg="\n${BOLD}${accent}Temporary Amazon STS Credentials Generated${reset}${UNBOLD}\n"
         echo -e $msg | indent02
 
         # temporary credential iam names from local awscli config
