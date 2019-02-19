@@ -72,48 +72,50 @@ function gcreds_help(){
                        ${accent}${BOLD}$pkg${UNBOLD}${reset} help contents
 
  ${accent}${BOLD}DESCRIPTION${UNBOLD}${reset}:
+
         $pkg generates temporary credentials used to assume roles across
-        many accounts. It is commonly used for progammatic use cases where
-        avoiding a multi-factor auth prompt in a cli environment is desired
+        many accounts.  It's commonly used for progammatic use cases where
+        avoiding  multi-factor auth prompt in a cli environment is desired
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
-            ${BOLD}$pkg -a ${UNBOLD}<ACCTFILE$> ${BOLD}--profile${UNBOLD} <IAM_PROFILE> ${BOLD}-c${UNBOLD} <MFA_CODE>
+
+        ${BOLD}$pkg -a ${UNBOLD}<ACCTFILE$> ${BOLD}--profile${UNBOLD} <IAM_PROFILE> ${BOLD}-c${UNBOLD} <MFA_CODE>
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
-            -a, --accounts : list of accounts
-            -p, --profile  : iam user account
-            -c, --mfa-code : authentication code
-           [-A, --auto     : auto refresh credentials ]
-           [-C, --config   : set $pkg configuration options ]
-           [-s, --show     : show credential expiration info ]
-           [-u, --awscli   : update awscli iam credentials ]
-           [-h, --help     : display this help menu ]
+                    -a, --accounts
+                    -p, --profile
+                    -c, --mfa-code
+                   [-A, --auto  ]
+                   [-C, --config  ]
+                   [-s, --show  ]
+                   [-u, --awscli  ]
+                   [-h, --help  ]
 
  ${accent}${BOLD}OPTIONS${UNBOLD}${reset}:
-    ${accent}${BOLD}-a, --accounts${reset} ${reset}<${accent}value${reset}> (required)
-        Text file listing of account profile names in your local awscli config,
-        one per line. Profiles correspond to IAM roles in AWS accounts for
-        which you wish to generate temporary credentials.
 
-    ${accent}${BOLD}-p, --profile${reset} ${reset}<${accent}value${reset}> (required)
-        Profile name of the IAM user in your local awscli configuration
-        that contains the ARN of the mfa_serial used to assume roles
+    ${accent}${BOLD}-a, --accounts${reset} <${accent}value${reset}>:  Text file listing of account profile names in
+        your local awscli configuration, one per line. Names correspond to
+        IAM roles for which you wish to generate temporary credentials.
 
-    ${accent}${BOLD}-c, --mfa-code${reset} ${reset}<${accent}value${reset}> (required)
-        6 digit otp integer code from either a hardware or virtual mfa
-        device MFA code must correspond to the IAM_PROFILE given
+    ${accent}${BOLD}-u, --awscli${reset}: Configure runtime options via menu.
 
-    ${accent}${BOLD}-A, --auto ${reset}<${accent}value${reset}> (optional)
-        Auto refresh of temporary credentials for specified number of hours.
-        If omitted, temporary credentials are generated only once and expire
-        after 60 min (default timeout).
+    ${accent}${BOLD}-p, --profile${reset} ${reset}<${accent}value${reset}>:  Profile name of the IAM user present in local
+        awscli config you will use to generate temporary iam credentials.
 
-    ${accent}${BOLD}-C, --config ${reset} (optional)
-        Configure may be invoked at any time to set (or reset) $pkg parameter
-        options. Config options, when set, override program defaults.
+    ${accent}${BOLD}-c, --mfa-code${reset} ${reset}<${accent}value${reset}>: 6 digit otp code from either a hardware or
+        virtual multi-factor authentication (mfa) device.
 
-    ${accent}${BOLD}-s, --show ${reset} (optional)
-        Display credential expiration datetime as well as time remaining
+    ${accent}${BOLD}-A, --auto ${reset}<${accent}value${reset}>: Auto refresh temporary credentials for specified
+        number of hours. If omitted, temporary credentials are generated
+        only once and expire after 60 min (default timeout).
+
+    ${accent}${BOLD}-C, --config${reset}: Configure may be invoked at any time to set (or reset)
+        $pkg parameter options. Config options, when set, override
+        program defaults.
+
+    ${accent}${BOLD}-s, --show ${reset}: Display credential expiration stats.
+
+    ${accent}${BOLD}-h, --help ${reset}: Display this help menu.
     __________________________________________________________________________
 
         New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
