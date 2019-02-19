@@ -79,7 +79,7 @@ function gcreds_help(){
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
 
-        ${BOLD}$pkg -a ${UNBOLD}<ACCTFILE$> ${BOLD}--profile${UNBOLD} <IAM_PROFILE> ${BOLD}-c${UNBOLD} <MFA_CODE>
+        ${BOLD}$pkg  --accounts ${UNBOLD}<value>  ${BOLD}--profile${UNBOLD} <value>  ${BOLD}--mfa-code${UNBOLD} <value>
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
                     -a, --accounts
