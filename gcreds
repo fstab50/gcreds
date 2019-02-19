@@ -636,6 +636,20 @@ EOM
     # <-- end function gcreds_remove_creds -->
 }
 
+
+function display_credential_profilenames(){
+    ##
+    ##  displays temporary credentials profilenames
+    ##  from local awscli configuration if found
+    ##
+    local awscli_dir="$1"
+
+    for row in $(grep gcreds "$awscli_dir" | cut -c 2-80 | rev | cut -c 2-80 | rev); do
+        echo -e "${cyan}$row${reset}" | indent10
+    done
+}
+
+
 function gcreds_show_creds(){
     ## display credentials in local config ##
     local session_life="$1"     # time remaining in session, minutes
@@ -645,22 +659,29 @@ function gcreds_show_creds(){
     local expire                # expiration timestamp, epoch seconds
     local expire_datetime       # expiration timestamp, date/time format
     local msg
-    #
+
     if [[ $(grep "gcreds" ~/.aws/credentials) ]]; then
+
+        # title header
         msg="\n${BOLD}${accent}Temporary Credentials in local awscli config:${reset}${UNBOLD}\n"
         echo -e $msg | indent02
-        grep --color=auto "gcreds" ~/.aws/credentials | indent10
+
+        # temporary credential iam names from local awscli config
+        display_credential_profilenames "$HOME/.aws/credentials"
+
         if [[ -e $config_path/credential.expiration ]]; then
             expire=$(cat $config_path/credential.expiration 2>/dev/null)
             credential_life=$(( $expire - $(date +%s) ))
         else
             credential_life=0
         fi
+
+        # branch if expired credentials
         if [ $credential_life -le 0 ]; then
             # Credentials have expired
             echo -e "\n    Your credentials have ${red}expired${reset}.\n" | indent02
         else
-            # session stats, auto refresh of credentials
+            # valid sts temp crednetials; print session stats, auto refresh of credentials
             if [ $session_life ]; then
                 ## show credential stats ##
                 expire_datetime=$(date --date=@$(cat $config_path/credential.expiration 2>/dev/null))
@@ -970,7 +991,7 @@ function update_awscli(){
     local profile                     # valid profile in local awscli config
     local awscli_bin=$(which aws)     # aws binary
     local clear_bin=$(which clear)    # clear screen bin file
-    local valid=0                     # loop counter
+    local valid=0                     # loop
     #
     $clear_bin                        # clear screen
     cat<<EOM
