@@ -909,9 +909,7 @@ function gcreds_generate_creds(){
     local py3bin=$(which python3 2>/dev/null)
     #
     # sanity check on list of profile names provided to gcreds
-    if valid_profilelist "$ACCTFILE"; then
-        std_message "Profilename list validated" "INFO"
-    else
+    if ! valid_profilelist "$ACCTFILE"; then
         std_message "Invalid profilenames found. Exit" "INFO"
         $py3bin $pkg_path/core/precheck-accounts.py --subset $ACCTFILE
         exit $E_DEPENDENCY
@@ -1079,7 +1077,7 @@ function valid_profilelist(){
     local acctfile="$1"
     local py3bin=$(which python3 2>/dev/null)
     #
-    if [ "$($py3bin $pkg_path/core/precheck-accounts.py --subset $acctfile)" = "True" ]; then
+    if [ "$($py3bin $pkg_path/core/precheck-accounts.py --subset $acctfile >/dev/null; echo $?)" = "1" ]; then
         return 0
     else
         return 1

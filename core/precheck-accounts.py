@@ -179,7 +179,4 @@ def init_cli():
 
 
 if __name__ == '__main__':
-    return_code = init_cli()
-    if not sys.stdout.isatty():
-        print(return_code)
-    sys.exit(return_code)
+    sys.exit(init_cli())
