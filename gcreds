@@ -85,11 +85,11 @@ function gcreds_help(){
                     -a, --accounts
                     -p, --profile
                     -c, --mfa-code
-                   [-A, --auto  ]
+                   [-A, --auto    ]
                    [-C, --config  ]
-                   [-s, --show  ]
+                   [-s, --show    ]
                    [-u, --awscli  ]
-                   [-h, --help  ]
+                   [-h, --help    ]
 
  ${accent}${BOLD}OPTIONS${UNBOLD}${reset}:
 
