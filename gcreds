@@ -79,7 +79,7 @@ function gcreds_help(){
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
 
-        ${BOLD}$pkg  --accounts ${UNBOLD}<value>  ${BOLD}--profile${UNBOLD} <value>  ${BOLD}--mfa-code${UNBOLD} <value>
+            ${BOLD}$pkg  --accounts ${UNBOLD}<value>  ${BOLD}--profile${UNBOLD} <value>  ${BOLD}-c${UNBOLD} <value>
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
                     -a, --accounts
@@ -116,10 +116,10 @@ function gcreds_help(){
     ${accent}${BOLD}-s, --show ${reset}: Display credential expiration stats.
 
     ${accent}${BOLD}-h, --help ${reset}: Display this help menu.
-    __________________________________________________________________________
+    ______________________________________________________________________
 
-        New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
-    __________________________________________________________________________
+      New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
+    ______________________________________________________________________
 
     To remove temporary credentials:
 
