@@ -120,9 +120,9 @@ function gcreds_help(){
         New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
       ______________________________________________________________________
 
-      To remove temporary credentials:
+        To remove temporary credentials:
 
-      ${accent}${BOLD}USAGE${UNBOLD}${reset} : $pkg -r
+        ${accent}${BOLD}USAGE${UNBOLD}${reset} : $pkg -r
 
           ${accent}${BOLD}-r, --remove${reset}  :  Clears temporary credentials from your local
                            awscli configuration, returning your config to
