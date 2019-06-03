@@ -82,52 +82,51 @@ function gcreds_help(){
             ${BOLD}$pkg  --accounts ${UNBOLD}<value>  ${BOLD}--profile${UNBOLD} <value>  ${BOLD}-c${UNBOLD} <value>
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
-                    -a, --accounts
-                    -p, --profile
-                    -c, --mfa-code
-                   [-A, --auto    ]
-                   [-C, --config  ]
-                   [-s, --show    ]
-                   [-u, --awscli  ]
-                   [-h, --help    ]
-
+                            -a, --accounts
+                            -p, --profile
+                            -c, --mfa-code
+                           [-A, --auto    ]
+                           [-C, --config  ]
+                           [-s, --show    ]
+                           [-u, --awscli  ]
+                           [-h, --help    ]
  ${accent}${BOLD}OPTIONS${UNBOLD}${reset}:
 
-    ${accent}${BOLD}-a, --accounts${reset} <${accent}value${reset}>:  Text file listing of account profile names in
-        your local awscli configuration, one per line. Names correspond to
-        IAM roles for which you wish to generate temporary credentials.
+      ${accent}${BOLD}-a, --accounts${reset} <${accent}value${reset}>:  Text file listing of profile names in your
+          local awscli configuration,  one per line.  Names correspond to
+          IAM roles for which you wish to generate temporary credentials.
 
-    ${accent}${BOLD}-u, --awscli${reset}: Configure runtime options via menu.
+      ${accent}${BOLD}-u, --awscli${reset}: Configure runtime options via menu.
 
-    ${accent}${BOLD}-p, --profile${reset} ${reset}<${accent}value${reset}>:  Profile name of the IAM user present in local
-        awscli config you will use to generate temporary iam credentials.
+      ${accent}${BOLD}-p, --profile${reset} ${reset}<${accent}value${reset}>:  Profile name of the IAM user from your local
+          awscli config you will use to generate temporary iam credentials.
 
-    ${accent}${BOLD}-c, --mfa-code${reset} ${reset}<${accent}value${reset}>: 6 digit otp code from either a hardware or
-        virtual multi-factor authentication (mfa) device.
+      ${accent}${BOLD}-c, --mfa-code${reset} ${reset}<${accent}value${reset}>:  6 digit otp code from either a hardware or
+          virtual multi-factor authentication (mfa) device.
 
-    ${accent}${BOLD}-A, --auto ${reset}<${accent}value${reset}>: Auto refresh temporary credentials for specified
-        number of hours. If omitted, temporary credentials are generated
-        only once and expire after 60 min (default timeout).
+      ${accent}${BOLD}-A, --auto ${reset}<${accent}value${reset}>: Auto refresh temporary credentials for specified
+          number of hours. If omitted, temporary credentials are generated
+          only once and expire after 60 min (default timeout).
 
-    ${accent}${BOLD}-C, --config${reset}: Configure may be invoked at any time to set (or reset)
-        $pkg parameter options. Config options, when set, override
-        program defaults.
+      ${accent}${BOLD}-C, --config${reset}: Configure may be invoked at any time to set (or reset)
+          $pkg runtime options.  Config options override gcreds defaults
+          when set.
 
-    ${accent}${BOLD}-s, --show ${reset}: Display credential expiration stats.
+      ${accent}${BOLD}-s, --show ${reset}: Display credential expiration stats.
 
-    ${accent}${BOLD}-h, --help ${reset}: Display this help menu.
-    ______________________________________________________________________
+      ${accent}${BOLD}-h, --help ${reset}: Display this help menu.
+      ______________________________________________________________________
 
-      New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
-    ______________________________________________________________________
+        New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
+      ______________________________________________________________________
 
-    To remove temporary credentials:
+      To remove temporary credentials:
 
-    ${accent}${BOLD}USAGE${UNBOLD}${reset} : $pkg -r
+      ${accent}${BOLD}USAGE${UNBOLD}${reset} : $pkg -r
 
-        ${accent}${BOLD}-r, --remove${reset}  :  Clears temporary credentials from your local
-                         awscli configuration, returning your config to
-                         a pre-gcreds state.
+          ${accent}${BOLD}-r, --remove${reset}  :  Clears temporary credentials from your local
+                           awscli configuration, returning your config to
+                           a pre-gcreds state.
 
 EOM
     exit 0
