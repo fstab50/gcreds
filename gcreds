@@ -69,7 +69,7 @@ indent10() { sed 's/^/          /'; }
 function gcreds_help(){
     cat <<EOM
 
-                       ${accent}${BOLD}$pkg${UNBOLD}${reset} help contents
+                          ${accent}${BOLD}$pkg${UNBOLD}${reset} help contents
 
  ${accent}${BOLD}DESCRIPTION${UNBOLD}${reset}:
 
@@ -79,7 +79,7 @@ function gcreds_help(){
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
 
-            ${BOLD}$pkg  --accounts ${UNBOLD}<value>  ${BOLD}--profile${UNBOLD} <value>  ${BOLD}-c${UNBOLD} <value>
+               ${BOLD}$pkg  -a ${UNBOLD}<value>  ${BOLD}--profile${UNBOLD} <value>  ${BOLD}-c${UNBOLD} <value>
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
                             -a, --accounts
