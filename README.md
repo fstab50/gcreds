@@ -13,7 +13,7 @@ For more information on the above terms and functions, see [an explanation of IA
 
 ## Purpose ##
 
-**gcreds** requests temporary credentials from [Amazon Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) for roles that normally require mfa credentials in order to authenticate.
+**gcreds** requests temporary credentials from [Amazon's Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) for roles that normally require [multi-factor credentials](https://en.wikipedia.org/wiki/Multi-factor_authentication) in order to authenticate.
 
 A primary use case for **gcreds** is generating a temporary set of AWS access credentials for programmatic use by automation tools running on your local machine.
 
