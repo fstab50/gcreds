@@ -1,19 +1,23 @@
-# README :  gcreds (v2.0)
 * * *
+# README | gcreds: Generate AWS Temporary Credentials
+* * *
+
+## Summary ##
+
+**gcreds** (pronounced "gee-creds" for _generate credentials_) is a utility for creation and managment of IAM temporary access credentials using Amazon's [Security Token Service (STS)](https://docs.aws.amazon.com/STS/latest/APIReference/welcome.html).  [Temporary credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html) are used to access AWS resources when assuming a role identity.
+
+For more information on the above terms and functions, see [an explanation of IAM roles in the Amazon Web Services](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) documentation.
+
+**Version**:  2.4
+
 
 ## Purpose ##
 
-**gcreds** (pronounced "gee-creds" for _generate credentials_) requests temporary credentials  
-from [Amazon Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) for roles that normally require mfa  
-credentials in order to authenticate.  
+**gcreds** requests temporary credentials from [Amazon Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) for roles that normally require mfa credentials in order to authenticate.
 
-A primary use case for **gcreds** is generating a temporary set of AWS access  
-credentials for programmatic use by automation tools running on your local machine.  
+A primary use case for **gcreds** is generating a temporary set of AWS access credentials for programmatic use by automation tools running on your local machine.
 
-**gcreds** manages temporary credentials it generates to prevent corruption of your  
-local awscli config. When generating new temporary credentials, **gcreds** will  
-automatically clear expired credentials from your local awscli config to block  
-the presence of duplicate sets of credentials.
+**gcreds** manages temporary credentials it generates to prevent corruption of your local awscli config. When generating new temporary credentials, **gcreds** will automatically clear expired credentials from your local awscli config to block the presence of duplicate sets of credentials.
 
 See [v2.0 Release Notes](./notes/release_v2.0.md)
 
@@ -26,8 +30,8 @@ See [v2.0 Release Notes](./notes/release_v2.0.md)
 
 ## Deployment Owner/ Author ##
 
-Blake Huber  
-Slack: [@blake](https://mpcaws.slack.com/team/blake)  
+Blake Huber
+Slack: [@blake](https://mpcaws.slack.com/team/blake)
 
 * * *
 
@@ -54,7 +58,7 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 Help Menu
 
 ```bash
-    $ ./gcreds -h  
+    $ ./gcreds -h
 ```
 
 ![help-menu](./.images/help-menu.png)
@@ -154,7 +158,7 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
         source_profile = IAMUSER1
         mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
 
-13. Create a file containing the profile names of the accounts in which you want  
+13. Create a file containing the profile names of the accounts in which you want
 to generate temporary credentials for roles
 
         $ vim myroles.profiles    # call this file anything you wish
@@ -173,11 +177,11 @@ to generate temporary credentials for roles
 
 ![gcreds output](./.images/stdout.png)
 
-**Modifications to local awscli configuration** (account ids have been obscured):  
+**Modifications to local awscli configuration** (account ids have been obscured):
 
 ```bash
     $ less ./aws/credentials
-```  
+```
 
 ![aws example credentials file](./.images/credentials.png)
 
@@ -191,7 +195,7 @@ to generate temporary credentials for roles
     $ less ~/gcreds/logs/gcreds.log
 ```
 
-![example gcreds.log](./.images/log-output.png)  
+![example gcreds.log](./.images/log-output.png)
 
 * * *
 
@@ -205,11 +209,11 @@ to generate temporary credentials for roles
 
 Generation of credentials:
 
-![option auto](./.images/auto-gen.png)  
+![option auto](./.images/auto-gen.png)
 
 Monitoring of session statics:
 
-![option auto](./.images/auto-stats.png)  
+![option auto](./.images/auto-stats.png)
 
 **Show Option** -- show current temporary credentials; associated lifetime
 
@@ -217,14 +221,14 @@ Monitoring of session statics:
     $ gcreds --show
 ```
 
-![option show](./.images/gcreds-show.png)  
+![option show](./.images/gcreds-show.png)
 
 * * *
 
 ## Enhancement Roadmap ##
 
-1. Upon startup, check the $AWS_SHARED_CREDENTIALS_FILE variable for an alternate location of the  
-awscli credentials dir.  Set cred_path = value if found; else use default location (~/.aws).  
+1. Upon startup, check the $AWS_SHARED_CREDENTIALS_FILE variable for an alternate location of the
+awscli credentials dir.  Set cred_path = value if found; else use default location (~/.aws).
 From a cli, see:
 ```bash
     $ aws help config-vars
