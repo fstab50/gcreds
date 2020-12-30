@@ -1,5 +1,5 @@
 * * *
-# README | gcreds: Generate AWS Temporary Credentials
+# gcreds: Generate AWS Temporary Credentials
 * * *
 
 ## Summary ##
