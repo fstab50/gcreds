@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # global variables
-VERSION='2.1'
 pkg=$(basename $0)
 pkg_path=$(cd $(dirname $0); pwd -P)
 pwd_path=$(pwd)
@@ -11,6 +10,7 @@ gcreds_log="/var/log/gcreds.log"
 lib_path="/usr/local/lib/$pkg"
 host=$(hostname)
 system=$(uname)
+VERSION=$(. "$lib_path"/version.py ; echo "$__version__")
 MONITOR=False
 DBUGMODE=""                 # change this value to "True" to turn on verbose \
                             # log output to aid debugging
@@ -743,7 +743,7 @@ function gcreds_source_config(){
         COLOR_SCHEME=$(cat $config_path/$gcreds_conf | jq -r .default_color)
 
         # validate config values
-        if [ $MFA_PROFILE == null ] || [ $COLOR_SCHEME == null ]; then
+        if [ "$MFA_PROFILE" == null ] || [ "$COLOR_SCHEME" == null ]; then
             std_warn "Problem reading $pkg config parameters."
             read -p "${yellow}  Do you want to configure $pkg? [yes]:${reset} " choice
             if [ -z $choice ] || [ $choice == 'yes' ]; then
@@ -906,7 +906,7 @@ function gcreds_generate_token() {
 function gcreds_generate_creds(){
     ## generate actual credentials ##
     local role_arn
-    local py3bin=$(which python3 2>/dev/null)
+    local py3bin=$(command -v python3 2>/dev/null)
     #
     # sanity check on list of profile names provided to gcreds
     if ! valid_profilelist "$ACCTFILE"; then
