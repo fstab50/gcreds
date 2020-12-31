@@ -8,6 +8,7 @@ pwd_path=$(pwd)
 config_path="$HOME/.$pkg"
 gcreds_conf="gcreds.cfg"
 gcreds_log="/var/log/gcreds.log"
+lib_path="/usr/local/lib/$pkg"
 host=$(hostname)
 system=$(uname)
 MONITOR=False
@@ -54,7 +55,7 @@ ansi=$(echo -e ${orange})   # use for ansi escape color codes
 
 
 # source dependencies
-source $pkg_path/core/std_functions.sh
+source $lib_path/std_functions.sh
 
 
 #
@@ -910,7 +911,7 @@ function gcreds_generate_creds(){
     # sanity check on list of profile names provided to gcreds
     if ! valid_profilelist "$ACCTFILE"; then
         std_message "Invalid profilenames found. Exit" "INFO"
-        $py3bin $pkg_path/core/precheck-accounts.py --subset $ACCTFILE
+        $py3bin "$lib_path"/precheck-accounts.py --subset $ACCTFILE
         exit $E_DEPENDENCY
     fi
     #
@@ -1056,7 +1057,7 @@ EOM
     if [ $profile == 'default' ]; then
         $awscli_bin configure
     else
-        $awscli_bin configure --profile $profile
+        $awscli_bin configure --profile "$profile"
     fi
 
     # create new credential backup copy
@@ -1074,9 +1075,11 @@ function valid_profilelist(){
     ##  and names missing from local awscli configuration
     ##
     local acctfile="$1"
-    local py3bin=$(which python3 2>/dev/null)
+    local py3bin
+
+    py3bin=$(command -v python3 2>/dev/null)
     #
-    if [ "$($py3bin $pkg_path/core/precheck-accounts.py --subset $acctfile >/dev/null; echo $?)" = "1" ]; then
+    if [ "$($py3bin "$lib_path"/precheck-accounts.py --subset "$acctfile" >/dev/null; echo $?)" = "1" ]; then
         return 0
     else
         return 1
