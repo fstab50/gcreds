@@ -246,6 +246,22 @@ function gcreds_env_info(){
     #<-- end function gcreds_env_info -->
 }
 
+
+function create_configuration(){
+    if [ ! -e "$config_path/$gcreds_conf" ]; then
+        # create the initial configuration
+        cat <<'EOF' >> "$config_path/$gcreds_conf"
+
+        {
+            "default_profile": "default",
+            "version": "$VERSION",
+            "default_color": "LTDB"
+        }
+EOF
+    fi
+}
+
+
 function gcreds_depcheck(){
     ## test default shell ##
     if [ ! -n "$BASH" ]; then
@@ -295,6 +311,10 @@ function gcreds_depcheck(){
     else
             TMPDIR="/tmp"
     fi
+
+    # init config files
+    create_configuration
+
     ## set parameters based on configuration options ##
     gcreds_source_config
     #
