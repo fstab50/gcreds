@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+# binary path
+BIN_PATH=/usr/local/bin
+
+##  finalize file ownership & permissions  ##
+
+# log files
+touch /var/log/buildpy.log
+touch /var/log/console.log
+chmod 0666 /var/log/buildpy.log
+chmod 0666 /var/log/console.log
+
+# main executable
+chown root:root /usr/local/bin/buildpy
+chmod 0755 /usr/local/bin/buildpy
+
+# lib files
+chown root:root -R /usr/local/lib/buildpy
+chmod 0644 /usr/local/lib/buildpy/*.sh
+chmod 0755 /usr/local/lib/buildpy
+
+# bash completion files
+chown root:root /etc/bash_completion.d/buildpy-completion.bash
+chmod 0644 /etc/bash_completion.d/buildpy-completion.bash
+
+
+##  update sudoers path  ##
+
+if [ -f /etc/sudoers ]; then
+
+    var=$(grep secure_path /etc/sudoers)
+    cur_path="$(echo ${var##*=} | cut -c 2-100 | rev | cut -c 2-100 | rev)"
+
+    if [[ -z "$(echo $cur_path | grep $BIN_PATH)" ]]; then
+        # insert bin path
+        new_path="$cur_path:$BIN_PATH"
+        # append hardcoded secure_path (single quotes mandatory)
+        sed -i 's/secure_path=.*/secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin\"/g' /etc/sudoers
+    fi
+
+fi
+
+
+## install debian-tools package repository if not exist  ##
+
+repository="debian-tools"
+
+if [[ -z $(ls /etc/apt/sources.list.d | grep $repository) ]]; then
+
+    if [[ $(grep VERSION_CODENAME /etc/os-release) ]]; then
+        version_str=$(grep VERSION_CODENAME /etc/os-release)
+        codename=${version_str#*=}
+
+    elif [[ $(which lsb_release) ]]; then
+        codename="$(lsb_release -sirc | tail -n 1)"
+
+    elif [[ $(grep VERSION_ID /etc/os-release) ]]; then
+        version_str=$(grep VERSION_ID /etc/os-release)
+        codename=${version_str#*=}
+    fi
+
+    case $codename in
+        'trusty' | 'Trusty' | 'Trusty Tahr' | "\"14.04\"" | "14.04")
+            echo 'deb [arch=amd64] http://deb.awscloud.center trusty main' > /etc/apt/sources.list.d/debian-tools.list
+            ;;
+
+        'xenial' | "\"16.04\"" | "16.04" | "8")
+            echo 'deb [arch=amd64] http://deb.awscloud.center xenial main' > /etc/apt/sources.list.d/debian-tools.list
+            ;;
+
+        'bionic' | "\"18.04\"" | "18.04" | "9")
+            echo 'deb [arch=amd64] http://deb.awscloud.center bionic main' > /etc/apt/sources.list.d/debian-tools.list
+            ;;
+
+        'cosmic' | "\"18.10\"" | "18.10")
+            echo 'deb [arch=amd64] http://deb.awscloud.center cosmic main' > /etc/apt/sources.list.d/debian-tools.list
+            ;;
+    esac
+
+    # install public key
+    wget -qO - 'http://awscloud.center/keys/public.key' | sudo apt-key add -
+
+fi
+
+
+##  enable bash_completion  ##
+
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+if [ -f '/etc/bash_completion' ]; then
+    . /etc/bash_completion
+
+elif [ -d '/etc/bash_completion.d' ]; then
+    . /etc/bash_completion.d/buildpy-completion.bash
+
+elif [ -f '/usr/share/bash-completion/bash_completion' ]; then
+    . /usr/share/bash-completion/bash_completion
+
+elif [ -f '/usr/local/etc/bash_completion.d/buildpy-completion.bash' ]; then
+    . /usr/local/etc/bash_completion.d/buildpy-completion.bash
+fi
+
+
+exit 0      ## post install end ##
