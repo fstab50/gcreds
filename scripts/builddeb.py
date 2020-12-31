@@ -2,7 +2,7 @@
 """
 Summary.
 
-    builddeb (python3):  buildpy binary operating system package (.deb, Debian systems)
+    builddeb (python3):  gcreds binary operating system package (.deb, Debian systems)
 
         - Automatic determination of version to be built
         - Build version can optionally be forced to a specific version
@@ -16,18 +16,18 @@ Summary.
 
 Author:
     Blake Huber
-    Copyright 2017-2019, All Rights Reserved.
+    Copyright 2017-2021, All Rights Reserved.
 
 License:
     General Public License v3
     Additional terms may be found in the complete license agreement:
-    https://bitbucket.org/blakeca00/buildpython3/src/master/LICENSE.md
+    https://bitbucket.org/blakeca00/gcredsthon3/src/master/LICENSE.md
 
 OS Support:
     - Debian, Ubuntu, Ubuntu variants
 
 Dependencies:
-    - Requires python3, developed and tested under python3.6
+    - Requires python3, developed and tested under python3.8
 """
 import argparse
 import os
@@ -50,7 +50,7 @@ except Exception:
 
 
 # globals
-PROJECT = 'buildpy'
+PROJECT = 'gcreds'
 module = os.path.basename(__file__)
 act = Colors.ORANGE                     # accent highlight (bright orange)
 bd = Colors.BOLD + Colors.WHITE         # title formatting
@@ -290,7 +290,7 @@ def builddir_structure(root, builddir):
     Vars:
         :core_dir (str): src path to library modules in project root
         :builddir_path (str): dst path to root of the current build directory
-         (/<path>/buildpy-1.X.X dir)
+         (/<path>/gcreds-1.X.X dir)
     Returns:
         Success | Failure, TYPE: bool
     """
@@ -571,7 +571,7 @@ def main(setVersion, force, debug):
         Success | Failure, TYPE: bool
     """
     global PROJECT_BIN
-    PROJECT_BIN = 'buildpy'
+    PROJECT_BIN = 'gcreds'
     global PROJECT_ROOT
     PROJECT_ROOT = git_root()
     global SCRIPT_DIR
