@@ -408,17 +408,8 @@ function _buildpy_completions(){
             ;;
     esac
     case "${prev}" in
-        file)
-            COMPREPLY=( $(compgen -f ${cur}) )
-            return 0
-            ;;
 
-        hostname)
-            COMPREPLY=( $(compgen -A hostname ${cur}) )
-            return 0
-            ;;
-
-        '--clean')
+        '--accounts')
             if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-uninstall') ]]; then
                 return 0
             else
@@ -430,12 +421,12 @@ function _buildpy_completions(){
             fi
             ;;
 
-        '--download')
+        '--awscli')
             _complete_download_subcommands "${download_subcommands}"
             return 0
             ;;
 
-        '--install')
+        '--config')
             if [ "$cur" = "" ] || [ "$cur" = "--" ]; then
                 _complete_install_subcommands "${install_subcommands}"
             else
@@ -444,12 +435,12 @@ function _buildpy_completions(){
             return 0
             ;;
 
-        '--parallel-processes')
+        '--mfa-code')
             COMPREPLY=( $(compgen -W "$(_parallel_subcommands) help" -- ${cur}) )
             return 0
             ;;
 
-        '--purge')
+        '--profile')
             if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-uninstall') ]]; then
                 return 0
             else
@@ -458,7 +449,7 @@ function _buildpy_completions(){
             fi
             ;;
 
-        '--show')
+        '--refresh')
             if [ "$cur" = "" ] || [ "$cur" = "-" ] || [ "$cur" = "--" ]; then
                 # display full completion subcommands
                 _complete_show_subcommands "${show_subcommands}"
