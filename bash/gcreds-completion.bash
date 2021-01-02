@@ -23,55 +23,6 @@
 # SOFTWARE.
 
 
-function _all_parameters(){
-    ##
-    ##    validates all subcommands provided or not
-    ##
-    declare -a check_words=("${!1}")
-    declare -a commandline="${COMP_WORDS[*]}"
-
-    for word in "${commandline[@]}"; do
-        if [[ ! $(echo "${check_words[@]}" | grep $word) ]]; then
-            return 1
-        fi
-    done
-    return 0
-}
-
-
-function _current_downloads(){
-    ##
-    ##  Examines local fs for downloaded artifacts
-    ##
-    ##      - returns entry for each python binary set downloaded to /tmp
-    ##
-    local index="0"
-    declare -a arr_targets xz tgz
-
-    xz=( $(find /tmp -name \*.tar.xz 2>/dev/null) )
-    tgz=( $(find /tmp -name \*.tgz 2>/dev/null) )
-
-    for i in "${xz[@]}"; do
-        temp="$(echo $i | awk -F '.tar' '{print $1}' | awk -F '.' '{print $1"."$2}')"
-        xz[$index]=$(echo $temp | awk -F '/' '{print $NF}')
-        (( index++ ))
-    done
-
-    index="0"
-
-    for i in "${tgz[@]}"; do
-        temp="$(echo $i | awk -F '.tgz' '{print $1}' | awk -F '.' '{print $1"."$2}')"
-        tgz[$index]=$(echo $temp | awk -F '/' '{print $NF}')
-        (( index++ ))
-    done
-
-    arr_targets=( $(echo "${xz[@]}") $(echo "${tgz[@]}") )
-    echo "${arr_targets[@]}"
-    #
-    # <--- end function _clean_subcommands --->
-}
-
-
 function _complete_gcreds_commands(){
     ##
     ##  $ gcreds  <commands>
@@ -92,13 +43,13 @@ function _complete_gcreds_commands(){
 }
 
 
-function _complete_download_subcommands(){
+function _complete_accounts_compcommands(){
     ##
-    ##  $ gcreds --download <subcommands>
+    ##  $ gcreds --accounts --<compcommands>
     ##
     local IFS=$' \t\n'
     local subcmds="$1"
-    local split='5'       # times to split screen width
+    local split='3'       # times to split screen width
     declare -a formatted_cmds=( $(compgen -W "${subcmds}" -- ${cur}) )
 
     for i in "${!formatted_cmds[@]}"; do
@@ -108,7 +59,27 @@ function _complete_download_subcommands(){
     COMPREPLY=( "${formatted_cmds[@]}")
     return 0
     #
-    # <-- end function _complete_gcreds_commands -->
+    # <-- end function _complete_mfacode_compcommands -->
+}
+
+
+function _complete_mfacode_compcommands(){
+    ##
+    ##  $ gcreds --mfa-code --<compcommands>
+    ##
+    local IFS=$' \t\n'
+    local subcmds="$1"
+    local split='3'       # times to split screen width
+    declare -a formatted_cmds=( $(compgen -W "${subcmds}" -- ${cur}) )
+
+    for i in "${!formatted_cmds[@]}"; do
+        formatted_cmds[$i]="$(printf '%*s' "-$(($COLUMNS/$split))"  "${formatted_cmds[$i]}")"
+    done
+
+    COMPREPLY=( "${formatted_cmds[@]}")
+    return 0
+    #
+    # <-- end function _complete_mfacode_compcommands -->
 }
 
 
@@ -215,9 +186,10 @@ function _gcreds_completions(){
     # option strings
     commands='--accounts --awscli --configure --clean --help --mfa-code --profile --mfa-code --show --version'
 
-    # install parameters
-    install_commands='--install --optimizations --quiet'
-    install_options='--optimizations --parallel-processes --quiet'
+    # complementary command sets
+    accounts_compcommands='--mfa-code --profile --refresh'
+    mfacode_compcommands='--accounts --profile --refresh'
+    profile_compcommands='--accounts --mfa-code --refresh'
 
     # subcommand sets
     download_subcommands=$(echo "${arr_all[@]}")
@@ -309,7 +281,8 @@ function _gcreds_completions(){
                 return 0
 
             else
-                COMPREPLY=( $(compgen -W "--accounts --refresh --profile" -- ${cur}) )
+                #COMPREPLY=( $(compgen -W "--accounts --refresh --profile" -- ${cur}) )
+                _complete_mfacode_compcommands "${mfacode_compcommands}"
             fi
             return 0
             ;;
