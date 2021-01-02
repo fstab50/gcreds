@@ -136,9 +136,9 @@ function _current_downloads(){
 }
 
 
-function _complete_buildpy_commands(){
+function _complete_gcreds_commands(){
     ##
-    ##  $ buildpy  <commands>
+    ##  $ gcreds  <commands>
     ##
     local cmds="$1"
     local split='5'       # times to split screen width
@@ -152,13 +152,13 @@ function _complete_buildpy_commands(){
     COMPREPLY=( "${formatted_cmds[@]}")
     return 0
   #
-  # <-- end function _complete_buildpy_commands -->
+  # <-- end function _complete_gcreds_commands -->
 }
 
 
 function _complete_download_subcommands(){
     ##
-    ##  $ buildpy --download <subcommands>
+    ##  $ gcreds --download <subcommands>
     ##
     local IFS=$' \t\n'
     local subcmds="$1"
@@ -172,13 +172,13 @@ function _complete_download_subcommands(){
     COMPREPLY=( "${formatted_cmds[@]}")
     return 0
     #
-    # <-- end function _complete_buildpy_commands -->
+    # <-- end function _complete_gcreds_commands -->
 }
 
 
 function _complete_install_subcommands(){
     ##
-    ##  $ buildpy --install <subcommands>
+    ##  $ gcreds --install <subcommands>
     ##
     local IFS=$' \t\n'
     local subcmds="$1"
@@ -192,13 +192,13 @@ function _complete_install_subcommands(){
     COMPREPLY=( "${formatted_cmds[@]}")
     return 0
     #
-    # <-- end function _complete_buildpy_commands -->
+    # <-- end function _complete_gcreds_commands -->
 }
 
 
 function _complete_ospackages_subcommands(){
     ##
-    ##  $ buildpy --show ospackages <subcommands>
+    ##  $ gcreds --show ospackages <subcommands>
     ##
     local IFS=$' \t\n'
     local subcmds="$1"
@@ -218,7 +218,7 @@ function _complete_ospackages_subcommands(){
 
 function _complete_show_subcommands(){
     ##
-    ##  $ buildpy --show  <subcommands>
+    ##  $ gcreds --show  <subcommands>
     ##
     local IFS=$' \t\n'
     local subcmds="$1"
@@ -232,7 +232,7 @@ function _complete_show_subcommands(){
     COMPREPLY=( "${formatted_cmds[@]}")
     return 0
     #
-    # <-- end function _complete_buildpy_commands -->
+    # <-- end function _complete_gcreds_commands -->
 }
 
 
@@ -260,9 +260,9 @@ function _uninstall_subcommand_list(){
 }
 
 
-function _buildpy_completions(){
+function _gcreds_completions(){
     ##
-    ##  Completion structures for buildpy exectuable
+    ##  Completion structures for gcreds exectuable
     ##
     local numargs numoptions cur prev initcmd
 
@@ -426,7 +426,7 @@ function _buildpy_completions(){
             return 0
             ;;
 
-        '--config')
+        '--configure')
             if [ "$cur" = "" ] || [ "$cur" = "--" ]; then
                 _complete_install_subcommands "${install_subcommands}"
             else
@@ -450,16 +450,6 @@ function _buildpy_completions(){
             ;;
 
         '--refresh')
-            if [ "$cur" = "" ] || [ "$cur" = "-" ] || [ "$cur" = "--" ]; then
-                # display full completion subcommands
-                _complete_show_subcommands "${show_subcommands}"
-            else
-                COMPREPLY=( $(compgen -W "${show_subcommands}" -- ${cur}) )
-            fi
-            return 0
-            ;;
-
-        '--uninstall')
             # assemble subcommands
             uninstall_subcommands=$(_uninstall_subcommand_list)
             # return reply
@@ -467,30 +457,15 @@ function _buildpy_completions(){
             return 0
             ;;
 
-        '--help' | '--info' |  '--backup-pip' | '--os-detect' | '--version')
+        '--show')
+            # assemble subcommands
+            uninstall_subcommands=$(_uninstall_subcommand_list)
+            # return reply
+            COMPREPLY=( $(compgen -W "${uninstall_subcommands}" -- ${cur}) )
             return 0
             ;;
 
-        'Python-'[0-9].[0-9])
-            if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                return 0
-            fi
-            case "${initcmd}" in
-                '--install')
-                    if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                        COMPREPLY=( $(compgen -W "--quiet --parallel-processes" -- ${cur}) )
-
-                    elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-                         [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]] ; then
-                        COMPREPLY=( $(compgen -W "--optimizations" -- ${cur}) )
-                        return 0
-                    fi
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "${install_options}" -- ${cur}) )
+        '--help' | '--purge' | '--version')
             return 0
             ;;
 
@@ -502,58 +477,6 @@ function _buildpy_completions(){
             else
                 COMPREPLY=( $(compgen -W "${os_distributions}" -- ${cur}) )
             fi
-            return 0
-            ;;
-
-        'downloads' | 'ALL' | 'help')
-            return 0
-            ;;
-
-        '--optimizations')
-            if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                return 0
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                COMPREPLY=( $(compgen -W "--install" -- ${cur}) )
-                return 0
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                COMPREPLY=( $(compgen -W "--quiet" -- ${cur}) )
-                return 0
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]]; then
-                COMPREPLY=( $(compgen -W "--parallel-processes" -- ${cur}) )
-                return 0
-            else
-                COMPREPLY=( $(compgen -W "--quiet --parallel-processes" -- ${cur}) )
-                return 0
-            fi
-
-            case "${initcmd}" in
-                'Python-'[0-9].[0-9])
-                    if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]]; then
-                        COMPREPLY=( $(compgen -W '--parallel-processes' -- ${cur}) )
-                    elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                        COMPREPLY=( $(compgen -W '--quiet' -- ${cur}) )
-                    fi
-                    return 0
-                    ;;
-                'buildpy')
-                    if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]]; then
-                        COMPREPLY=( $(compgen -W "--quiet" -- ${cur}) )
-                    else
-                        COMPREPLY=( $(compgen -W '--install --quiet' -- ${cur}) )
-                        return 0
-                    fi
-                    return 0
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "--quiet" -- ${cur}) )
             return 0
             ;;
 
@@ -594,7 +517,7 @@ function _buildpy_completions(){
                     COMPREPLY=( $(compgen -W "--install" -- ${cur}) )
                     return 0
                     ;;
-                'buildpy')
+                'gcreds')
                     if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]]; then
                         COMPREPLY=( $(compgen -W "--optimizations --parallel-processes" -- ${cur}) )
                     else
@@ -608,10 +531,10 @@ function _buildpy_completions(){
             return 0
             ;;
 
-        'buildpy')
+        'gcreds')
             if [ "$cur" = "" ] || [ "$cur" = "--" ]; then
 
-                _complete_buildpy_commands "${commands}"
+                _complete_gcreds_commands "${commands}"
                 return 0
 
             fi
@@ -620,4 +543,4 @@ function _buildpy_completions(){
 
     COMPREPLY=( $(compgen -W "${commands}" -- ${cur}) )
 
-} && complete -F _buildpy_completions buildpy
+} && complete -F _gcreds_completions gcreds
