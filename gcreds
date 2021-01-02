@@ -97,29 +97,29 @@ function gcreds_help(){
           local awscli configuration,  one per line.  Names correspond to
           IAM roles for which you wish to generate temporary credentials.
 
-      ${accent}${BOLD}-u, --awscli${reset}: Configure runtime options via menu.
-
-      ${accent}${BOLD}-h, --help ${reset}: Display this help menu.
-
-          awscli config you will use to generate temporary iam credentials.
-
-      ${accent}${BOLD}-c, --mfa-code${reset} ${reset}<${accent}value${reset}>:  6 digit otp code from either a hardware or
-      virtual multi-factor authentication (mfa) device.
-
-      ${accent}${BOLD}-p, --profile${reset} ${reset}<${accent}value${reset}>:  Profile name of the IAM user from your local
-
-      ${accent}${BOLD}-P, --purge${reset} ${reset}<${accent}value${reset}>:  Clean all temporary credentials from the local
-           awscli configuration, returning your config to pre-gcreds state.
-
-      ${accent}${BOLD}-R, --refresh ${reset}<${accent}value${reset}>:  Automatically refresh temporary credentials
-          for specified number of hours. If omitted, temp credentials are
-          generated only once and expire after 60 min (default timeout).
+      ${accent}${BOLD}-c, --clean${reset} ${reset}<${accent}value${reset}>:  Clean all temporary credentials from the local
+          awscli configuration, returning your config to pre-gcreds state.
 
       ${accent}${BOLD}-C, --configure${reset}: Configure may be invoked any time to set (or reset)
           $pkg runtime options.  Config options override gcreds defaults
           when set.
 
+      ${accent}${BOLD}-h, --help ${reset}: Display this help menu.
+
+      ${accent}${BOLD}-m, --mfa-code${reset} ${reset}<${accent}value${reset}>:  6 digit otp code from either a hardware or
+          virtual multi-factor authentication (mfa) device.
+
+      ${accent}${BOLD}-p, --profile${reset} ${reset}<${accent}value${reset}>:  Profile name of the IAM user from your local
+          awscli config you will use to generate temporary iam credentials.
+
+      ${accent}${BOLD}-r, --refresh ${reset}<${accent}value${reset}>:  Automatically refresh temporary credentials
+          for specified number of hours. If omitted, temp credentials are
+          generated only once and expire after 60 min (default timeout).
+
       ${accent}${BOLD}-s, --show ${reset}: Display credential expiration stats.
+
+      ${accent}${BOLD}-u, --awscli${reset}: Update permanent profile name credentials in the local
+         awscli configuration using gcreds.
 
       ${accent}${BOLD}-v, --version ${reset}: Display gcreds code revision info.
 
@@ -469,7 +469,7 @@ function gcreds_configure(){
 function gcreds_profile_exists(){
     ## validate if profile exists in local awscli config ##
     #
-    if [[ $1 == "" ]] && [[ $1 == $MFA_ARN ]]; then
+    if [[ $1 == "" ]] && [[ $1 == "$MFA_ARN" ]]; then
         std_error_exit "Invalid MFA profile name provided ($MFA_PROFILE) Exiting code $E_BADARG." $E_BADARG
 
     elif [ ! $1 ]; then
@@ -493,12 +493,12 @@ function gcreds_parse_parameters(){
                     # display help
                     gcreds_help
                     ;;
-                -C | --config)
+                -C | --configure)
                     # set configuration options
                     gcreds_configure
                     exit 0
                     ;;
-                -r | --remove)
+                -c | --clean)
                     rm=1    # flag indicating direct call to clear config
                     if ! gcreds_preexisting_creds $rm; then
                         std_message "You do not have temporary credentials in your config. Nothing to do." INFO
@@ -522,7 +522,7 @@ function gcreds_parse_parameters(){
                         std_error_exit "You must provide an IAM profile name. Exiting (code $E_BADARG)" $E_BADARG
                     fi
                     ;;
-                --mfa-code | --mfacode | --mfa | --code | -c)
+                -m | --mfa-code | --mfacode | --mfa | --code)
                     # otp code from virtual or hw mfa device. verify 6 digit int
                     if [[ $2 =~ ^[0-9]{6}$ ]]; then
                         MFA_CODE=$2
@@ -537,7 +537,7 @@ function gcreds_parse_parameters(){
                     shift 1
                     exit 0
                     ;;
-                -A | --auto)     # optional
+                -r | --refresh)     # optional
                     if [ $2 ]; then
                         # $2 given in hours
                         TOKEN_LIFE=$2
