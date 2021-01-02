@@ -39,70 +39,6 @@ function _all_parameters(){
 }
 
 
-function _version2_subcommand_list(){
-    ##
-    ## Python version 2 major version numbers  ##
-    ##
-    local minor="7"
-    local major="2"
-    declare -a arr_version2=( )    # array; Python2 versions
-
-    while (( $minor >= 0 )); do
-        version="Python-$major.$minor"
-        arr_version2=(  ${arr_version2[@]}  $version  )
-        (( minor-- ))
-    done
-    echo "${arr_version2[@]}"
-}
-
-
-function _version3_subcommand_list(){
-    ##
-    ## Python version 3 major version numbers  ##
-    ##
-    local minor="9"
-    local major="3"
-    declare -a arr_version3=( )    # array, Python3 versions
-
-    while (( $minor >= 0 )); do
-        version="Python-$major.$minor"
-        arr_version3=(  ${arr_version3[@]}  $version  )
-        (( minor-- ))
-    done
-    echo "${arr_version3[@]}"
-}
-
-
-# array; all Python versions
-declare -a arr_all=(
-
-        $(_version2_subcommand_list)
-        $(_version3_subcommand_list)
-
-    )
-
-
-function _parallel_subcommands(){
-    ##
-    ##  Valid number of parallel processes for make binary
-    ##
-    declare -a arr_subcmds
-
-    for count in $(seq 9); do
-        if [ "$count" = "1" ]; then
-            arr_subcmds=( "${arr_subcmds[@]}" '1-None'  )
-
-        elif [ "$count" = "4" ]; then
-            arr_subcmds=( "${arr_subcmds[@]}" '4-Default'  )
-
-        else
-            arr_subcmds=( "${arr_subcmds[@]}" "$count"  )
-        fi
-    done
-    printf -- '%s\n' "${arr_subcmds[@]}"
-}
-
-
 function _current_downloads(){
     ##
     ##  Examines local fs for downloaded artifacts
@@ -277,7 +213,7 @@ function _gcreds_completions(){
     numoptions=0
 
     # option strings
-    commands='--accounts --awscli --configure --mfa-code --profile --purge --refresh --help --show --version'
+    commands='--accounts --awscli --configure --clean --help --mfa-code --profile --refresh --show --version'
 
     # install parameters
     install_commands='--install --optimizations --quiet'
@@ -354,7 +290,38 @@ function _gcreds_completions(){
             ;;
 
         '--mfa-code')
-            COMPREPLY=( $(compgen -W "$(_parallel_subcommands) help" -- ${cur}) )
+            if [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ]; then
+                COMPREPLY=( $(compgen -W "--refresh --profile" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts --profile" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts --refresh" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--refresh" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--profile" -- ${cur}) )
+                return 0
+            fi
             return 0
             ;;
 
@@ -395,57 +362,6 @@ function _gcreds_completions(){
             else
                 COMPREPLY=( $(compgen -W "${os_distributions}" -- ${cur}) )
             fi
-            return 0
-            ;;
-
-        '--quiet')
-            if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                return 0
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                COMPREPLY=( $(compgen -W "--install" -- ${cur}) )
-                return 0
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                COMPREPLY=( $(compgen -W "--optimizations" -- ${cur}) )
-                return 0
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                COMPREPLY=( $(compgen -W "--parallel-processes" -- ${cur}) )
-                return 0
-            fi
-            case "${initcmd}" in
-                'Python-'[0-9].[0-9])
-                    if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                        COMPREPLY=( $(compgen -W '--parallel-processes' -- ${cur}) )
-                    elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                        COMPREPLY=( $(compgen -W '--quiet' -- ${cur}) )
-                    fi
-                    ;;
-                '--parallel-processes' | [1-9])
-                        COMPREPLY=( $(compgen -W "--optimizations" -- ${cur}) )
-                        return 0
-                    ;;
-                '--optimizations')
-                    COMPREPLY=( $(compgen -W "--install" -- ${cur}) )
-                    return 0
-                    ;;
-                'gcreds')
-                    if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]]; then
-                        COMPREPLY=( $(compgen -W "--optimizations --parallel-processes" -- ${cur}) )
-                    else
-                        COMPREPLY=( $(compgen -W '--install --optimizations --parallel-processes' -- ${cur}) )
-                        return 0
-                    fi
-                    return 0
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "--optimizations" -- ${cur}) )
             return 0
             ;;
 
