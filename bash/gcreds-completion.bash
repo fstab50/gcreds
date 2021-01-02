@@ -277,20 +277,11 @@ function _gcreds_completions(){
     numoptions=0
 
     # option strings
-    commands='--backup-pip --clean --download --help --info --install --os-detect \
-             --show --uninstall --version --optimizations --quiet'
+    commands='--accounts --awscli --configure --mfa-code --profile --purge --refresh --help --show --version'
 
     # install parameters
     install_commands='--install --optimizations --quiet'
     install_options='--optimizations --parallel-processes --quiet'
-
-    # uninstall parameters
-    uninstall_commands='--uninstall'
-    uninstall_options='--purge'
-
-    # linux distro options
-    os_distributions='amazonLinux1 amazonLinux2 centos7 centos8 redhat7.4 redhat7.5\+ \
-                    redhat8.0\+ ubuntu14.04 ubuntu16.04 ubuntu18.04'
 
     # subcommand sets
     download_subcommands=$(echo "${arr_all[@]}")
@@ -310,82 +301,9 @@ function _gcreds_completions(){
             esac
             ;;
 
-        '--install')
-            case "${prev}" in
-                'Python-'[0-9].[0-9] | [0-9].[0-9])
-                    if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-                       [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-                       [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]] && \
-                       [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]]; then
-                        return 0
-                    fi
-                    COMPREPLY=( $(compgen -W "${install_options}" -- ${cur}) )
-                    return 0
-                    ;;
-
-                'help' | 'os-packages')
-                    return 0
-                    ;;
-            esac
-            ;;
-
-        '--parallel-processes')
-            if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                return 0
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]]; then
-                COMPREPLY=( $(compgen -W "--install" -- ${cur}) )
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-install') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                COMPREPLY=( $(compgen -W "--quiet" -- ${cur}) )
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                COMPREPLY=( $(compgen -W "--install" -- ${cur}) )
-
-            elif [ "${prev}" = "help" ]; then
-                return 0
-
-            else
-                COMPREPLY=( $(compgen -W "--quiet --optimizations" -- ${cur}) )
-            fi
-            return 0
-            ;;
-
-        'os-packages')
-            return 0
-            ;;
     esac
     case "${cur}" in
-        '--info' | '--version' | '--backup-pip' | 'help')
-            return 0
-            ;;
-
-        'Python-'[0-9].[0-9])
-            if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-               [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                return 0
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]]; then
-                COMPREPLY=( $(compgen -W "--optimizations" -- ${cur}) )
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-parallel-processes') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                COMPREPLY=( $(compgen -W "--quiet" -- ${cur}) )
-
-            elif [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-quiet') ]] && \
-                 [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-optimizations') ]]; then
-                COMPREPLY=( $(compgen -W "--parallel-processes" -- ${cur}) )
-
-            else
-                COMPREPLY=( $(compgen -W "--quiet --parallel-processes --optimizations" -- ${cur}) )
-            fi
+        '--awscli' | '--configure'  | 'help' | '--purge' | '--show' | '--version')
             return 0
             ;;
 
@@ -465,7 +383,7 @@ function _gcreds_completions(){
             return 0
             ;;
 
-        '--help' | '--purge' | '--version')
+        '--awscli' | '--configure'  | 'help' | '--purge' | '--show' | '--version')
             return 0
             ;;
 
