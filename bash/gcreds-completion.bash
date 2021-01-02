@@ -213,7 +213,7 @@ function _gcreds_completions(){
     numoptions=0
 
     # option strings
-    commands='--accounts --awscli --configure --clean --help --mfa-code --profile --refresh --show --version'
+    commands='--accounts --awscli --configure --clean --help --mfa-code --profile --mfa-code --show --version'
 
     # install parameters
     install_commands='--install --optimizations --quiet'
@@ -275,20 +275,6 @@ function _gcreds_completions(){
             fi
             ;;
 
-        '--awscli')
-            _complete_download_subcommands "${download_subcommands}"
-            return 0
-            ;;
-
-        '--configure')
-            if [ "$cur" = "" ] || [ "$cur" = "--" ]; then
-                _complete_install_subcommands "${install_subcommands}"
-            else
-                COMPREPLY=( $(compgen -W "${install_subcommands}" -- ${cur}) )
-            fi
-            return 0
-            ;;
-
         '--mfa-code')
             if [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
                [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
@@ -321,47 +307,92 @@ function _gcreds_completions(){
                  [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
                 COMPREPLY=( $(compgen -W "--profile" -- ${cur}) )
                 return 0
+
+            else
+                COMPREPLY=( $(compgen -W "--accounts --refresh --profile" -- ${cur}) )
             fi
             return 0
             ;;
 
         '--profile')
-            if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-uninstall') ]]; then
+            if [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
                 return 0
-            else
-                COMPREPLY=( $(compgen -W "${uninstall_commands}" -- ${cur}) )
-                return 0
-            fi
-            ;;
 
-        '--refresh')
-            # assemble subcommands
-            uninstall_subcommands=$(_uninstall_subcommand_list)
-            # return reply
-            COMPREPLY=( $(compgen -W "${uninstall_subcommands}" -- ${cur}) )
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ]; then
+                COMPREPLY=( $(compgen -W "--mfa-code --refresh" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts --refresh" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts --mfa-code" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--mfa-code" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ]; then
+                COMPREPLY=( $(compgen -W "--refresh" -- ${cur}) )
+                return 0
+
+            else
+                COMPREPLY=( $(compgen -W "--accounts --mfa-code --refresh" -- ${cur}) )
+            fi
             return 0
             ;;
 
-        '--show')
-            # assemble subcommands
-            uninstall_subcommands=$(_uninstall_subcommand_list)
-            # return reply
-            COMPREPLY=( $(compgen -W "${uninstall_subcommands}" -- ${cur}) )
+        '--refresh')
+            if [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ]; then
+                COMPREPLY=( $(compgen -W "--mfa-code --profile" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts --profile" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts --mfa-code" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--mfa-code" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ]; then
+                COMPREPLY=( $(compgen -W "--profile" -- ${cur}) )
+                return 0
+
+            else
+                COMPREPLY=( $(compgen -W "--accounts --mfa-code --profile" -- ${cur}) )
+            fi
             return 0
             ;;
 
         '--awscli' | '--configure'  | 'help' | '--purge' | '--show' | '--version')
-            return 0
-            ;;
-
-        'os-packages')
-            return 0
-            #  --- option code below not yet ga --- #
-            if [ "$cur" = "" ] || [ "$cur" = "-" ] || [ "$cur" = "--" ]; then
-                _complete_ospackages_subcommands  "${os_distributions}"
-            else
-                COMPREPLY=( $(compgen -W "${os_distributions}" -- ${cur}) )
-            fi
             return 0
             ;;
 
