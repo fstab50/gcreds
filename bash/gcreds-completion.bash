@@ -83,6 +83,46 @@ function _complete_mfacode_compcommands(){
 }
 
 
+function _complete_profile_compcommands(){
+    ##
+    ##  $ gcreds --mfa-code --<compcommands>
+    ##
+    local IFS=$' \t\n'
+    local subcmds="$1"
+    local split='3'       # times to split screen width
+    declare -a formatted_cmds=( $(compgen -W "${subcmds}" -- ${cur}) )
+
+    for i in "${!formatted_cmds[@]}"; do
+        formatted_cmds[$i]="$(printf '%*s' "-$(($COLUMNS/$split))"  "${formatted_cmds[$i]}")"
+    done
+
+    COMPREPLY=( "${formatted_cmds[@]}")
+    return 0
+    #
+    # <-- end function _complete_profile_compcommands -->
+}
+
+
+function _complete_refresh_compcommands(){
+    ##
+    ##  $ gcreds --mfa-code --<compcommands>
+    ##
+    local IFS=$' \t\n'
+    local subcmds="$1"
+    local split='3'       # times to split screen width
+    declare -a formatted_cmds=( $(compgen -W "${subcmds}" -- ${cur}) )
+
+    for i in "${!formatted_cmds[@]}"; do
+        formatted_cmds[$i]="$(printf '%*s' "-$(($COLUMNS/$split))"  "${formatted_cmds[$i]}")"
+    done
+
+    COMPREPLY=( "${formatted_cmds[@]}")
+    return 0
+    #
+    # <-- end function _complete_refresh_compcommands -->
+}
+
+
 function _complete_install_subcommands(){
     ##
     ##  $ gcreds --install <subcommands>
@@ -190,25 +230,52 @@ function _gcreds_completions(){
     accounts_compcommands='--mfa-code --profile --refresh'
     mfacode_compcommands='--accounts --profile --refresh'
     profile_compcommands='--accounts --mfa-code --refresh'
+    refresh_compcommands='--accounts --mfa-code --profile'
 
     # subcommand sets
     download_subcommands=$(echo "${arr_all[@]}")
-    show_subcommands="$(echo "${arr_all[@]}") os-packages downloads"
-    install_subcommands="$(_version3_subcommand_list) Python-2.6 Python-2.7 os-packages help"
-
 
     #echo -e "CUR: $cur, PREV: $prev, INITCMD: $initcmd"       # debug
 
     case "${initcmd}" in
-        '--uninstall')
-            case "${prev}" in
-                'Python-'[0-9].[0-9] | [0-9].[0-9])
-                    COMPREPLY=( $(compgen -W "${uninstall_options}" -- ${cur}) )
-                    return 0
-                    ;;
-            esac
-            ;;
+        '--accounts')
+            if [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                return 0
 
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ]; then
+                COMPREPLY=( $(compgen -W "--refresh --profile" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--mfa-code --profile" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--mfa-code --refresh" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--refresh" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--mfa-code" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--profile" -- ${cur}) )
+                return 0
+
+            else
+                _complete_accounts_compcommands "${accounts_compcommands}"
+            fi
+            return 0
+            ;;
     esac
     case "${cur}" in
         '--awscli' | '--configure'  | 'help' | '--purge' | '--show' | '--version')
@@ -281,7 +348,6 @@ function _gcreds_completions(){
                 return 0
 
             else
-                #COMPREPLY=( $(compgen -W "--accounts --refresh --profile" -- ${cur}) )
                 _complete_mfacode_compcommands "${mfacode_compcommands}"
             fi
             return 0
@@ -321,7 +387,7 @@ function _gcreds_completions(){
                 return 0
 
             else
-                COMPREPLY=( $(compgen -W "--accounts --mfa-code --refresh" -- ${cur}) )
+                _complete_profile_compcommands "${profile_compcommands}"
             fi
             return 0
             ;;
@@ -360,7 +426,7 @@ function _gcreds_completions(){
                 return 0
 
             else
-                COMPREPLY=( $(compgen -W "--accounts --mfa-code --profile" -- ${cur}) )
+                _complete_refresh_compcommands "${refresh_compcommands}"
             fi
             return 0
             ;;
