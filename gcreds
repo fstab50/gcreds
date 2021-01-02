@@ -122,10 +122,10 @@ function gcreds_help(){
          awscli configuration using gcreds.
 
       ${accent}${BOLD}-v, --version ${reset}: Display gcreds code revision info.
-
       ______________________________________________________________________
 
-        New profiles added to your awscli config prefixed with '${BOLD}gcreds-${UNBOLD}'
+              New temporary credentials written to your local awscli
+              config will be prefixed with '${BOLD}gcreds-${UNBOLD}' + IAM role name
       ______________________________________________________________________
 
 EOM
