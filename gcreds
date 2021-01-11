@@ -54,7 +54,8 @@ accent=$(tput setaf 008)
 ansi=$(echo -e ${orange})   # use for ansi escape color codes
 
 # ansi bright colors
-a_brightblue='\033[38;5;51m'
+a_brightgreen='\033[38;5;95;38;5;46m'
+
 
 # source dependencies
 source $lib_path/std_functions.sh
@@ -484,8 +485,8 @@ function display_program_version(){
     ##
     ## output script version info, license
     ##
-    local _version=$__version__
-    local _hic=$(echo -e ${a_brightblue})
+    local _version=$VERSION
+    local _hic=$(echo -e ${a_brightgreen})
     local _year=$(date +%G)
     local _bashver="$(
                 bash --version | head -n1 | awk -F 'version' '{print $2}' \
@@ -598,6 +599,12 @@ function gcreds_parse_parameters(){
                 -u | --awscli)
                     # display info on current credentials, if exist
                     update_awscli
+                    shift 1
+                    exit 0
+                    ;;
+                -V | --version)
+                    # display gcreds program release version info
+                    display_program_version
                     shift 1
                     exit 0
                     ;;
