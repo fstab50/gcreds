@@ -103,6 +103,24 @@ function _complete_profile_compcommands(){
 }
 
 
+function _complete_profile_subcommands(){
+    local cmds="$1"
+    local split='7'       # times to split screen width
+    local ct="0"
+    local IFS=$' \t\n'
+    local formatted_cmds=( $(compgen -W "${cmds}" -- "${cur}") )
+
+    for i in "${!formatted_cmds[@]}"; do
+        formatted_cmds[$i]="$(printf '%*s' "-$(($COLUMNS/$split))"  "${formatted_cmds[$i]}")"
+    done
+
+    COMPREPLY=( "${formatted_cmds[@]}")
+    return 0
+    #
+    # <-- end function _complete_profile_subcommands -->
+}
+
+
 function _complete_refresh_compcommands(){
     ##
     ##  $ gcreds --mfa-code --<compcommands>
@@ -140,26 +158,6 @@ function _complete_install_subcommands(){
     return 0
     #
     # <-- end function _complete_gcreds_commands -->
-}
-
-
-function _complete_ospackages_subcommands(){
-    ##
-    ##  $ gcreds --show ospackages <subcommands>
-    ##
-    local IFS=$' \t\n'
-    local subcmds="$1"
-    local split='6'       # times to split screen width
-    declare -a formatted_cmds=( $(compgen -W "${subcmds}" -- ${cur}) )
-
-    for i in "${!formatted_cmds[@]}"; do
-        formatted_cmds[$i]="$(printf '%*s' "-$(($COLUMNS/$split))"  "${formatted_cmds[$i]}")"
-    done
-
-    COMPREPLY=( "${formatted_cmds[@]}")
-    return 0
-    #
-    # <-- end function _complete_ospackages_subcommands -->
 }
 
 
@@ -236,6 +234,7 @@ function _gcreds_completions(){
     #echo -e "CUR: $cur, PREV: $prev, INITCMD: $initcmd"       # debug
 
     case "${initcmd}" in
+
         '--accounts')
             if [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-mfa-code')" ] && \
                [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
@@ -271,6 +270,45 @@ function _gcreds_completions(){
 
             else
                 _complete_accounts_compcommands "${accounts_compcommands}"
+            fi
+            return 0
+            ;;
+
+        '--mfa-code')
+            if [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
+               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ]; then
+                COMPREPLY=( $(compgen -W "--refresh --profile" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts --profile" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts --refresh" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--refresh" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
+                COMPREPLY=( $(compgen -W "--accounts" -- ${cur}) )
+                return 0
+
+            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
+                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
+                COMPREPLY=( $(compgen -W "--profile" -- ${cur}) )
+                return 0
+
+            else
+                _complete_mfacode_compcommands "${mfacode_compcommands}"
             fi
             return 0
             ;;
@@ -315,52 +353,47 @@ function _gcreds_completions(){
             ;;
     esac
     case "${cur}" in
-        '--awscli' | '--configure'  | 'help' | '--purge' | '--show' | '--version')
+
+        '--ac'*)
+            COMPREPLY=( $(compgen -W '--accounts' -- ${cur}) )
             return 0
             ;;
+
+        '--aw'*)
+            COMPREPLY=( $(compgen -W '--awscli' -- ${cur}) )
+            return 0
+            ;;
+
+        '--h'*)
+            COMPREPLY=( $(compgen -W '--help' -- ${cur}) )
+            return 0
+            ;;
+
+        '--c'*)
+            COMPREPLY=( $(compgen -W '--clean --configure' -- ${cur}) )
+            return 0
+            ;;
+
+        '--p'*)
+            COMPREPLY=( $(compgen -W '--profile' -- ${cur}) )
+            return 0
+            ;;
+
+        '--s'*)
+            COMPREPLY=( $(compgen -W '--show' -- ${cur}) )
+            return 0
+            ;;
+
+        '--v'*)
+            COMPREPLY=( $(compgen -W '--version' -- ${cur}) )
+            return 0
+            ;;
+
     esac
     case "${prev}" in
 
         '--accounts')
-            echo $(ls .)
-            ;;
-
-        '--mfa-code')
-            if [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
-               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
-               [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
-                return 0
-
-            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ]; then
-                COMPREPLY=( $(compgen -W "--refresh --profile" -- ${cur}) )
-                return 0
-
-            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
-                COMPREPLY=( $(compgen -W "--accounts --profile" -- ${cur}) )
-                return 0
-
-            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
-                COMPREPLY=( $(compgen -W "--accounts --refresh" -- ${cur}) )
-                return 0
-
-            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
-                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
-                COMPREPLY=( $(compgen -W "--refresh" -- ${cur}) )
-                return 0
-
-            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ] && \
-                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-profile')" ]; then
-                COMPREPLY=( $(compgen -W "--accounts" -- ${cur}) )
-                return 0
-
-            elif [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-accounts')" ] && \
-                 [ "$(echo "${COMP_WORDS[@]}" | grep '\-\-refresh')" ]; then
-                COMPREPLY=( $(compgen -W "--profile" -- ${cur}) )
-                return 0
-
-            else
-                _complete_mfacode_compcommands "${mfacode_compcommands}"
-            fi
+            COMPREPLY=( $(compgen -f ${cur}) )
             return 0
             ;;
 
@@ -418,7 +451,7 @@ function _gcreds_completions(){
             return 0
             ;;
 
-        '--awscli' | '--configure'  | 'help' | '--purge' | '--show' | '--version')
+        '--awscli' | '--configure'  | 'help' | '--clean' | '--mfa-code' | '--show' | '--version')
             return 0
             ;;
 
