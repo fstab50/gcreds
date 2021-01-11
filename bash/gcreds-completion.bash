@@ -233,9 +233,6 @@ function _gcreds_completions(){
     profile_compcommands='--accounts --mfa-code --refresh'
     refresh_compcommands='--accounts --mfa-code --profile'
 
-    # subcommand sets
-    download_subcommands=$(echo "${arr_all[@]}")
-
     #echo -e "CUR: $cur, PREV: $prev, INITCMD: $initcmd"       # debug
 
     case "${initcmd}" in
@@ -325,15 +322,7 @@ function _gcreds_completions(){
     case "${prev}" in
 
         '--accounts')
-            if [[ $(echo "${COMP_WORDS[@]}" | grep '\-\-uninstall') ]]; then
-                return 0
-            else
-                # assemble subcommands
-                clean_subcommands="$(_current_downloads) ALL"
-                # return reply
-                COMPREPLY=( $(compgen -W "${clean_subcommands}" -- ${cur}) )
-                return 0
-            fi
+            echo $(ls .)
             ;;
 
         '--mfa-code')
