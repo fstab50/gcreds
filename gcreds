@@ -53,6 +53,8 @@ UNBOLD=`tput sgr0`
 accent=$(tput setaf 008)
 ansi=$(echo -e ${orange})   # use for ansi escape color codes
 
+# ansi bright colors
+a_brightblue='\033[38;5;51m'
 
 # source dependencies
 source $lib_path/std_functions.sh
@@ -134,6 +136,7 @@ EOM
     #<-- end function gcreds_help -->
 }
 
+
 function array2json(){
     ## converts associative array to json file output ##
     local -n array_dict=$1      # local assoc array must use -n opt
@@ -158,6 +161,7 @@ function array2json(){
     # <-- end function array2json -->
 }
 
+
 function std_logger(){
     local msg="$1"
     if [[ ! $gcreds_log ]]; then
@@ -166,6 +170,7 @@ function std_logger(){
     fi
     echo "$(date +'%b %d %T') $host $pkg: $msg" >> "$gcreds_log"
 }
+
 
 function std_message(){
     local msg="$1"
@@ -186,11 +191,13 @@ function std_message(){
     fi
 }
 
+
 function std_error(){
     local msg="$1"
     std_logger "[ERROR]: $msg"
     echo -e "\n${yellow}[ ${red}ERROR${yellow} ]$reset  $msg\n" | indent04
 }
+
 
 function std_warn(){
     local msg="$1"
@@ -204,12 +211,14 @@ function std_warn(){
     fi
 }
 
+
 function std_error_exit(){
     local msg="$1"
     local status="$2"
     std_error "$msg"
     exit $status
 }
+
 
 function gcreds_env_info(){
     local msg_header=$1
@@ -320,6 +329,7 @@ function gcreds_depcheck(){
     # <-- end function gcreds_depcheck -->
 }
 
+
 function gcreds_authentication(){
     # validate authenthentication to aws apis before writing to awscli config
     if [ ! $1 ] || [ ! $2 ] || [ ! $3 ]; then
@@ -331,6 +341,7 @@ function gcreds_authentication(){
     #<-- end function gcreds_authentication -->
 }
 
+
 function gcreds_backup(){
     # backup existing awscli config
     if [[ ! -e ~/.aws/credentials.orig ]]; then
@@ -340,6 +351,7 @@ function gcreds_backup(){
     #
     #<-- end functions gcreds_backup -->
 }
+
 
 function gcreds_clean(){
     # delete all files given as parameters
@@ -354,6 +366,7 @@ function gcreds_clean(){
     #
     #<-- end function gcreds_clean -->
 }
+
 
 function gcreds_configure(){
     ## set configuration options ##
@@ -465,6 +478,41 @@ function gcreds_configure(){
     #
     # <-- end function gcreds_configure -->
 }
+
+
+function display_program_version(){
+    ##
+    ## output script version info, license
+    ##
+    local _version=$__version__
+    local _hic=$(echo -e ${a_brightblue})
+    local _year=$(date +%G)
+    local _bashver="$(
+                bash --version | head -n1 | awk -F 'version' '{print $2}' \
+                    | awk '{print $1}' | awk -F '(' '{print $1}'
+            )"
+    #
+    cat <<EOM
+    ______________________________________________________________________
+
+
+
+
+
+              ${_hic}$pkg${reset} version: ${title}$_version${reset}   |   GNU Bash $_bashver
+
+
+
+
+    ______________________________________________________________________
+
+      Copyright 2017-$_year, Blake Huber.  This program distributed under
+      GPL v3.  This copyright notice must remain with derivative works.
+    ______________________________________________________________________
+
+EOM
+}
+
 
 function gcreds_profile_exists(){
     ## validate if profile exists in local awscli config ##
