@@ -21,7 +21,7 @@ Author:
 License:
     General Public License v3
     Additional terms may be found in the complete license agreement:
-    https://bitbucket.org/blakeca00/gcredsthon3/src/master/LICENSE.md
+    https://bitbucket.org/blakeca00/gcreds/src/master/LICENSE.md
 
 OS Support:
     - Debian, Ubuntu, Ubuntu variants
