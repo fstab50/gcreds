@@ -206,7 +206,8 @@ function _gcreds_completions(){
     ##
     local numargs numoptions cur prev initcmd
 
-    config_dir="$HOME/.gcreds"
+    #config_dir="$HOME/.gcreds"
+    config_dir="/usr/local/lib/gcreds"
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     initcmd="${COMP_WORDS[COMP_CWORD-2]}"
