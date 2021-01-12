@@ -7,9 +7,7 @@ BIN_PATH=/usr/local/bin
 
 # log files
 touch /var/log/gcreds.log
-touch /var/log/console.log
 chmod 0666 /var/log/gcreds.log
-chmod 0666 /var/log/console.log
 
 # main executable
 chown root:root /usr/local/bin/gcreds
