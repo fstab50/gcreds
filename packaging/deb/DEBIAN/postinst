@@ -23,23 +23,6 @@ chown root:root /etc/bash_completion.d/gcreds-completion.bash
 chmod 0644 /etc/bash_completion.d/gcreds-completion.bash
 
 
-##  update sudoers path  ##
-
-if [ -f /etc/sudoers ]; then
-
-    var=$(grep secure_path /etc/sudoers)
-    cur_path="$(echo ${var##*=} | cut -c 2-100 | rev | cut -c 2-100 | rev)"
-
-    if [[ -z "$(echo $cur_path | grep $BIN_PATH)" ]]; then
-        # insert bin path
-        new_path="$cur_path:$BIN_PATH"
-        # append hardcoded secure_path (single quotes mandatory)
-        sed -i 's/secure_path=.*/secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin\"/g' /etc/sudoers
-    fi
-
-fi
-
-
 ## install debian-tools package repository if not exist  ##
 
 repository="debian-tools"
