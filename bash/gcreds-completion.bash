@@ -163,18 +163,20 @@ function _refresh_subcommands(){
     ##
     ##  Valid number of parallel processes for make binary
     ##
-    declare -a arr_subcmds
+    local cmds=$(seq 9)
+    local split='4'       # times to split screen width
+    local IFS=$' \t\n'
+    local formatted_cmds=( $(compgen -W "${cmds}" -- "${cur}") )
 
-    for count in $(seq 20); do
-        if [[ ${#$count} == "1" ]]; then
-            arr_subcmds=( "${arr_subcmds[@]}" "0$i" )
-
-        else
-            arr_subcmds=( "${arr_subcmds[@]}" "$count"  )
-        fi
+    for i in "${!formatted_cmds[@]}"; do
+        formatted_cmds[$i]="$(printf '%*s' "-$(($COLUMNS/$split))"  "${formatted_cmds[$i]}")"
     done
-    printf -- '%s\n' "${arr_subcmds[@]}"
+    COMPREPLY=( "${formatted_cmds[@]}")
+    return 0
+    #
+    # <-- end function _complete_region_subcommands -->
 }
+
 
 
 function _numargs(){
@@ -240,9 +242,9 @@ function _gcreds_completions(){
     commands='--accounts --awscli --configure --clean --help --mfa-code --profile --mfa-code --show --version'
 
     # complementary command sets
-    accounts_compcommands='--mfa-code --profile --refresh'
-    mfacode_compcommands='--accounts --profile --refresh'
-    profile_compcommands='--accounts --mfa-code --refresh'
+    accounts_compcommands='--mfa-code --profile --refresh-hours'
+    mfacode_compcommands='--accounts --profile --refresh-hours'
+    profile_compcommands='--accounts --mfa-code --refresh-hours'
     refresh_compcommands='--accounts --mfa-code --profile'
 
     #echo -e "CUR: $cur, PREV: $prev, INITCMD: $initcmd"       # debug
@@ -255,7 +257,7 @@ function _gcreds_completions(){
             ##  not already present on the command line
             ##
             declare -a horsemen
-            horsemen=( '--accounts' '--mfa-code'  '--profile'  '--refresh' )
+            horsemen=( '--accounts' '--mfa-code'  '--profile'  '--refresh-hours' )
             subcommands=$(_parse_compwords COMP_WORDS[@] horsemen[@])
             numargs=$(_numargs "$subcommands")
 
@@ -333,8 +335,8 @@ function _gcreds_completions(){
             return 0
             ;;
 
-        '--refresh')
-            COMPREPLY=( $(compgen -W "$(_complete_refresh_subcommands)" -- ${cur}) )
+        '--refresh-hours')
+            _refresh_subcommands
             return 0
             ;;
 
@@ -344,7 +346,7 @@ function _gcreds_completions(){
             ##  not already present on the command line
             ##
             declare -a horsemen
-            horsemen=( '--accounts' '--mfa-code'  '--profile'  '--refresh' )
+            horsemen=( '--accounts' '--mfa-code'  '--profile'  '--refresh-hours' )
             subcommands=$(_parse_compwords COMP_WORDS[@] horsemen[@])
             numargs=$(_numargs "$subcommands")
 
