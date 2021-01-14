@@ -115,7 +115,7 @@ function gcreds_help(){
       ${accent}${BOLD}-p, --profile${reset} ${reset}<${accent}value${reset}>:  Profile name of the IAM user from your local
           awscli config you will use to generate temporary iam credentials.
 
-      ${accent}${BOLD}-r, --refresh ${reset}<${accent}value${reset}>:  Automatically refresh temporary credentials
+      ${accent}${BOLD}-r, --refresh-hours ${reset}<${accent}value${reset}>:  Automatically refresh temp credentials
           for specified number of hours. If omitted, temp credentials are
           generated only once and expire after 60 min (default timeout).
 
