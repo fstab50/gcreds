@@ -15,7 +15,7 @@ chmod 0755 /usr/local/bin/gcreds
 
 # lib files
 chown root:root -R /usr/local/lib/gcreds
-chmod 0644 /usr/local/lib/gcreds/*.sh
+chmod -R 0755 /usr/local/lib/gcreds/*.sh
 chmod 0755 /usr/local/lib/gcreds
 
 # bash completion files

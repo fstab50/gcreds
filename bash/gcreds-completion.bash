@@ -159,6 +159,24 @@ function _complete_4_horsemen_subcommands(){
 }
 
 
+function _refresh_subcommands(){
+    ##
+    ##  Valid number of parallel processes for make binary
+    ##
+    declare -a arr_subcmds
+
+    for count in $(seq 20); do
+        if [[ ${#$count} == "1" ]]; then
+            arr_subcmds=( "${arr_subcmds[@]}" "0$i" )
+
+        else
+            arr_subcmds=( "${arr_subcmds[@]}" "$count"  )
+        fi
+    done
+    printf -- '%s\n' "${arr_subcmds[@]}"
+}
+
+
 function _numargs(){
     ##
     ## Returns count of number of parameter args passed
@@ -316,6 +334,11 @@ function _gcreds_completions(){
             ;;
 
         '--refresh')
+            COMPREPLY=( $(compgen -W "$(_complete_refresh_subcommands)" -- ${cur}) )
+            return 0
+            ;;
+
+        [0-2][0-9])
             ##
             ##  Return compreply with any of the 4 comp_words that
             ##  not already present on the command line
