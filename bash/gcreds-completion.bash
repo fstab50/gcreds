@@ -340,7 +340,7 @@ function _gcreds_completions(){
             return 0
             ;;
 
-        [0-2][0-9])
+        [0-9])
             ##
             ##  Return compreply with any of the 4 comp_words that
             ##  not already present on the command line
