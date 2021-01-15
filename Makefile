@@ -117,6 +117,11 @@ installrpm: buildrpm   ## Install (source: pypi). Build artifacts exist
 rebuild-docs:   ##  Regenerate sphinx documentation
 	cd $(CUR_DIR)/docs && . $(VENV_DIR)/bin/activate && $(MAKE) html && cd $(CUR_DIR);
 
+	
+.PHONY: upload-images
+upload-images:   ## Upload README images to Amazon S3
+	bash $(CUR_DIR)/scripts/s3upload.sh
+
 
 .PHONY: help
 help:   ## Print help index
