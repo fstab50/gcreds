@@ -209,7 +209,7 @@ to generate temporary credentials for roles
 **Auto Refresh** -- automatic regeneration of temporary credentials
 
 ```bash
-    $ gcreds -p <iam_user> -a list.accounts --auto 4
+    $ gcreds --profile <iam_user> --accounts list.accounts --refresh-hours 4
 ```
 
 Generation of credentials:
@@ -226,15 +226,6 @@ Monitoring of session statics:
     $ gcreds --show
 ```
 
-![option show](./assets/gcreds-show.png)
+![option show](./assets/status.png)
 
 * * *
-
-## Enhancement Roadmap ##
-
-1. Upon startup, check the $AWS_SHARED_CREDENTIALS_FILE variable for an alternate location of the
-awscli credentials dir.  Set cred_path = value if found; else use default location (~/.aws).
-From a cli, see:
-```bash
-    $ aws help config-vars
-```
