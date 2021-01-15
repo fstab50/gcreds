@@ -15,7 +15,7 @@ chmod 0755 /usr/local/bin/gcreds
 
 # lib files
 chown root:root -R /usr/local/lib/gcreds
-chmod -R 0755 /usr/local/lib/gcreds/*.sh
+chmod -R 0644 /usr/local/lib/gcreds/*.sh
 chmod 0755 /usr/local/lib/gcreds
 
 # bash completion files
@@ -23,50 +23,9 @@ chown root:root /etc/bash_completion.d/gcreds-completion.bash
 chmod 0644 /etc/bash_completion.d/gcreds-completion.bash
 
 
-## install debian-tools package repository if not exist  ##
-
-repository="debian-tools"
-
-if [[ -z $(ls /etc/apt/sources.list.d | grep $repository) ]]; then
-
-    if [[ $(grep VERSION_CODENAME /etc/os-release) ]]; then
-        version_str=$(grep VERSION_CODENAME /etc/os-release)
-        codename=${version_str#*=}
-
-    elif [[ $(which lsb_release) ]]; then
-        codename="$(lsb_release -sirc | tail -n 1)"
-
-    elif [[ $(grep VERSION_ID /etc/os-release) ]]; then
-        version_str=$(grep VERSION_ID /etc/os-release)
-        codename=${version_str#*=}
-    fi
-
-    case $codename in
-        'trusty' | 'Trusty' | 'Trusty Tahr' | "\"14.04\"" | "14.04")
-            echo 'deb [arch=amd64] http://deb.awscloud.center trusty main' > /etc/apt/sources.list.d/debian-tools.list
-            ;;
-
-        'xenial' | "\"16.04\"" | "16.04" | "8")
-            echo 'deb [arch=amd64] http://deb.awscloud.center xenial main' > /etc/apt/sources.list.d/debian-tools.list
-            ;;
-
-        'bionic' | "\"18.04\"" | "18.04" | "9")
-            echo 'deb [arch=amd64] http://deb.awscloud.center bionic main' > /etc/apt/sources.list.d/debian-tools.list
-            ;;
-
-        'cosmic' | "\"18.10\"" | "18.10")
-            echo 'deb [arch=amd64] http://deb.awscloud.center cosmic main' > /etc/apt/sources.list.d/debian-tools.list
-            ;;
-    esac
-
-    # install public key
-    wget -qO - 'http://awscloud.center/keys/public.key' | sudo apt-key add -
-
-fi
-
-
 ##  enable bash_completion  ##
 
+# Possible Bash completion source file locations:
 # - /etc/bash_completion.d
 # - /usr/local/etc/bash_completion.d
 # - /usr/share/bash-completion/completions
