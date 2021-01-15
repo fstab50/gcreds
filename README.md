@@ -45,11 +45,16 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 
 ## Dependencies ##
 
-- One of the following python versions: 2.6.5, 2.7.X+, 3.3.X+, 3.4.X+
+- One of the following python versions: 3.6.X+
 - Installation Amazon CLI tools (awscli, see Installation section)
 - [jq](https://stedolan.github.io/jq), a json parser generally available from your distribution repo
 - bash (4.x)
-- Standard linux utilities: grep, awk, sed, cat, hostname
+- Standard linux utilities:
+    * grep
+    * awk
+    * sed
+    * cat
+    * hostname
 
 * * *
 
@@ -58,7 +63,7 @@ Slack: [@blake](https://mpcaws.slack.com/team/blake)
 Help Menu
 
 ```bash
-    $ ./gcreds -h
+    $ gcreds --help
 ```
 
 ![help-menu](./assets/help-menu.png)
@@ -116,7 +121,7 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
 2. Run installer
 
     -------------------------------------------
-    ![cygwin project](./.images/cygwin1.png)
+    ![cygwin project](./assets/cygwin1.png)
 
     -------------------------------------------
 
@@ -130,7 +135,7 @@ Cygwin is a Unix-like environment and command-line interface for Microsoft Windo
     b. Type package name into Search field
     c. Click on New field in particular package that you would like to install, Bin? field has to have "X" icon
 
-    ![cygwin python3](./.images/cygwin2.png)
+    ![cygwin python3](./assets/cygwin2.png)
 
 9. Run Cygwin64 Terminal
 10. Run command:
@@ -175,7 +180,7 @@ to generate temporary credentials for roles
 
 **stdout** - when generating credentials
 
-![gcreds output](./.images/stdout.png)
+![gcreds output](./assets/stdout.png)
 
 **Modifications to local awscli configuration** (account ids have been obscured):
 
@@ -183,11 +188,11 @@ to generate temporary credentials for roles
     $ less ./aws/credentials
 ```
 
-![aws example credentials file](./.images/credentials.png)
+![aws example credentials file](./assets/credentials.png)
 
 **Example Use** of profiles created by **greds**:
 
-![example usage](./.images/example-usage.png)
+![example usage](./assets/example-usage.png)
 
 **Log output** (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
 
@@ -195,7 +200,7 @@ to generate temporary credentials for roles
     $ less ~/gcreds/logs/gcreds.log
 ```
 
-![example gcreds.log](./.images/log-output.png)
+![example gcreds.log](./assets/log-output.png)
 
 * * *
 
@@ -209,11 +214,11 @@ to generate temporary credentials for roles
 
 Generation of credentials:
 
-![option auto](./.images/auto-gen.png)
+![option auto](./assets/auto-gen.png)
 
 Monitoring of session statics:
 
-![option auto](./.images/auto-stats.png)
+![option auto](./assets/auto-stats.png)
 
 **Show Option** -- show current temporary credentials; associated lifetime
 
@@ -221,7 +226,7 @@ Monitoring of session statics:
     $ gcreds --show
 ```
 
-![option show](./.images/gcreds-show.png)
+![option show](./assets/gcreds-show.png)
 
 * * *
 
