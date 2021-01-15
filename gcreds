@@ -277,12 +277,6 @@ function gcreds_depcheck(){
         # shell other than bash
         std_error_exit "Default shell appears to be something other than bash. Please rerun with bash. Aborting (code $E_BADSHELL)" $E_BADSHELL
     fi
-    ## create log dir for gcreds ##
-    if [[ ! -d $pkg_path/logs ]]; then
-        if ! mkdir -p "$pkg_path/logs"; then
-            std_error_exit "$pkg: failed to make log directory: $pkg_path/logs" $E_DIR
-        fi
-    fi
     ## create gcreds config dir ##
     if [[ ! -d $config_path ]]; then
         std_warn "config_path not found, creating config dir $config_path"
