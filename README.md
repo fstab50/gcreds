@@ -68,6 +68,9 @@ Help Menu
 
 ![help-menu](./assets/help-menu.png)
 
+[![help-menu](./assets/help-menu.png)(http://images.awspros.world/xlines/help-menu.png)]
+
+
 * * *
 
 ## Installation - Redhat / Ubuntu ##
