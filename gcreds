@@ -580,7 +580,7 @@ function gcreds_parse_parameters(){
                     shift 1
                     exit 0
                     ;;
-                -r | --refresh)     # optional
+                -r | --refresh | --refresh-hours)     # optional
                     if [ $2 ]; then
                         # $2 given in hours
                         TOKEN_LIFE=$2
