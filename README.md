@@ -68,8 +68,6 @@ Help Menu
 
 ![help-menu](./assets/help-menu.png)
 
-[![help-menu](http://images.awspros.world/xlines/help-menu.png)
-
 
 * * *
 
