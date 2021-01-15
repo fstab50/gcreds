@@ -61,7 +61,7 @@ Help Menu
     $ ./gcreds -h
 ```
 
-![help-menu](./.images/help-menu.png)
+![help-menu](./assets/help-menu.png)
 
 * * *
 
