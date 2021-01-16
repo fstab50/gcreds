@@ -5,9 +5,12 @@
 
 ## Summary
 
-Count the number of lines of text in a code project (or anything else)
+**gcreds** (pronounced "gee-creds" for _generate credentials_) is a utility for creation and managment of IAM temporary access credentials using Amazon's [Security Token Service (STS)](https://docs.aws.amazon.com/STS/latest/APIReference/welcome.html).  [Temporary credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html) are used to access AWS resources when assuming a role identity.
+
+For more information on the above terms and functions, see [an explanation of IAM roles in the Amazon Web Services](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) documentation.
 
 **Version**:	2.4.3
+
 
 * * *
 
