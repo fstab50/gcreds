@@ -1,232 +1,425 @@
+<a name="top"></a>
 * * *
-# gcreds: Generate AWS Temporary Credentials
+# gcreds
 * * *
 
-## Summary ##
+## Summary
 
-**gcreds** (pronounced "gee-creds" for _generate credentials_) is a utility for creation and managment of IAM temporary access credentials using Amazon's [Security Token Service (STS)](https://docs.aws.amazon.com/STS/latest/APIReference/welcome.html).  [Temporary credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html) are used to access AWS resources when assuming a role identity.
+Count the number of lines of text in a code project (or anything else)
 
-For more information on the above terms and functions, see [an explanation of IAM roles in the Amazon Web Services](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) documentation.
-
-**Version**:	2.4.1
-
-
-## Purpose ##
-
-**gcreds** requests temporary credentials from [Amazon's Security Token Service (STS)](http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html) for roles that normally require [multi-factor credentials](https://en.wikipedia.org/wiki/Multi-factor_authentication) in order to authenticate.
-
-A primary use case for **gcreds** is generating a temporary set of AWS access credentials for programmatic use by automation tools running on your local machine.
-
-**gcreds** manages temporary credentials it generates to prevent corruption of your local awscli config. When generating new temporary credentials, **gcreds** will automatically clear expired credentials from your local awscli config to block the presence of duplicate sets of credentials.
-
-See [v2.0 Release Notes](./notes/release_v2.0.md)
-
-#### Previous Releases ####
-* [v1.2 Release Notes](./notes/release_v1.2.md)
-* [v1.0 Release Notes](./notes/release_v1.0.md)
-* [v1.3 Release Notes](./notes/release_v1.3.md)
+**Version**: 0.7.21
 
 * * *
 
-## Deployment Owner/ Author ##
+## Contents
 
-Blake Huber
-Slack: [@blake](https://mpcaws.slack.com/team/blake)
+* [**Dependencies**](#dependencies)
+
+* [**Program Options**](#program-options)
+
+* [**Build Options**](#build-options)
+
+* [**Configuration**](#configuration)
+
+* [**Installation**](#installation)
+    * [Pip Install](#installation)
+    * [Ubuntu, Linux Mint, Debian-based Distributions](#debian-distro-install)
+    * [Redhat, CentOS](#redhat-distro-install)
+    * [Amazon Linux 2, Fedora](#amzn2-distro-install)
+
+* [**Screenshots**](#screenshots)
+
+* [**Author & Copyright**](#author--copyright)
+
+* [**License**](#license)
+
+* [**Disclaimer**](#disclaimer)
+
+--
+
+[back to the top](#top)
 
 * * *
 
-## Contents ##
+## Dependencies
 
-* [README.md](./README.md):  This file
-* [gcreds](./gcreds):  gcreds main executable
-* [notes/](./notes/):  Directory containing all release notes
+[gcreds](https://github.com/fstab50/gcreds) requires [Python 3.6+](https://docs.python.org/3/).
 
-* * *
+If your environment has Python 3.5 or older or is missing Python 3 altogether, consider using <a href="https://github.com/fstab50/nlines" target="_blank">nlines</a> as an excellent alternative. nlines [bash](https://www.gnu.org/software/bash) implementation line counter is compatible with virtually any Linux-based development environment.
 
-## Dependencies ##
 
-- One of the following python versions: 3.6.X+
-- Installation Amazon CLI tools (awscli, see Installation section)
-- [jq](https://stedolan.github.io/jq), a json parser generally available from your distribution repo
-- bash (4.x)
-- Standard linux utilities:
-    * grep
-    * awk
-    * sed
-    * cat
-    * hostname
+[back to the top](#top)
 
 * * *
 
-## Usage ##
+## Program Options
 
-Help Menu
+To display the **gcreds** help menu:
 
 ```bash
     $ gcreds --help
 ```
 
-![help-menu](./assets/help-menu.png)
+<p align="center">
+    <a href="http://images.awspros.world/gcreds/help-menu.png" target="_blank"><img src="./assets/help-menu.png">
+</p>
 
+--
+
+[back to the top](#top)
+
+* * *
+## Build options
+
+**[GNU Make](https://www.gnu.org/software/make) Targets**.  Type the following to display the available make targets from the root of the project:
+
+```bash
+    $  make help
+```
+
+<p align="center">
+    <a href="http://images.awspros.world/gcreds/make-help.png" target="_blank"><img src="./assets/make-help.png">
+</p>
+
+--
+
+[back to the top](#top)
+
+* * *
+## Configuration
+
+Configure [gcreds](https://github.com/fstab50/gcreds) runtime options by entering the configuration menu:
+
+```bash
+    $ gcreds --configure
+```
+
+[![toc](./assets/configure_toc.png)](http://images.awspros.world/gcreds/configure_toc.png)&nbsp;
+
+[back to the top](#top)
+
+--
+
+Option "A" (shown below) allows addition of file types to be excluded (skipped) from line totals
+
+[![option a](./assets/configure_a.png)](http://images.awspros.world/gcreds/configure_a.png)
+
+[back to the top](#top)
+
+--
+
+Option "B" (shown below) allows deletion of file types from the exclusion list so that a specific file extension will be included in total line counts:
+
+[![option b](./assets/configure_b.png)](http://images.awspros.world/gcreds/configure_b.png)&nbsp;
+
+[back to the top](#top)
+
+--
+
+Option "C" (shown below) allows user-customization of files highlighted for containing a large number of lines of text:
+
+[![option c](./assets/configure_c.png)](http://images.awspros.world/gcreds/configure_c.png)
+
+--
+
+[back to the top](#top)
+
+* * *
+## Installation
+* * *
+
+### Pip Install
+
+**gcreds** may be installed on Linux via [pip, python package installer](https://pypi.org/project/pip) in one of two methods:
+
+To install **gcreds** for a single user:
+
+```
+$  pip3 install gcreds --user
+```
+
+To install **gcreds** for all users (Linux):
+
+```
+$  sudo -H pip3 install gcreds
+```
+
+[back to the top](#top)
+
+* * *
+<a name="debian-distro-install"></a>
+### Ubuntu, Linux Mint, Debian variants  (Python 3.6, 3.7)
+
+The easiest way to install **gcreds** on debian-based Linux distributions is via the debian-tools package repository:
+
+
+1. Open a command line terminal.
+
+    [![deb-install0](./assets/deb-install-0.png)](http://images.awspros.world/gcreds/deb-install-0.png)
+
+2. Download and install the repository definition file
+
+    ```
+    $ sudo apt install wget
+    ```
+
+    ```
+    $ wget http://awscloud.center/deb/debian-tools.list
+    ```
+
+    [![deb-install1](./assets/deb-install-1.png)](http://images.awspros.world/gcreds/deb-install-1.png)
+
+    ```
+    $ sudo chown 0:0 debian-tools.list && sudo mv debian-tools.list /etc/apt/sources.list.d/
+    ```
+
+3. Install the package repository public key on your local machine
+
+    ```
+    $ wget -qO - http://awscloud.center/keys/public.key | sudo apt-key add -
+    ```
+
+    [![deb-install2](./assets/deb-install-2.png)](http://images.awspros.world/gcreds/deb-install-2.png)
+
+4. Update the local package repository cache
+
+    ```
+    $ sudo apt update
+    ```
+
+5. Install **gcreds** os package
+
+    ```
+    $ sudo apt install python3-gcreds
+    ```
+
+    Answer "y":
+
+    [![deb-install3](./assets/deb-install-3.png)](http://images.awspros.world/gcreds/deb-install-3.png)
+
+
+6. Verify Installation
+
+    ```
+    $ apt show python3-gcreds
+    ```
+
+    [![rpm-install4](./assets/rpm-install-4.png)](http://images.awspros.world/gcreds/rpm-install-4.png)
+
+
+[back to the top](#top)
+
+* * *
+<a name="redhat-distro-install"></a>
+### Redhat, CentOS  (Python 3.6)
+
+The easiest way to install **gcreds** on redhat-based Linux distributions is via the developer-tools package repository:
+
+
+1. Open a command line terminal.
+
+    [![rpm-install0](./assets/rpm-install-0.png)](http://images.awspros.world/gcreds/rpm-install-0.png)
+
+2. Install the official epel package repository
+
+    ```
+    $ sudo yum install epel-release
+    ```
+
+2. Download and install the repo definition file
+
+    ```
+    $ sudo yum install wget
+    ```
+
+    [![rpm-install1](./assets/rpm-install-1.png)](http://images.awspros.world/gcreds/rpm-install-1.png)
+
+    ```
+    $ wget http://awscloud.center/rpm/developer-tools.repo
+    ```
+
+    [![rpm-install2](./assets/rpm-install-2.png)](http://images.awspros.world/gcreds/rpm-install-2.png)
+
+    ```
+    $ sudo chown 0:0 developer-tools.repo && sudo mv developer-tools.repo /etc/yum.repos.d/
+    ```
+
+3. Delete the local repository cache, then Update the cache with new package references
+
+    ```
+    $ sudo rm -fr /var/cache/yum
+    $ sudo yum update -y
+    ```
+
+4. Install the **python3-gcreds** os package
+
+    ```
+    $ sudo yum install python36-gcreds
+    ```
+
+    [![rpm-install3](./assets/rpm-install-3.png)](http://images.awspros.world/gcreds/rpm-install-3.png)
+
+
+    Answer "y":
+
+    [![rpm-install4](./assets/rpm-install-4.png)](http://images.awspros.world/gcreds/rpm-install-4.png)
+
+
+5. Verify Installation
+
+    ```
+    $ yum info python36-gcreds
+    ```
+
+    [![rpm-install5](./assets/rpm-install-5.png)](http://images.awspros.world/gcreds/rpm-install-5.png)
+
+
+[back to the top](#top)
+
+* * *
+<a name="amzn2-distro-install"></a>
+### Amazon Linux 2 / Fedora (Python 3.7)
+
+The easiest way to install **gcreds** on redhat-based Linux distribution [Amazon Linux 2](https://aws.amazon.com/amazon-linux-2) or [Fedora](http://fedoraproject.org), is via the developer-tools [amzn2.awscloud.center](http://amzn2.awscloud.center) package repository:
+
+
+1. Install the official epel package repository
+
+    ```
+    $ sudo amazon-linux-extras install epel -y
+    ```
+
+
+2. Download and install the repo definition file
+
+    ```
+    $ sudo yum install wget
+    ```
+
+    [![amzn2-install1](./assets/amzn2-install-1.png)](http://images.awspros.world/gcreds/amzn2-install-1.png)
+
+    ```
+    $ wget http://awscloud.center/amzn2/developer-tools.repo
+    ```
+
+    [![amzn2-install2](./assets/amzn2-install-2.png)](http://images.awspros.world/gcreds/amzn2-install-2.png)
+
+    ```
+    $ sudo chown 0:0 developer-tools.repo && sudo mv developer-tools.repo /etc/yum.repos.d/
+    ```
+
+3. Delete the local repository cache, then Update the cache with new package references
+
+    ```
+    $ sudo rm -fr /var/cache/yum
+    $ sudo yum update -y
+    ```
+
+4. Install **gcreds** os package
+
+    ```
+    $ sudo yum install python37-gcreds
+    ```
+
+    [![amzn2-install3](./assets/amzn2-install-3.png)](http://images.awspros.world/gcreds/amzn2-install-3.png)
+
+
+    Answer "y":
+
+    [![amzn2-install4](./assets/amzn2-install-4.png)](http://images.awspros.world/gcreds/amzn2-install-4.png)
+
+
+5. Verify Installation
+
+    ```
+    $ yum info python37-gcreds
+    ```
+
+    [![rpm-install5](./assets/amzn2-install-5.png)](http://images.awspros.world/gcreds/amzn2-install-5.png)
+
+    A check of python3 should point to Python 3.7:
+    ```
+    $ python3 --version
+    ```
+    ```
+    $ Python 3.7.X
+    ```
+
+--
+
+[back to the top](#top)
+
+* * *
+## Screenshots
+
+#### Project 1: Line count, low complexity git repository:
+
+```bash
+    $ gcreds  --sum  git/branchdiff
+```
+
+<p align="center">
+    <a href="http://images.awspros.world/gcreds/gcreds-output-branchdiff.png"><img src="./assets/gcreds-output-branchdiff-md.png" width="900">
+</p>
+
+
+[back to the top](#top)
 
 * * *
 
-## Installation - Redhat / Ubuntu ##
+#### Project 2: Line count, medium complexity git repository:
 
-* Install jq, a JSON parser from your local distribution repository.
+<p align="right">
+    <a href="http://images.awspros.world/gcreds/gcreds-awslabs.png"><img src="./assets/awslabs-content.png">
+</p>
 
-```bash
-    $ sudo apt-get install jq    # Ubuntu, most Debian-based distributions
-```
-```bash
-    $ sudo yum install jq        # RedHat, Fedora, CentOS
-```
 
-* Install [awscli](https://github.com/aws/aws-cli/)
-
-    Detailed instructions can be found in the README located at:
-    https://github.com/aws/aws-cli/
-
-    The easiest method, provided your platform supports it, is via [pip](http://www.pip-installer.org/en/latest).
-
-```bash
-    $ sudo pip install awscli
-```
-
-* If you have the aws-cli installed and want to upgrade to the latest version you can run:
-
-```bash
-    $ sudo pip install --upgrade awscli
-```
-
-* Clone this git repo in a writeable directory:
-
-```bash
-    $ git clone <domain>/gcreds.git
-```
-
-* Add **gcreds** to your PATH in your shell profile (.bashrc OR .bash_profile)
-
-```bash
-    $  echo "export PATH=$PATH:$HOME/<gcreds dir>/gcreds" >> ~/.bashrc
-```
+[back to the top](#top)
 
 * * *
 
-## Installation - Cygwin (Windows 7) ##
+#### Project 3: Line count, high complexity git repository:
 
-Cygwin is a Unix-like environment and command-line interface for Microsoft Windows. Cygwin provides native integration of Windows-based applications, data, and other system resources with applications, software tools, and data of the Unix-like environment. Thus it is possible to launch Windows applications from the Cygwin environment, as well as to use Cygwin tools and applications within the Windows operating context.
+<p align="right">
+    <a href="http://images.awspros.world/gcreds/gcreds_output_large.png"><img src="./assets/awslabs-serverless.png">
+</p>
 
-#### Required steps to install and configure Cygwin:
-1. Download Cygwin installer from official website https://www.cygwin.com/
-2. Run installer
 
-    -------------------------------------------
-    ![cygwin project](./assets/cygwin1.png)
-
-    -------------------------------------------
-
-3. Choose Install from Internet option in Choose A Download Source
-4. Select Root Install Directory, All Users option is recommended
-5. Select Local Package Directory
-6. Choose Use Internet Explorer Proxy Settings option
-7. Select one of the mirrors
-8. Select packages, required packages: python3, python3-pip, and git
-    a. Change view to Full
-    b. Type package name into Search field
-    c. Click on New field in particular package that you would like to install, Bin? field has to have "X" icon
-
-    ![cygwin python3](./assets/cygwin2.png)
-
-9. Run Cygwin64 Terminal
-10. Run command:
-
-        $ pip3 install awscli
-
-11. clone this repository
-
-        $ git clone <domain>/gcreds.git
-
-12. Configure credentials and profiles in ~/.aws/credentials
-
-        [IAMUSER1]
-        aws_access_key_id=XXXXXXXXXXXXXXX
-        aws_secret_access_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-        mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
-
-        [tooling-dev]
-        role_arn = arn:aws:iam::102512488663:role/Admin-ServiceRole
-        source_profile = IAMUSER1
-        mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
-
-        [development-qa]
-        role_arn = arn:aws:iam::935229214006:role/S3-ServiceRole
-        source_profile = IAMUSER1
-        mfa_serial = arn:aws:iam::0000000:mfa/IAMUSER1
-
-13. Create a file containing the profile names of the accounts in which you want
-to generate temporary credentials for roles
-
-        $ vim myroles.profiles    # call this file anything you wish
-
-        $ cat myroles.profiles
-
-        tooling-dev
-        tooling-qa
-        development-qa
+[back to the top](#top)
 
 * * *
 
-## Output ##
+## Author & Copyright
 
-**stdout** - when generating credentials
+All works contained herein copyrighted via below author unless work is explicitly noted by an alternate author.
 
-![gcreds output](./assets/stdout.png)
+* Copyright Blake Huber, All Rights Reserved.
 
-**Modifications to local awscli configuration** (account ids have been obscured):
-
-```bash
-    $ less ./aws/credentials
-```
-
-![aws example credentials file](./assets/credentials.png)
-
-**Example Use** of profiles created by **greds**:
-
-![example usage](./assets/example-usage.png)
-
-**Log output** (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
-
-```bash
-    $ less ~/gcreds/logs/gcreds.log
-```
-
-![example gcreds.log](./assets/log-output.png)
+[back to the top](#top)
 
 * * *
 
-## Options ##
+## License
 
-**Auto Refresh** -- automatic regeneration of temporary credentials
+* Software contained in this repo is licensed under the [license agreement](./LICENSE.md).  You may display the license and copyright information by issuing the following command:
 
-```bash
-    $ gcreds --profile <iam_user> --accounts list.accounts --refresh-hours 4
+```
+$ gcreds --version
 ```
 
-Generation of credentials:
+[![help](./assets/version-copyright.png)](https://images.awspros.world/gcreds/version-copyright.png)
 
-![option auto](./assets/auto-gen.png)
 
-Monitoring of session statics:
+[back to the top](#top)
 
-![option auto](./assets/auto-stats.png)
+* * *
 
-**Show Option** -- show current temporary credentials; associated lifetime
+## Disclaimer
 
-```bash
-    $ gcreds --show
-```
+*Code is provided "as is". No liability is assumed by either the code's originating author nor this repo's owner for their use at AWS or any other facility. Furthermore, running function code at AWS may incur monetary charges; in some cases, charges may be substantial. Charges are the sole responsibility of the account holder executing code obtained from this library.*
 
-![option show](./assets/status.png)
+Additional terms may be found in the complete [license agreement](./LICENSE.md).
+
+[back to the top](#top)
 
 * * *
