@@ -43,10 +43,18 @@ Count the number of lines of text in a code project (or anything else)
 
 ## Dependencies
 
-[gcreds](https://github.com/fstab50/gcreds) requires [Python 3.6+](https://docs.python.org/3/).
+[gcreds](https://github.com/fstab50/gcreds) requires the following:
 
-If your environment has Python 3.5 or older or is missing Python 3 altogether, consider using <a href="https://github.com/fstab50/nlines" target="_blank">nlines</a> as an excellent alternative. nlines [bash](https://www.gnu.org/software/bash) implementation line counter is compatible with virtually any Linux-based development environment.
-
+- [Python version 3.6+](https://docs.python.org/3/)
+- Installation Amazon CLI tools (awscli, see Installation section)
+- [jq](https://stedolan.github.io/jq), a json parser generally available from your distribution repo
+- bash (4.x)
+- Standard linux utilities:
+    * grep
+    * awk
+    * sed
+    * cat
+    * hostname
 
 [back to the top](#top)
 
@@ -128,25 +136,6 @@ Option "C" (shown below) allows user-customization of files highlighted for cont
 ## Installation
 * * *
 
-### Pip Install
-
-**gcreds** may be installed on Linux via [pip, python package installer](https://pypi.org/project/pip) in one of two methods:
-
-To install **gcreds** for a single user:
-
-```
-$  pip3 install gcreds --user
-```
-
-To install **gcreds** for all users (Linux):
-
-```
-$  sudo -H pip3 install gcreds
-```
-
-[back to the top](#top)
-
-* * *
 <a name="debian-distro-install"></a>
 ### Ubuntu, Linux Mint, Debian variants  (Python 3.6, 3.7)
 
@@ -213,137 +202,16 @@ The easiest way to install **gcreds** on debian-based Linux distributions is via
 <a name="redhat-distro-install"></a>
 ### Redhat, CentOS  (Python 3.6)
 
-The easiest way to install **gcreds** on redhat-based Linux distributions is via the developer-tools package repository:
-
-
-1. Open a command line terminal.
-
-    [![rpm-install0](./assets/rpm-install-0.png)](http://images.awspros.world/gcreds/rpm-install-0.png)
-
-2. Install the official epel package repository
-
-    ```
-    $ sudo yum install epel-release
-    ```
-
-2. Download and install the repo definition file
-
-    ```
-    $ sudo yum install wget
-    ```
-
-    [![rpm-install1](./assets/rpm-install-1.png)](http://images.awspros.world/gcreds/rpm-install-1.png)
-
-    ```
-    $ wget http://awscloud.center/rpm/developer-tools.repo
-    ```
-
-    [![rpm-install2](./assets/rpm-install-2.png)](http://images.awspros.world/gcreds/rpm-install-2.png)
-
-    ```
-    $ sudo chown 0:0 developer-tools.repo && sudo mv developer-tools.repo /etc/yum.repos.d/
-    ```
-
-3. Delete the local repository cache, then Update the cache with new package references
-
-    ```
-    $ sudo rm -fr /var/cache/yum
-    $ sudo yum update -y
-    ```
-
-4. Install the **python3-gcreds** os package
-
-    ```
-    $ sudo yum install python36-gcreds
-    ```
-
-    [![rpm-install3](./assets/rpm-install-3.png)](http://images.awspros.world/gcreds/rpm-install-3.png)
-
-
-    Answer "y":
-
-    [![rpm-install4](./assets/rpm-install-4.png)](http://images.awspros.world/gcreds/rpm-install-4.png)
-
-
-5. Verify Installation
-
-    ```
-    $ yum info python36-gcreds
-    ```
-
-    [![rpm-install5](./assets/rpm-install-5.png)](http://images.awspros.world/gcreds/rpm-install-5.png)
+Redhat Package Manager (RPM) format installation package under development.  Check [rpm.awscloud.center](http://s3.us-east-2.amazonaws.com/rpm.awscloud.center/index.html) page for updates.
 
 
 [back to the top](#top)
 
 * * *
 <a name="amzn2-distro-install"></a>
-### Amazon Linux 2 / Fedora (Python 3.7)
+### Amazon Linux 2 / Fedora (Python 3.7+)
 
-The easiest way to install **gcreds** on redhat-based Linux distribution [Amazon Linux 2](https://aws.amazon.com/amazon-linux-2) or [Fedora](http://fedoraproject.org), is via the developer-tools [amzn2.awscloud.center](http://amzn2.awscloud.center) package repository:
-
-
-1. Install the official epel package repository
-
-    ```
-    $ sudo amazon-linux-extras install epel -y
-    ```
-
-
-2. Download and install the repo definition file
-
-    ```
-    $ sudo yum install wget
-    ```
-
-    [![amzn2-install1](./assets/amzn2-install-1.png)](http://images.awspros.world/gcreds/amzn2-install-1.png)
-
-    ```
-    $ wget http://awscloud.center/amzn2/developer-tools.repo
-    ```
-
-    [![amzn2-install2](./assets/amzn2-install-2.png)](http://images.awspros.world/gcreds/amzn2-install-2.png)
-
-    ```
-    $ sudo chown 0:0 developer-tools.repo && sudo mv developer-tools.repo /etc/yum.repos.d/
-    ```
-
-3. Delete the local repository cache, then Update the cache with new package references
-
-    ```
-    $ sudo rm -fr /var/cache/yum
-    $ sudo yum update -y
-    ```
-
-4. Install **gcreds** os package
-
-    ```
-    $ sudo yum install python37-gcreds
-    ```
-
-    [![amzn2-install3](./assets/amzn2-install-3.png)](http://images.awspros.world/gcreds/amzn2-install-3.png)
-
-
-    Answer "y":
-
-    [![amzn2-install4](./assets/amzn2-install-4.png)](http://images.awspros.world/gcreds/amzn2-install-4.png)
-
-
-5. Verify Installation
-
-    ```
-    $ yum info python37-gcreds
-    ```
-
-    [![rpm-install5](./assets/amzn2-install-5.png)](http://images.awspros.world/gcreds/amzn2-install-5.png)
-
-    A check of python3 should point to Python 3.7:
-    ```
-    $ python3 --version
-    ```
-    ```
-    $ Python 3.7.X
-    ```
+Redhat Package Manager (RPM) format used by Amazon Linux under development.  Check [amzn2.awscloud.center](http://s3.us-east-2.amazonaws.com/amzn2.awscloud.center/index.html) page for updates.
 
 --
 
