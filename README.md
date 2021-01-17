@@ -182,7 +182,7 @@ The easiest way to install **gcreds** on debian-based Linux distributions is via
 5. Install **gcreds** os package
 
     ```
-    $ sudo apt install python3-gcreds
+    $ sudo apt install gcreds
     ```
 
     Answer "y":
@@ -193,7 +193,7 @@ The easiest way to install **gcreds** on debian-based Linux distributions is via
 6. Verify Installation
 
     ```
-    $ apt show python3-gcreds
+    $ apt show gcreds
     ```
 
     [![rpm-install4](./assets/rpm-install-4.png)](http://images.awspros.world/gcreds/rpm-install-4.png)
