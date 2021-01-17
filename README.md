@@ -196,7 +196,7 @@ The easiest way to install **gcreds** on debian-based Linux distributions is via
     $ apt show gcreds
     ```
 
-    [![rpm-install4](./assets/rpm-install-4.png)](http://images.awspros.world/gcreds/rpm-install-4.png)
+    [![apt-show](./assets/deb-install-4.png)](http://images.awspros.world/gcreds/deb-install-4.png)
 
 
 [back to the top](#top)
