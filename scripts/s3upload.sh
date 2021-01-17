@@ -15,7 +15,7 @@ function _git_root(){
     ##
     ##  determines full path to current git project root
     ##
-    echo "$(git rev-parse --show-toplevel 2>/dev/null)"
+    git rev-parse --show-toplevel 2>/dev/null
 }
 
 
