@@ -24,11 +24,10 @@ host=$(hostname)
 system=$(uname)
 
 # this file
-VERSION="2.9.3"
+LIB_VERSION="2.9.8"
 
 if [ ! $pkg ] || [ ! $pkg_path ]; then
-    echo -e "\npkg and pkg_path errors - both are null"
-    exit
+    echo -e "\n[std_functions.sh]: pkg and pkg_path errors - both are null"
 fi
 
 
@@ -68,8 +67,9 @@ function authenticated(){
     ## validates authentication using iam user or role ##
     local profilename="$1"
     local response
+    local awscli=$(which aws)
     #
-    response=$(aws sts get-caller-identity --profile $profilename 2>&1)
+    response=$($awscli sts get-caller-identity --profile $profilename 2>&1)
     if [ "$(echo $response | grep Invalid)" ]; then
         std_message "The IAM profile provided ($profilename) failed to authenticate to AWS. Exit (Code $E_AUTH)" "AUTH"
         return 1
@@ -412,7 +412,7 @@ function pkg_info(){
     ##     - sourcing of dep modules must occur after local var to avoid overwrite
     ##       of variable values in this module
     ##
-    local version=$VERSION
+    local version=$LIB_VERSION
     source $pkg_path/colors.sh
     bd=$(echo -e ${bold})
     act=$(echo -e ${a_orange})
@@ -670,10 +670,10 @@ function std_logger(){
         source "$pkg_lib/version.py"
         version=$__version__
 
-    elif [ "$VERSION" ]; then
-        version=$VERSION
+    elif [ "$LIB_VERSION" ]; then
+        version=$LIB_VERSION
 
-    elif [ ! "$VERSION" ]; then
+    elif [ ! "$LIB_VERSION" ]; then
         version="1.0.NA"
 
     fi
@@ -754,8 +754,16 @@ function std_message(){
             echo -e "${format}$prefix${rst}  |  $msg${format}" | indent04
             ;;
 
+        'FAIL' | 'ERROR' | 'BAD' | 'N/A')
+            echo -e "${format}${yellow}[ ${red}${BOLD}$prefix${rst}${yellow} ]${rst}  $msg${format}" | indent04
+            ;;
+
         'NOT-FOUND')
             echo -e "${format}${red}${BOLD}$prefix${rst}  |  $msg${format}" | indent04
+            ;;
+
+        'WARN')
+            echo -e "${format}${yellow}[ ${yellow}$prefix${rst}${yellow} ]${rst}  $msg${format}" | indent04
             ;;
 
         *)
