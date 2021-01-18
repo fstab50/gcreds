@@ -237,7 +237,7 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 
 * * *
 
-#### Blue Accent Scheme
+#### Blue Accent Scheme (green terminal)
 
 <p align="right">
     <a href="http://images.awspros.world/gcreds/help-menu-blue.png"><img src="./assets/help-menu-blue.png">
