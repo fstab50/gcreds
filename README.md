@@ -104,29 +104,22 @@ Configure [gcreds](https://github.com/fstab50/gcreds) runtime options by enterin
     $ gcreds --configure
 ```
 
-[![toc](./assets/configure_toc.png)](http://images.awspros.world/gcreds/configure_toc.png)&nbsp;
-
-[back to the top](#top)
+[![toc](./assets/configure-1.png)](http://images.awspros.world/gcreds/configure-1.png)&nbsp;
 
 --
 
-Option "A" (shown below) allows addition of file types to be excluded (skipped) from line totals
+If the same IAM user will be utilised to generate role credentials, set the default gcreds IAM user here to avoid entering "--profile <user>" every time gcreds is called to generate credentials for your local awscli configuration:
 
-[![option a](./assets/configure_a.png)](http://images.awspros.world/gcreds/configure_a.png)
-
-[back to the top](#top)
+[![option a](./assets/configure-2.png)](http://images.awspros.world/gcreds/configure-2.png)
 
 --
 
-Option "B" (shown below) allows deletion of file types from the exclusion list so that a specific file extension will be included in total line counts:
+Choose a default color scheme for gcreds accent highlighting via the next menu:
 
-[![option b](./assets/configure_b.png)](http://images.awspros.world/gcreds/configure_b.png)&nbsp;
-
-[back to the top](#top)
+[![option b](./assets/configure-3.png)](http://images.awspros.world/gcreds/configure-3.png)&nbsp;
 
 --
 
-Option "C" (shown below) allows user-customization of files highlighted for containing a large number of lines of text:
 
 [![option c](./assets/configure_c.png)](http://images.awspros.world/gcreds/configure_c.png)
 
