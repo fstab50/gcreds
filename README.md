@@ -222,6 +222,23 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 * * *
 ## Screenshots
 
+#### Authentication Status
+
+Runtime statistics displayed while authenitcation is active.   Alternatively, the command below displays same information anytime.
+
+```bash
+    $ gcreds  --show
+```
+
+<p align="center">
+    <a href="http://images.awspros.world/gcreds/status.png"><img src="./assets/status.png">
+</p>
+
+
+[back to the top](#top)
+
+* * *
+
 #### Green Accent Scheme
 
 ```bash
