@@ -104,7 +104,7 @@ Configure [gcreds](https://github.com/fstab50/gcreds) runtime options by enterin
     $ gcreds --configure
 ```
 
-[![toc](./assets/configure-1.png)](http://images.awspros.world/gcreds/configure-1.png)&nbsp;
+[![cinfugyre2](./assets/configure-1.png)](http://images.awspros.world/gcreds/configure-1.png)&nbsp;
 
 --
 
@@ -116,12 +116,12 @@ If the same IAM user will be utilised to generate role credentials, set the defa
 
 Choose a default color scheme for gcreds accent highlighting via the next menu:
 
-[![option b](./assets/configure-3.png)](http://images.awspros.world/gcreds/configure-3.png)&nbsp;
+[![configure3](./assets/configure-3.png)](http://images.awspros.world/gcreds/configure-3.png)&nbsp;
 
 --
 
 
-[![option c](./assets/configure_c.png)](http://images.awspros.world/gcreds/configure_c.png)
+[![configure4](./assets/configure-4.png)](http://images.awspros.world/gcreds/configure-4.png)
 
 --
 
