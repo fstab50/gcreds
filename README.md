@@ -222,14 +222,14 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 * * *
 ## Screenshots
 
-#### Green color scheme
+#### Green Accent Scheme
 
 ```bash
     $ gcreds  --help
 ```
 
 <p align="center">
-    <a href="http://images.awspros.world/gcreds/help-menu-green"><img src="./assets/help-menu-green.png">
+    <a href="http://images.awspros.world/gcreds/help-menu-green.png"><img src="./assets/help-menu-green.png">
 </p>
 
 
@@ -237,10 +237,10 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 
 * * *
 
-#### Project 2: Line count, medium complexity git repository:
+#### Blue Accent Scheme
 
 <p align="right">
-    <a href="http://images.awspros.world/gcreds/gcreds-awslabs.png"><img src="./assets/awslabs-content.png">
+    <a href="http://images.awspros.world/gcreds/help-menu-blue.png"><img src="./assets/help-menu-blue.png">
 </p>
 
 
@@ -248,10 +248,10 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 
 * * *
 
-#### Project 3: Line count, high complexity git repository:
+#### Log file
 
 <p align="right">
-    <a href="http://images.awspros.world/gcreds/gcreds_output_large.png"><img src="./assets/awslabs-serverless.png">
+    <a href="http://images.awspros.world/gcreds/log-output.png"><img src="./assets/log-output.png">
 </p>
 
 
