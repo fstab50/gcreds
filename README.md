@@ -25,7 +25,6 @@ For more information on the above terms and functions, see [an explanation of IA
 * [**Configuration**](#configuration)
 
 * [**Installation**](#installation)
-    * [Pip Install](#installation)
     * [Ubuntu, Linux Mint, Debian-based Distributions](#debian-distro-install)
     * [Redhat, CentOS](#redhat-distro-install)
     * [Amazon Linux 2, Fedora](#amzn2-distro-install)
@@ -223,14 +222,14 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 * * *
 ## Screenshots
 
-#### Project 1: Line count, low complexity git repository:
+#### Green color scheme
 
 ```bash
-    $ gcreds  --sum  git/branchdiff
+    $ gcreds  --help
 ```
 
 <p align="center">
-    <a href="http://images.awspros.world/gcreds/gcreds-output-branchdiff.png"><img src="./assets/gcreds-output-branchdiff-md.png" width="900">
+    <a href="http://images.awspros.world/gcreds/help-menu-green"><img src="./assets/help-menu-green.png">
 </p>
 
 
