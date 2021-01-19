@@ -58,7 +58,9 @@ install -m 0755 -d $RPM_BUILD_ROOT/%{_yumdir}
 install -m 0755 gcreds $RPM_BUILD_ROOT/%{_bindir}/gcreds
 install -m 0644 std_functions.sh $RPM_BUILD_ROOT/%{_libdir}/std_functions.sh
 install -m 0644 colors.sh $RPM_BUILD_ROOT/%{_libdir}/colors.sh
-install -m 0644 exitcodes.sh $RPM_BUILD_ROOT/%{_libdir}/exitcodes.sh
+install -m 0644 colors.py $RPM_BUILD_ROOT/%{_libdir}/colors.py
+install -m 0644 iam_users.py $RPM_BUILD_ROOT/%{_libdir}/iam_users.py
+install -m 0644 precheck-accounts.py $RPM_BUILD_ROOT/%{_libdir}/precheck-accounts.py
 install -m 0644 version.py $RPM_BUILD_ROOT/%{_libdir}/version.py
 install -m 0644 gcreds-completion.bash $RPM_BUILD_ROOT/%{_compdir}/gcreds-completion.bash
 
@@ -79,13 +81,10 @@ BIN_PATH=/usr/local/bin
 
 ##  finalize file ownership & permissions  ##
 
-# log files
+# log file
 touch /var/log/gcreds.log
-touch /var/log/console.log
 chown root:root /var/log/gcreds.log
-chown root:root /var/log/console.log
 chmod 0666 /var/log/gcreds.log
-chmod 0666 /var/log/console.log
 
 
 ##   ensure /usr/local/bin for python executables in PATH   ##
