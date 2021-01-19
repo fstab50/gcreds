@@ -60,6 +60,10 @@ See [v2.0 Release Notes](./notes/release_v2.0.md)
 * [v1.0 Release Notes](./notes/release_v1.0.md)
 * [v1.3 Release Notes](./notes/release_v1.3.md)
 
+--
+
+[back to the top](#top)
+
 * * *
 
 ## Dependencies
@@ -76,6 +80,8 @@ See [v2.0 Release Notes](./notes/release_v2.0.md)
     * sed
     * cat
     * hostname
+
+--
 
 [back to the top](#top)
 
