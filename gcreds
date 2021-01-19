@@ -479,7 +479,7 @@ function display_program_version(){
     ##
     ## output script version info, license
     ##
-    local _version=$VERSION
+    local _version="$1"
     local _hic=$(echo -e ${a_brightgreen})
     local _year=$(date +%G)
     local _bashver="$(
@@ -494,7 +494,7 @@ function display_program_version(){
 
 
 
-              ${_hic}$pkg${reset} version: ${title}$_version${reset}   |   GNU Bash $_bashver
+              ${_hic}$pkg${reset} version: ${title}${_version}${reset}   |   GNU Bash $_bashver
 
 
 
@@ -598,7 +598,8 @@ function gcreds_parse_parameters(){
                     ;;
                 -V | --version)
                     # display gcreds program release version info
-                    display_program_version
+                    VERSION=$(. "$lib_path"/version.py ; echo "$__version__")
+                    display_program_version "$VERSION"
                     shift 1
                     exit 0
                     ;;
