@@ -1,7 +1,7 @@
 {
     "Package": "rpm",
     "Project": "gcreds",
-    "ProjectUrl": "https://bitbucket.org/blakeca00/gcreds",
+    "ProjectUrl": "https://github.com/fstab50/gcreds",
     "Description": "Utility for compiling and installing any Python3 version.\nSupports RHEL 6, RHEL 7, CentOS 6, CentOS",
     "Version": "MAJOR_VERSION",
     "Release": "MINOR_VERSION",
