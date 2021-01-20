@@ -16,7 +16,7 @@ BuildRoot:      %{buildroot}
 Name:           %{name}
 Version:        %{version}
 Release:        %{release}
-Summary:        A Utility for Compiling and Installing Python3 on Linux
+Summary:        Create and Manage Amazon STS Role Credentials for Amazon Web Services
 
 Group:          Development/Tools
 BuildArch:      noarch
@@ -27,18 +27,19 @@ Prefix:         /usr
 Requires:      DEPLIST
 
 %if 0%{?rhel}%{?amzn2}
-Requires: bash-completion procps-ng
+Requires: epel-release bash-completion procps-ng jq awscli hostname util-linux coreutils curl bc bash
 %endif
 
 %if 0%{?amzn1}
-Requires: epel-release procps
+Requires: epel-release procps jq awscli hostname util-linux coreutils curl bc bash
 %endif
 
 %description
-Utility for compiling and installing any Python version
-from source.
-Supports Amazon Linux v1, Amazon Linux v2 (2018+),
-CentOS 7, Redhat Enterprise Linux 6 and 7
+gcreds requests temporary credentials from Amazon's Security Token Service, STS (http://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html), for roles that normally require multi-factor credentials authentication in order to authenticate users.
+.
+A primary use case for gcreds is the generation of a temporary set of AWS access credentials for programmatic use by automation tools running on your local machine.
+.
+gcreds manages temporary credentials it generates to prevent corruption of your local awscli config. When generating new temporary credentials, gcreds will automatically clear expired credentials from your local awscli config to prevent duplicate sets of credentials.
 
 
 %prep
