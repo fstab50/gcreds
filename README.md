@@ -157,7 +157,7 @@ Choose a default color scheme for gcreds accent highlighting via the next menu:
 * * *
 
 <a name="debian-distro-install"></a>
-### Ubuntu, Linux Mint, Debian variants  (Python 3.6, 3.7)
+### Ubuntu, Linux Mint, Debian variants  (Python 3.6+)
 
 The easiest way to install **gcreds** on debian-based Linux distributions is via the debian-tools package repository:
 
@@ -220,7 +220,7 @@ The easiest way to install **gcreds** on debian-based Linux distributions is via
 
 * * *
 <a name="redhat-distro-install"></a>
-### Redhat, CentOS  (Python 3.6)
+### Redhat, CentOS  (Python 3.6+)
 
 Redhat Package Manager (RPM) format installation package under development.  Check [rpm.awscloud.center](http://s3.us-east-2.amazonaws.com/rpm.awscloud.center/index.html) page for updates.
 
