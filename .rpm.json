@@ -1,0 +1,112 @@
+{
+    "Package": "rpm",
+    "Project": "gcreds",
+    "ProjectUrl": "https://bitbucket.org/blakeca00/gcreds",
+    "Description": "Utility for compiling and installing any Python3 version.\nSupports RHEL 6, RHEL 7, CentOS 6, CentOS",
+    "Version": "MAJOR_VERSION",
+    "Release": "MINOR_VERSION",
+    "PreInstall": ["rpm-build", "rpmdevtools"],
+    "Dependencies": [
+        "bash >= 4.1",
+        "curl >= 7.0",
+        "bc >= 1.0",
+        "coreutils",
+        "hostname",
+        "which",
+        "sudo",
+        "util-linux",
+        "tar",
+        "wget",
+        "xz",
+        "xz-libs"
+    ],
+    "LogFiles": [
+        {
+            "file": "gcreds.log", "Permissions": "0666"
+        },
+        {
+            "file": "console.log", "Permissions": "0666"
+        }
+    ],
+    "VersionModule": "version.py",
+    "DockerImage": "rpmbuildE",
+    "DockerContainer": "gcreds",
+    "DockerUser": "builder",
+    "DockerBuildScript": "docker-buildrpm.sh",
+    "BashCompletion": "gcreds-completion.bash",
+    "RepoDefinitionFile": "developer-tools.repo",
+    "SpecFile": {
+        "Name": "gcreds.spec",
+        "Summary": "A Utility for Compiling and Installing Python3 on Linux",
+        "Group":  "TecAdmin",
+        "BuildArch": "noarch",
+        "License": "GPL",
+        "Source": "gcreds-MAJOR_VERSION.MINOR_VERSION.tar.gz",
+        "BuildDirName": "gcreds-MAJOR_VERSION",
+        "Directories": [
+            {
+                "Dirname": "/usr/local/lib/gcreds",
+                "Permissions": "0755"
+            },
+            {
+                "Dirname": "/usr/local/bin",
+                "Permissions": "0755"
+            },
+            {
+                "Dirname": "/var/log",
+                "Permissions": "0755"
+            }
+        ],
+        "Files": [
+            {
+                "filename": "gcreds",
+                "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/gcreds",
+                "location": "/usr/local/bin/gcreds",
+                "Permissions": "0755"
+            },
+            {
+                "filename": "std_functions.sh",
+                "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/std_functions.sh",
+                "SpecFilePath": "/usr/local/lib/gcreds/std_functions.sh",
+                "Permissions": "0755"
+            },
+            {
+                "filename": "colors.py",
+                "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/colors.py",
+                "SpecFilePath": "/usr/local/lib/gcreds/colors.py",
+                "Permissions": "0755"
+            },
+            {
+                "filename": "colors.sh",
+                "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/colors.sh",
+                "SpecFilePath": "/usr/local/lib/gcreds/colors.sh",
+                "Permissions": "0755"
+            },
+            {
+                "filename": "iam_users.py",
+                "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/iam_users.py",
+                "SpecFilePath": "/usr/local/lib/gcreds/iam_users.py",
+                "Permissions": "0755"
+            },
+            {
+                "filename": "version.py",
+                "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/version.py",
+                "SpecFilePath": "/usr/local/lib/gcreds/version.py",
+                "Permissions": "0755"
+            },
+            {
+                "filename": "precheck-accounts.py",
+                "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/precheck-accounts.py",
+                "SpecFilePath": "/usr/local/lib/gcreds/precheck-accounts.py",
+                "Permissions": "0755"
+            },
+            {
+                "filename": "gcreds.log",
+                "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/gcreds.log",
+                "SpecFilePath": "/var/log/gcreds.log",
+                "Permissions": "0666"
+            },
+        ],
+        "BuildComment": "RPM Package built by CI/CD automtation"
+    }
+}
