@@ -71,11 +71,11 @@ def print_profiles(config, args):
 
 # --- main --------------------------------------------------------------------------------
 
+if __name__ == '__main__':
+    # globals
+    home = os.environ.get('HOME')
+    config_file = shared_credentials_location() or home + '/.aws/credentials'
+    config = ConfigParser()
 
-# globals
-home = os.environ.get('HOME')
-config_file = shared_credentials_location() or home + '/.aws/credentials'
-config = ConfigParser()
-
-modified_config = awscli_profiles()
-sys.exit(print_profiles(modified_config, sys.argv[1:]))
+    modified_config = awscli_profiles()
+    sys.exit(print_profiles(modified_config, sys.argv[1:]))
