@@ -31,7 +31,7 @@ def print_array(content, args):
         if x in args:
             continue
         else:
-            print(x + ' ', end='')
+            print(x + ' ')
 
 
 def shared_credentials_location():
