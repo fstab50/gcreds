@@ -13,19 +13,13 @@
         "coreutils",
         "hostname",
         "which",
-        "sudo",
         "util-linux",
-        "tar",
-        "wget",
-        "xz",
-        "xz-libs"
+        "jq",
+        "wget"
     ],
     "LogFiles": [
         {
             "file": "gcreds.log", "Permissions": "0666"
-        },
-        {
-            "file": "console.log", "Permissions": "0666"
         }
     ],
     "VersionModule": "version.py",
@@ -105,7 +99,7 @@
                 "SourceLocation": "rpmbuild/SOURCES/gcreds-MAJOR_VERSION/gcreds.log",
                 "SpecFilePath": "/var/log/gcreds.log",
                 "Permissions": "0666"
-            },
+            }
         ],
         "BuildComment": "RPM Package built by CI/CD automtation"
     }
