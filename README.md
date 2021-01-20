@@ -249,7 +249,7 @@ Runtime statistics displayed while authenitcation is active.   Alternatively, th
 ```
 
 <p align="center">
-    <a href="http://images.awspros.world/gcreds/status.png"><img src="./assets/status.png">
+    <a href="http://images.awspros.world/gcreds/gcreds-status.png"><img src="./assets/gcreds-status.png">
 </p>
 
 
