@@ -23,7 +23,7 @@
         }
     ],
     "VersionModule": "version.py",
-    "DockerImage": "rpmbuildE",
+    "DockerImage": "rpmbuildF",
     "DockerContainer": "gcreds",
     "DockerUser": "builder",
     "DockerBuildScript": "docker-buildrpm.sh",
@@ -31,7 +31,7 @@
     "RepoDefinitionFile": "developer-tools.repo",
     "SpecFile": {
         "Name": "gcreds.spec",
-        "Summary": "A Utility for Compiling and Installing Python3 on Linux",
+        "Summary": "A Utility for Managing Amazon STS Temporary Credentials",
         "Group":  "TecAdmin",
         "BuildArch": "noarch",
         "License": "GPL",
