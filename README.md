@@ -264,7 +264,7 @@ The easiest way to install **gcreds** on redhat-based Linux distributions is via
 4. Install the **gcreds** os package
 
     ```
-    $ sudo yum install python36-xlines
+    $ sudo yum install gcreds
     ```
 
     [![rpm-install3](./assets/rpm-install-3.png)](http://images.awspros.world/xlines/rpm-install-3.png)
@@ -278,7 +278,7 @@ The easiest way to install **gcreds** on redhat-based Linux distributions is via
 5. Verify Installation
 
     ```
-    $ yum info python36-xlines
+    $ yum info gcreds
     ```
 
     [![rpm-install5](./assets/rpm-install-5.png)](http://images.awspros.world/xlines/rpm-install-5.png)
