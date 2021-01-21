@@ -2,7 +2,7 @@
 
 # GPL v3 License
 #
-# Copyright (c) 2018 Blake Huber
+# Copyright (c) 2021 Blake Huber
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the 'Software'), to deal
@@ -178,7 +178,6 @@ function _refresh_subcommands(){
 }
 
 
-
 function _numargs(){
     ##
     ## Returns count of number of parameter args passed
@@ -261,7 +260,7 @@ function _gcreds_completions(){
             subcommands=$(_parse_compwords COMP_WORDS[@] horsemen[@])
             numargs=$(_numargs "$subcommands")
 
-            if [ "$cur" = "" ] || [ "$cur" = "-" ] || [ "$cur" = "--" ] && (( "$numargs" > 2 )); then
+            if [ "$cur" = "-" ] || [ "$cur" = "--" ] && (( "$numargs" > 2 )); then
                 _complete_4_horsemen_subcommands "${subcommands}"
             else
                 COMPREPLY=( $(compgen -W "${subcommands}" -- ${cur}) )
@@ -350,7 +349,7 @@ function _gcreds_completions(){
             subcommands=$(_parse_compwords COMP_WORDS[@] horsemen[@])
             numargs=$(_numargs "$subcommands")
 
-            if [ "$cur" = "" ] || [ "$cur" = "-" ] || [ "$cur" = "--" ] && (( "$numargs" > 2 )); then
+            if [ "$cur" = "-" ] || [ "$cur" = "--" ] && (( "$numargs" > 2 )); then
                 _complete_4_horsemen_subcommands "${subcommands}"
             else
                 COMPREPLY=( $(compgen -W "${subcommands}" -- ${cur}) )
