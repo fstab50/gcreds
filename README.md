@@ -254,6 +254,9 @@ The easiest way to install **gcreds** on redhat-based Linux distributions is via
     $ sudo chown 0:0 developer-tools.repo && sudo mv developer-tools.repo /etc/yum.repos.d/
     ```
 
+    [![rpm-install2b](./assets/rpm-install-2b.png)](http://images.awspros.world/xlines/rpm-install-2b.png)
+
+
 3. Delete the local repository cache, then Update the cache with new package references
 
     ```
