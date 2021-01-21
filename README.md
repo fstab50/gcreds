@@ -228,7 +228,7 @@ The easiest way to install **gcreds** on redhat-based Linux distributions is via
 
 1. Open a command line terminal.
 
-    [![rpm-install0](./assets/rpm-install-0.png)](http://images.awspros.world/xlines/rpm-install-0.png)
+    [![rpm-install0](./assets/rpm-install-0.png)](http://images.awspros.world/gcreds/rpm-install-0.png)
 
 2. Install the official epel package repository
 
@@ -242,19 +242,19 @@ The easiest way to install **gcreds** on redhat-based Linux distributions is via
     $ sudo yum install wget
     ```
 
-    [![rpm-install1](./assets/rpm-install-1.png)](http://images.awspros.world/xlines/rpm-install-1.png)
+    [![rpm-install1](./assets/rpm-install-1.png)](http://images.awspros.world/gcreds/rpm-install-1.png)
 
     ```
     $ wget http://awscloud.center/rpm/developer-tools.repo
     ```
 
-    [![rpm-install2](./assets/rpm-install-2.png)](http://images.awspros.world/xlines/rpm-install-2.png)
+    [![rpm-install2](./assets/rpm-install-2.png)](http://images.awspros.world/gcreds/rpm-install-2.png)
 
     ```
     $ sudo chown 0:0 developer-tools.repo && sudo mv developer-tools.repo /etc/yum.repos.d/
     ```
 
-    [![rpm-install2b](./assets/rpm-install-2b.png)](http://images.awspros.world/xlines/rpm-install-2b.png)
+    [![rpm-install2b](./assets/rpm-install-2b.png)](http://images.awspros.world/gcreds/rpm-install-2b.png)
 
 
 3. Delete the local repository cache, then Update the cache with new package references
@@ -270,12 +270,12 @@ The easiest way to install **gcreds** on redhat-based Linux distributions is via
     $ sudo yum install gcreds
     ```
 
-    [![rpm-install3](./assets/rpm-install-3.png)](http://images.awspros.world/xlines/rpm-install-3.png)
+    [![rpm-install3](./assets/rpm-install-3.png)](http://images.awspros.world/gcreds/rpm-install-3.png)
 
 
     Answer "y":
 
-    [![rpm-install4](./assets/rpm-install-4.png)](http://images.awspros.world/xlines/rpm-install-4.png)
+    [![rpm-install4](./assets/rpm-install-4.png)](http://images.awspros.world/gcreds/rpm-install-4.png)
 
 
 5. Verify Installation
@@ -284,7 +284,7 @@ The easiest way to install **gcreds** on redhat-based Linux distributions is via
     $ yum info gcreds
     ```
 
-    [![rpm-install5](./assets/rpm-install-5.png)](http://images.awspros.world/xlines/rpm-install-5.png)
+    [![rpm-install5](./assets/rpm-install-5.png)](http://images.awspros.world/gcreds/rpm-install-5.png)
 
 
 [back to the top](#top)
