@@ -219,10 +219,69 @@ The easiest way to install **gcreds** on debian-based Linux distributions is via
 [back to the top](#top)
 
 * * *
+
 <a name="redhat-distro-install"></a>
 ### Redhat, CentOS  (Python 3.6+)
 
-Redhat Package Manager (RPM) format installation package under development.  Check [rpm.awscloud.center](http://s3.us-east-2.amazonaws.com/rpm.awscloud.center/index.html) page for updates.
+The easiest way to install **gcreds** on redhat-based Linux distributions is via the developer-tools package repository:
+
+
+1. Open a command line terminal.
+
+    [![rpm-install0](./assets/rpm-install-0.png)](http://images.awspros.world/xlines/rpm-install-0.png)
+
+2. Install the official epel package repository
+
+    ```
+    $ sudo yum install epel-release
+    ```
+
+2. Download and install the repo definition file
+
+    ```
+    $ sudo yum install wget
+    ```
+
+    [![rpm-install1](./assets/rpm-install-1.png)](http://images.awspros.world/xlines/rpm-install-1.png)
+
+    ```
+    $ wget http://awscloud.center/rpm/developer-tools.repo
+    ```
+
+    [![rpm-install2](./assets/rpm-install-2.png)](http://images.awspros.world/xlines/rpm-install-2.png)
+
+    ```
+    $ sudo chown 0:0 developer-tools.repo && sudo mv developer-tools.repo /etc/yum.repos.d/
+    ```
+
+3. Delete the local repository cache, then Update the cache with new package references
+
+    ```
+    $ sudo rm -fr /var/cache/yum
+    $ sudo yum update -y
+    ```
+
+4. Install the **gcreds** os package
+
+    ```
+    $ sudo yum install python36-xlines
+    ```
+
+    [![rpm-install3](./assets/rpm-install-3.png)](http://images.awspros.world/xlines/rpm-install-3.png)
+
+
+    Answer "y":
+
+    [![rpm-install4](./assets/rpm-install-4.png)](http://images.awspros.world/xlines/rpm-install-4.png)
+
+
+5. Verify Installation
+
+    ```
+    $ yum info python36-xlines
+    ```
+
+    [![rpm-install5](./assets/rpm-install-5.png)](http://images.awspros.world/xlines/rpm-install-5.png)
 
 
 [back to the top](#top)
