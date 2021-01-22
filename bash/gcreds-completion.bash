@@ -250,7 +250,7 @@ function _gcreds_completions(){
 
     case "${initcmd}" in
 
-        '--accounts' | '--profile' | '--mfa-code' )
+        '--accounts' | '--profile' | '--mfa-code' | '--refresh-hours' )
             ##
             ##  Return compreply with any of the 5 comp_words that
             ##  not already present on the command line
