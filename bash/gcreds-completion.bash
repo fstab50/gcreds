@@ -212,7 +212,7 @@ function _refresh_subcommands(){
     ##
     local cmds=$(seq 9)
     local split='4'       # times to split screen width
-    local IFS=$' \t\n'
+    local IFS=$' \n'
     local formatted_cmds=( $(compgen -W "${cmds}" -- "${cur}") )
 
     for i in "${!formatted_cmds[@]}"; do
@@ -382,29 +382,9 @@ function _gcreds_completions(){
             ;;
 
         '--refresh-hours')
-            _refresh_subcommands
+            COMPREPLY=( $(compgen -W "$(seq 9)" -- ${cur}) )
             return 0
             ;;
-
-        [0-9])
-            ##
-            ##  Return compreply with any of the 4 comp_words that
-            ##  not already present on the command line
-            ##
-            declare -a horsemen
-            horsemen=( '--accounts' '--mfa-code'  '--profile'  '--refresh-hours' )
-            subcommands=$(_parse_compwords COMP_WORDS[@] horsemen[@])
-            numargs=$(_numargs "$subcommands")
-
-            if [ "$cur" = "-" ] || [ "$cur" = "--" ] && (( "$numargs" > 2 )); then
-                _complete_4_horsemen_subcommands "${subcommands}"
-            else
-                COMPREPLY=( $(compgen -W "${subcommands}" -- ${cur}) )
-            fi
-            return 0
-            ;;
-
-                #_complete_refresh_compcommands "${refresh_compcommands}"
 
         '--awscli' | '--configure'  | 'help' | '--clean' | '--mfa-code' | '--show' | '--version')
             return 0
