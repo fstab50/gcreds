@@ -9,7 +9,7 @@
 
 For more information on the above terms and functions, see [an explanation of IAM roles in the Amazon Web Services](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) documentation.
 
-**Version**:	2.4.4
+**Version**:	2.4.5
 
 
 * * *
