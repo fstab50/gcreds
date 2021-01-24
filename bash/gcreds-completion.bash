@@ -159,6 +159,53 @@ function _complete_4_horsemen_subcommands(){
 }
 
 
+_pathopt ()
+{
+    local cur prev words cword split;
+    _init_completion_en -s || return;
+    case "${prev,,}" in
+        --help | --usage | --version)
+            return
+        ;;
+        --*dir*)
+            _filedir_en -d;
+            return
+        ;;
+        --*file* | --*path*)
+            _filedir_en;
+            return
+        ;;
+        --+[-a-z0-9_])
+            local argtype=$( LC_ALL=C $1 --help 2>&1 | command sed -ne "s|.*$prev\[\{0,1\}=[<[]\{0,1\}\([-A-Za-z0-9_]\{1,\}\).*|\1|p" );
+            case ${argtype,,} in
+                *dir*)
+                    _filedir_en -d;
+                    return
+                ;;
+                *file* | *path*)
+                    _filedir_en;
+                    return
+                ;;
+            esac
+        ;;
+    esac;
+    $split && return;
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($( compgen -W "$( LC_ALL=C $1 --help 2>&1 | command sed -ne 's/.*\(--[-A-Za-z0-9]\{1,\}=\{0,1\}\).*/\1/p' | sort -u )" -- "$cur" ));
+        [[ $COMPREPLY == *= ]] && compopt -o nospace;
+    else
+        if [[ "$1" == @(rmdir|chroot) ]]; then
+            _filedir_en -d;
+        else
+            [[ "$1" == mkdir ]] && compopt -o nospace;
+            _filedir_en;
+        fi;
+    fi
+    #
+    # <-- end function _pathopt -->
+}
+
+
 function _refresh_subcommands(){
     ##
     ##  Valid number of parallel processes for make binary
@@ -315,7 +362,7 @@ function _gcreds_completions(){
     case "${prev}" in
 
         '--accounts')
-            COMPREPLY=( $(compgen -f ${cur}) )
+            _pathopt
             return 0
             ;;
 
