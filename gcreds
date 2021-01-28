@@ -32,6 +32,10 @@ E_BADARG=8                  # exit code if bad input parameter
 E_EXPIRED_CREDS=9           # exit code if temporary credentials no longer valid
 E_MISC=11                   # exit code if miscellaneous (unspecified) error
 
+# source dependencies
+source $lib_path/colors.sh
+source $lib_path/std_functions.sh
+
 # Formatting
 blue=$(tput setaf 4)
 cyan=$(tput setaf 6)
@@ -56,12 +60,9 @@ ansi=$(echo -e ${orange})                   # use for ansi escape color codes
 # ansi bright colors
 a_brightgreen='\033[38;5;95;38;5;46m'       # ansi brightgreen
 wb=${BOLD}${white}                          # white bold
-lbkt="${cyan}<${reset}"                     # left arrow bracket
-rbkt="${cyan}>${reset}"                     # right arrow bracket
-
-# source dependencies
-source $lib_path/std_functions.sh
-
+lbkt="$(echo -e ${wgray})<${reset}"                     # left arrow bracket
+rbkt="$(echo -e ${wgray})>${reset}"                     # right arrow bracket
+orange=$(echo -e ${orange})
 
 #
 # function declaration start --------------(do not modify this line)-----------
@@ -86,7 +87,7 @@ function gcreds_help(){
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
 
-        ${white}$pkg -a ${reset}${lbkt}value${rbkt} ${white}-p${reset} ${lbkt}value${rbkt} ${white}-m${reset} ${lbkt}value${rbkt}  |  ${white}--refresh-hours${reset} ${lbkt}value${rbkt}
+        $orange$pkg${reset}${white} -a ${reset}${lbkt}value${rbkt} ${white}-p${reset} ${lbkt}value${rbkt} ${white}-m${reset} ${lbkt}value${rbkt}  |  ${white}--refresh-hours${reset} ${lbkt}value${rbkt}
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
                             -a, --accounts
