@@ -42,8 +42,8 @@ white=$(tput setaf 7)
 yellow=$(tput setaf 3)
 orange='\033[38;5;95;38;5;214m'
 gray=$(tput setaf 008)
-lgray='\033[38;5;95;38;5;245m'    # light gray
-dgray='\033[38;5;95;38;5;8m'      # dark gray
+lgray='\033[38;5;95;38;5;245m'              # light gray
+dgray='\033[38;5;95;38;5;8m'                # dark gray
 reset=$(tput sgr0)
 #
 BOLD=`tput bold`
@@ -51,11 +51,13 @@ UNBOLD=`tput sgr0`
 
 # initialize default color scheme
 accent=$(tput setaf 008)
-ansi=$(echo -e ${orange})   # use for ansi escape color codes
+ansi=$(echo -e ${orange})                   # use for ansi escape color codes
 
 # ansi bright colors
-a_brightgreen='\033[38;5;95;38;5;46m'
-
+a_brightgreen='\033[38;5;95;38;5;46m'       # ansi brightgreen
+wb=${BOLD}${white}                          # white bold
+lbkt="${cyan}<${reset}"                     # left arrow bracket
+rbkt="${cyan}>${reset}"                     # right arrow bracket
 
 # source dependencies
 source $lib_path/std_functions.sh
@@ -71,6 +73,7 @@ indent04() { sed 's/^/    /'; }
 indent10() { sed 's/^/          /'; }
 
 function gcreds_help(){
+    local
     cat <<EOM
 
                           ${accent}${BOLD}$pkg${UNBOLD}${reset} help contents
@@ -83,14 +86,14 @@ function gcreds_help(){
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
 
-               ${BOLD}$pkg  -a ${UNBOLD}<value>  ${BOLD}--profile${UNBOLD} <value>  ${BOLD}-c${UNBOLD} <value>
+        ${white}$pkg -a ${reset}${lbkt}value${rbkt} ${white}-p${reset} ${lbkt}value${rbkt} ${white}-m${reset} ${lbkt}value${rbkt}  |  ${white}--refresh-hours${reset} ${lbkt}value${rbkt}
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
                             -a, --accounts
                             -p, --profile
-                            -c, --mfa-code
-                           [-A, --auto    ]
-                           [-C, --config  ]
+                            -m, --mfa-code
+                           [-C, --configure  ]
+                           [-r, --refresh-hours <value>  ]
                            [-s, --show    ]
                            [-u, --awscli  ]
                            [-h, --help    ]
