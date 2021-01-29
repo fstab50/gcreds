@@ -60,8 +60,8 @@ ansi=$(echo -e ${orange})                   # use for ansi escape color codes
 # ansi bright colors
 a_brightgreen='\033[38;5;95;38;5;46m'       # ansi brightgreen
 wb=${BOLD}${white}                          # white bold
-lbkt="$(echo -e ${wgray})<${reset}"                     # left arrow bracket
-rbkt="$(echo -e ${wgray})>${reset}"                     # right arrow bracket
+lbkt="$(echo -e ${lgray})<${reset}"                     # left arrow bracket
+rbkt="$(echo -e ${lgray})>${reset}"                     # right arrow bracket
 orange=$(echo -e ${orange})
 
 #
@@ -87,7 +87,7 @@ function gcreds_help(){
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
 
-        $orange$pkg${reset}${white} -a ${reset}${lbkt}value${rbkt} ${white}-p${reset} ${lbkt}value${rbkt} ${white}-m${reset} ${lbkt}value${rbkt}  |  ${white}--refresh-hours${reset} ${lbkt}value${rbkt}
+        $orange$pkg${reset}${white} -a ${reset}${lbkt}value${rbkt} ${white}-p${reset} ${lbkt}value${rbkt} ${white}-m${reset} ${lbkt}value${rbkt}  ${cyan}|  ${white}--refresh-hours${reset} ${lbkt}value${rbkt}
 
  ${accent}${BOLD}SYNOPSIS${UNBOLD}${reset}:
                             -a, --accounts
