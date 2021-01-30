@@ -356,6 +356,60 @@ Runtime statistics displayed while authenitcation is active.   Alternatively, th
 
 * * *
 
+## Output ##
+
+**stdout** - when generating credentials
+
+![gcreds output](./assets/stdout.png)
+
+**Modifications to local awscli configuration** (account ids have been obscured):
+
+```bash
+    $ less ./aws/credentials
+```
+
+![aws example credentials file](./assets/credentials.png)
+
+**Example Use** of profiles created by **greds**:
+
+![example usage](./assets/example-usage.png)
+
+**Log output** (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
+
+```bash
+    $ less ~/gcreds/logs/gcreds.log
+```
+
+![example gcreds.log](./assets/log-output.png)
+
+* * *
+
+## Options ##
+
+**Auto Refresh** -- automatic regeneration of temporary credentials
+
+```bash
+    $ gcreds --profile <iam_user> --accounts list.accounts --refresh-hours 4
+```
+
+Generation of credentials:
+
+![option auto](./assets/auto-gen.png)
+
+Monitoring of session statics:
+
+![option auto](./assets/auto-stats.png)
+
+**Show Option** -- show current temporary credentials; associated lifetime
+
+```bash
+    $ gcreds --show
+```
+
+![option show](./assets/status.png)
+
+* * *
+
 ## Author & Copyright
 
 All works contained herein copyrighted via below author unless work is explicitly noted by an alternate author.
