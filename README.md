@@ -9,7 +9,7 @@
 
 For more information on the above terms and functions, see [an explanation of IAM roles in the Amazon Web Services](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) documentation.
 
-**Version**:	2.4.5
+**Version**:	2.4.6
 
 
 * * *
@@ -300,61 +300,6 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 [back to the top](#top)
 
 * * *
-## Screenshots
-
-#### Authentication Status
-
-Runtime statistics displayed while authenitcation is active.   Alternatively, the command below displays same information anytime.
-
-```bash
-    $ gcreds  --show
-```
-
-<p align="center">
-    <a href="http://images.awspros.world/gcreds/gcreds-status.png"><img src="./assets/gcreds-status.png">
-</p>
-
-
-[back to the top](#top)
-
-* * *
-
-#### Green Accent Scheme
-
-```bash
-    $ gcreds  --help
-```
-
-<p align="center">
-    <a href="http://images.awspros.world/gcreds/help-menu-green.png"><img src="./assets/help-menu-green.png">
-</p>
-
-
-[back to the top](#top)
-
-* * *
-
-#### Blue Accent Scheme (green terminal)
-
-<p align="right">
-    <a href="http://images.awspros.world/gcreds/help-menu-blue.png"><img src="./assets/help-menu-blue.png">
-</p>
-
-
-[back to the top](#top)
-
-* * *
-
-#### Log file
-
-<p align="right">
-    <a href="http://images.awspros.world/gcreds/log-output.png"><img src="./assets/log-output.png">
-</p>
-
-
-[back to the top](#top)
-
-* * *
 
 ## Output ##
 
@@ -407,6 +352,51 @@ Monitoring of session statics:
 ```
 
 ![option show](./assets/status.png)
+
+* * *
+
+## Screenshots
+
+#### Authentication Status
+
+Runtime statistics displayed while authenitcation is active.   Alternatively, the command below displays same information anytime.
+
+```bash
+    $ gcreds  --show
+```
+
+<p align="center">
+    <a href="http://images.awspros.world/gcreds/gcreds-status.png"><img src="./assets/gcreds-status.png">
+</p>
+
+
+[back to the top](#top)
+
+* * *
+
+#### Green Accent Scheme
+
+```bash
+    $ gcreds  --help
+```
+
+<p align="center">
+    <a href="http://images.awspros.world/gcreds/help-menu-green.png"><img src="./assets/help-menu-green.png">
+</p>
+
+
+[back to the top](#top)
+
+* * *
+
+#### Blue Accent Scheme (green terminal)
+
+<p align="right">
+    <a href="http://images.awspros.world/gcreds/help-menu-blue.png"><img src="./assets/help-menu-blue.png">
+</p>
+
+
+[back to the top](#top)
 
 * * *
 
