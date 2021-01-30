@@ -325,7 +325,7 @@ std_message "RPM Contents:" "INFO" $LOG_FILE
 rpm_contents
 
 std_message "copy completed rpm to volume mount: $VOLMNT" "INFO" $LOG_FILE
-cp -rv RPMS $VOLMNT >> $LOG_FILE
+sudo cp -rv RPMS $VOLMNT >> $LOG_FILE
 
 
 std_message "rpmbuild Complete. Exit" "INFO" $LOG_FILE
