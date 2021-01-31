@@ -31,6 +31,10 @@ For more information on the above terms and functions, see [an explanation of IA
     * [Redhat, CentOS](#redhat-distro-install)
     * [Amazon Linux 2, Fedora](#amzn2-distro-install)
 
+* [**Generating STS Credentials**](#generating-sts-credentails)
+
+* [**Auto Refresh Mode**](#auto-refresh-mode)
+
 * [**Screenshots**](#screenshots)
 
 * [**Author & Copyright**](#author--copyright)
@@ -301,9 +305,13 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 
 * * *
 
-## Output ##
+## Generating STS Credentials ##
 
 **stdout** - when generating credentials
+
+```bash
+    $ gcreds --profile <iam_user> --accounts list.accounts --refresh-hours 4
+```
 
 ![gcreds output](./assets/stdout.png)
 
@@ -329,7 +337,7 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 
 * * *
 
-## Options ##
+## Auto Refresh Mode ##
 
 **Auto Refresh** -- automatic regeneration of temporary credentials
 
@@ -351,12 +359,7 @@ Monitoring of session statics:
     $ gcreds --show
 ```
 
-![option show](./assets/status.png)
-
 * * *
-
-## Screenshots
-
 #### Authentication Status
 
 Runtime statistics displayed while authenitcation is active.   Alternatively, the command below displays same information anytime.
@@ -373,6 +376,8 @@ Runtime statistics displayed while authenitcation is active.   Alternatively, th
 [back to the top](#top)
 
 * * *
+
+## Screenshots
 
 #### Green Accent Scheme
 
