@@ -336,7 +336,9 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 </p>
 
 
-#### Log output (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite):
+#### Log output (colors courtesy of [source-highlight](https://www.gnu.org/software/src-highlite)):
+
+Log output (colors courtesy of [source-highlight](https://www.gnu.org/software/src-highlite)):
 
 ```bash
     $ less ~/gcreds/logs/gcreds.log
