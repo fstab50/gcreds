@@ -313,7 +313,10 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
     $ gcreds --profile <iam_user> --accounts list.accounts --refresh-hours 4
 ```
 
-![gcreds output](./assets/stdout.png)
+<p align="left">
+    <a href="http://images.awspros.world/gcreds/stdout.png"><img src="./assets/stdout.png">
+</p>
+
 
 #### Modifications to local awscli configuration (account ids have been obscured):
 
@@ -325,11 +328,13 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
     <a href="http://images.awspros.world/gcreds/credentials.png"><img src="./assets/credentials.png">
 </p>
 
+
 #### Example Use of profiles created by **greds**:
 
 <p align="left">
     <a href="http://images.awspros.world/gcreds/example-usage.png"><img src="./assets/example-usage.png">
 </p>
+
 
 #### Log output (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
 
@@ -340,6 +345,7 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 <p align="left">
     <a href="http://images.awspros.world/gcreds/log-output.png"><img src="./assets/log-output.png">
 </p>
+
 
 * * *
 
