@@ -307,7 +307,7 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 
 ## Generating STS Credentials ##
 
-**stdout** - when generating credentials
+#### Output when generating credentials
 
 ```bash
     $ gcreds --profile <iam_user> --accounts list.accounts --refresh-hours 4
@@ -315,7 +315,7 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 
 ![gcreds output](./assets/stdout.png)
 
-**Modifications to local awscli configuration** (account ids have been obscured):
+#### Modifications to local awscli configuration (account ids have been obscured):
 
 ```bash
     $ less ./aws/credentials
@@ -325,13 +325,13 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
     <a href="http://images.awspros.world/gcreds/credentials.png"><img src="./assets/credentials.png">
 </p>
 
-**Example Use** of profiles created by **greds**:
+#### Example Use of profiles created by **greds**:
 
 <p align="left">
     <a href="http://images.awspros.world/gcreds/example-usage.png"><img src="./assets/example-usage.png">
 </p>
 
-**Log output** (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
+#### Log output (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
 
 ```bash
     $ less ~/gcreds/logs/gcreds.log
