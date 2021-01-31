@@ -321,11 +321,15 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
     $ less ./aws/credentials
 ```
 
-![aws example credentials file](./assets/credentials.png)
+<p align="left">
+    <a href="http://images.awspros.world/gcreds/credentials.png"><img src="./assets/credentials.png">
+</p>
 
 **Example Use** of profiles created by **greds**:
 
-![example usage](./assets/example-usage.png)
+<p align="left">
+    <a href="http://images.awspros.world/gcreds/example-usage.png"><img src="./assets/example-usage.png">
+</p>
 
 **Log output** (colors courtesy of pkg [source-highlight](https://www.gnu.org/software/src-highlite/)):
 
@@ -333,28 +337,24 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
     $ less ~/gcreds/logs/gcreds.log
 ```
 
-![example gcreds.log](./assets/log-output.png)
+<p align="left">
+    <a href="http://images.awspros.world/gcreds/log-output.png"><img src="./assets/log-output.png">
+</p>
 
 * * *
 
 ## Auto Refresh Mode ##
 
-**Auto Refresh** -- automatic regeneration of temporary credentials
+#### Automatic regeneration of temporary credentials
 
 ```bash
     $ gcreds --profile <iam_user> --accounts list.accounts --refresh-hours 4
 ```
 
-### Output during generation of credentials:
+#### Output during generation of credentials:
 
 <p align="left">
     <a href="http://images.awspros.world/gcreds/auto-gen.png"><img src="./assets/auto-gen.png">
-</p>
-
-### Monitoring of session statics:
-
-<p align="left">
-    <a href="http://images.awspros.world/gcreds/auto-stats.png"><img src="./assets/auto-stats.png">
 </p>
 
 #### Authentication Status
