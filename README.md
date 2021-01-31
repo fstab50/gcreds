@@ -336,12 +336,12 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
 </p>
 
 
-#### Log output
+#### Log File
 
-Coloration courtesy of [source-highlight](https://www.gnu.org/software/src-highlite).
+Coloration courtesy of ![source-highlight](https://www.gnu.org/software/src-highlite).
 
 ```bash
-    $ less ~/gcreds/logs/gcreds.log
+    $ cat /var/log/gcreds.log
 ```
 
 <p align="left">
