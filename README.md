@@ -31,7 +31,7 @@ For more information on the above terms and functions, see [an explanation of IA
     * [Redhat, CentOS](#redhat-distro-install)
     * [Amazon Linux 2, Fedora](#amzn2-distro-install)
 
-* [**Generating STS Credentials**](#generating-sts-credentails)
+* [**Generating STS Credentials**](#generating-sts-credentials)
 
 * [**Auto Refresh Mode**](#auto-refresh-mode)
 
@@ -345,21 +345,18 @@ Redhat Package Manager (RPM) format used by Amazon Linux under development.  Che
     $ gcreds --profile <iam_user> --accounts list.accounts --refresh-hours 4
 ```
 
-Generation of credentials:
+### Output during generation of credentials:
 
-![option auto](./assets/auto-gen.png)
+<p align="left">
+    <a href="http://images.awspros.world/gcreds/auto-gen.png"><img src="./assets/auto-gen.png">
+</p>
 
-Monitoring of session statics:
+### Monitoring of session statics:
 
-![option auto](./assets/auto-stats.png)
+<p align="left">
+    <a href="http://images.awspros.world/gcreds/auto-stats.png"><img src="./assets/auto-stats.png">
+</p>
 
-**Show Option** -- show current temporary credentials; associated lifetime
-
-```bash
-    $ gcreds --show
-```
-
-* * *
 #### Authentication Status
 
 Runtime statistics displayed while authenitcation is active.   Alternatively, the command below displays same information anytime.
