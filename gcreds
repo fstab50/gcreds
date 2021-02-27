@@ -75,7 +75,7 @@ indent10() { sed 's/^/          /'; }
 function gcreds_help(){
     cat <<EOM
 
-                          ${accent}${BOLD}$pkg${UNBOLD}${reset} help contents
+                          ${wb}$pkg${reset}${reset} help contents
 
  ${accent}${BOLD}DESCRIPTION${UNBOLD}${reset}:
 
