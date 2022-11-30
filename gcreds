@@ -81,7 +81,7 @@ function gcreds_help(){
 
         $pkg generates temporary credentials used to assume roles across
         many AWS accounts.  $pkg is used for progammatic use cases where
-        avoiding  multi-factor auth prompt in a cli environment is desired
+        avoiding multi-factor auth prompt in a cli environment is desired.
 
  ${accent}${BOLD}USAGE${UNBOLD}${reset}:
 
